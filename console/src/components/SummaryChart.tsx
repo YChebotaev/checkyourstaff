@@ -13,8 +13,6 @@ import { useWindowSize } from "@react-hook/window-size";
 export const SummaryChart: FC<{ data: any }> = ({ data }) => {
   const [width, height] = useWindowSize();
 
-  console.log('data =', data)
-
   return (
     <LineChart width={width} height={height} data={data}>
       <CartesianGrid strokeDasharray="3 3" />

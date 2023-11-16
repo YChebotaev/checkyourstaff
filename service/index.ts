@@ -22,7 +22,7 @@ service.get<{
   const db = new JSONDB(process.env['DB_FILE']!)
   const sessions: Session[] = db.get('sessions') ?? []
 
-  for (let i=0; i<sessions.length; i++) {
+  for (let i = 0; i < sessions.length; i++) {
     const session = sessions[i]
 
     if (session.answers.length === 0) {
@@ -68,8 +68,35 @@ service.get<{
     })
 })
 
+service.get('/text_feedback', () => {
+  const db = new JSONDB(process.env['DB_FILE']!)
+  const sessions: Session[] = db.get('sessions') ?? []
+
+  for (let i = 0; i < sessions.length; i++) {
+    const session = sessions[i]
+
+    if (session.answers.length === 0) {
+      sessions.splice(i, 1)
+      i -= 1
+    } else {
+      break
+    }
+  }
+
+  return sessions
+    .filter(s => s.answers.some(a => Boolean(a.feedback)))
+    .map(s => ({
+      t: s.ts,
+      a: s.answers
+        .filter(a => Boolean(a.feedback))
+        .map(a => ({
+          q: a.question,
+          f: a.feedback
+        }))
+    }))
+})
+
 service.listen({
-  path: '/api',
   port: Number(process.env['PORT'] ?? 3000),
   host: process.env['HOST'] ?? '0.0.0.0'
 })

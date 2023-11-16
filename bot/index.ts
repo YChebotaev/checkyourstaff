@@ -3,8 +3,8 @@ import cron from 'node-cron'
 import JSONDB from 'simple-json-db'
 import { Telegraf, Markup } from 'telegraf'
 import { mkdirpSync } from 'mkdirp'
-import { readTemplate, logger, saveAnswer } from './lib'
-import type { Session } from './types'
+import { readTemplate, logger } from './lib'
+import type { Session, SessionAnswer } from './types'
 
 mkdirpSync(path.join(__dirname, 'data'))
 
@@ -40,6 +40,37 @@ if (!token) {
 }
 
 const bot = new Telegraf(token)
+
+const sendQuestion = (chatId: number, s: number, q: '1' | '2' | '3') => {
+  let text: string
+
+  switch (q) {
+    case '1':
+      text = question1Template({})
+
+      break
+    case '2':
+      text = question2Template({})
+
+      break
+    case '3':
+      text = question3Template({})
+
+      break
+  }
+
+  return bot.telegram.sendMessage(
+    chatId,
+    text,
+    Markup.inlineKeyboard([
+      Markup.button.callback('1', `s=${s}&q=${q}&sc=1`),
+      Markup.button.callback('2', `s=${s}&q=${q}&sc=2`),
+      Markup.button.callback('3', `s=${s}&q=${q}&sc=3`),
+      Markup.button.callback('4', `s=${s}&q=${q}&sc=4`),
+      Markup.button.callback('5', `s=${s}&q=${q}&sc=5`),
+    ])
+  )
+}
 
 bot.start(async (ctx) => {
   const chats: number[] = db.get('chats') ?? []
@@ -79,59 +110,130 @@ bot.action(/s=(\d)&q=(\d+)&sc=(\d+)/, async (ctx) => {
   }
 
   session.answeredChatIds = Array.from(new Set([...session.answeredChatIds, ctx.chat!.id]))
-  session.answers.push({
+
+  const answer: SessionAnswer = {
+    id: session.answers.length,
     ts: new Date().toISOString(),
     chatId: ctx.chat!.id!,
     question: q,
     score: sc
-  })
+  }
 
-  db.set('sessions', sessions)
+  session.answers.push(answer)
 
   await ctx.answerCbQuery('Данные сохранены!')
 
-  await saveAnswer(ctx.update.callback_query.from.id, q, sc)
+  if (sc <= 3) {
+    const m = await ctx.sendMessage('Расскажите, что не так:', Markup.forceReply())
 
-  switch (q) {
-    case '1':
-      await bot.telegram.sendMessage(
-        ctx.chat!.id,
-        question2Template({}),
-        Markup.inlineKeyboard([
-          Markup.button.callback('1', `s=${s}&q=2&sc=1`),
-          Markup.button.callback('2', `s=${s}&q=2&sc=2`),
-          Markup.button.callback('3', `s=${s}&q=2&sc=3`),
-          Markup.button.callback('4', `s=${s}&q=2&sc=4`),
-          Markup.button.callback('5', `s=${s}&q=2&sc=5`),
-        ])
-      )
+    session.feedbackMessageIds[q] = m.message_id
+  } else {
+    switch (q) {
+      case '1': {
+        const m = await sendQuestion(ctx.chat!.id, s, '2')
+
+        session.questionsMessagesIds[2] = m.message_id
+
+        break
+      }
+      case '2': {
+        const m = await sendQuestion(ctx.chat!.id, s, '3')
+
+        session.questionsMessagesIds[3] = m.message_id
+
+        break
+      }
+      case '3':
+        await bot.telegram.sendMessage(
+          ctx.chat!.id,
+          thanksTemplate({})
+        )
+
+        break
+    }
+  }
+
+  db.set('sessions', sessions)
+})
+
+bot.on('message', async (ctx) => {
+  const sessions: Session[] = db.get('sessions') ?? []
+  const replyToMessageId: number | undefined = Reflect.get(ctx.update.message, 'reply_to_message')?.message_id
+
+  if (replyToMessageId == null) {
+    return
+  }
+
+  let session: Session;
+  let question: '1' | '2' | '3'
+
+  for (const s of sessions) {
+    const { feedbackMessageIds } = s
+
+    for (const [q, feedbackMessageId] of Object.entries(feedbackMessageIds)) {
+      if (feedbackMessageId == null) {
+        continue
+      }
+
+      if (feedbackMessageId === replyToMessageId) {
+        session = s
+        question = q as '1' | '2' | '3'
+
+        break
+      }
+    }
+
+    if (session! != null) {
+      break
+    }
+  }
+
+  if (typeof session! === 'undefined' || typeof question! === 'undefined') {
+    logger.warn("Session not found chat_id = %s", ctx.chat.id)
+
+    return
+  }
+
+  const answer = session.answers.find(({ chatId, question: q }) => {
+    return chatId === ctx.chat.id && question === q
+  })
+
+  if (!answer) {
+    logger.warn("Answer not found chatId = %s, question = %s", ctx.chat.id, question)
+
+    return
+  }
+
+  answer.feedback = Reflect.get(ctx.message, 'text') as string
+
+  switch (question) {
+    case '1': {
+      const m = await sendQuestion(ctx.chat.id, session.id, '2')
+
+      session.questionsMessagesIds[1] = m.message_id
 
       break
-    case '2':
-      await bot.telegram.sendMessage(
-        ctx.chat!.id,
-        question3Template({}),
-        Markup.inlineKeyboard([
-          Markup.button.callback('1', `s=${s}&q=3&sc=1`),
-          Markup.button.callback('2', `s=${s}&q=3&sc=2`),
-          Markup.button.callback('3', `s=${s}&q=3&sc=3`),
-          Markup.button.callback('4', `s=${s}&q=3&sc=4`),
-          Markup.button.callback('5', `s=${s}&q=3&sc=5`),
-        ])
-      )
+    }
+    case '2': {
+      const m = await sendQuestion(ctx.chat.id, session.id, '3')
+
+      session.questionsMessagesIds[2] = m.message_id
 
       break
+    }
     case '3':
       await bot.telegram.sendMessage(
-        ctx.chat!.id,
+        ctx.chat.id,
         thanksTemplate({})
       )
 
       break
   }
+
+  db.set('sessions', sessions)
 })
 
-cron.schedule('0 19 * * FRI', async () => {
+const startSequence = async () => {
   const chats = db.get('chats')
 
   if (chats.length === 0) {
@@ -144,30 +246,44 @@ cron.schedule('0 19 * * FRI', async () => {
     ts: new Date().toISOString(),
     tz: timezone,
     answeredChatIds: [],
-    answers: []
+    answers: [],
+    questionsMessagesIds: {
+      1: null,
+      2: null,
+      3: null
+    },
+    feedbackMessageIds: {
+      1: null,
+      2: null,
+      3: null
+    }
   }
-
-  db.set('sessions', [...sessions, session])
 
   for (const chatId of chats) {
     try {
-      await bot.telegram.sendMessage(
-        chatId,
-        question1Template({}),
-        Markup.inlineKeyboard([
-          Markup.button.callback('1', `s=${session.id}&q=1&sc=1`),
-          Markup.button.callback('2', `s=${session.id}&q=1&sc=2`),
-          Markup.button.callback('3', `s=${session.id}&q=1&sc=3`),
-          Markup.button.callback('4', `s=${session.id}&q=1&sc=4`),
-          Markup.button.callback('5', `s=${session.id}&q=1&sc=5`),
-        ])
-      )
+      const m = await sendQuestion(chatId, session.id, '1')
+
+      session.questionsMessagesIds[1] = m.message_id
     } catch (e) {
       logger.error(e)
     }
   }
-}, {
-  timezone
+
+  db.set('sessions', [...sessions, session])
+}
+
+cron.schedule('0 19 * * FRI', startSequence, { timezone })
+
+bot.on('message', (ctx) => {
+  console.log(278)
+
+  const text = Reflect.get(ctx.message, 'text') as string
+
+  console.log('text =', text)
+
+  if (text === 'тест' || text === 'Тест') {
+    startSequence()
+  }
 })
 
 process.once('SIGINT', () => bot.stop('SIGINT'))
