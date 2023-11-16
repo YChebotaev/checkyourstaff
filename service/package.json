@@ -1,0 +1,27 @@
+{
+  "name": "@checkyourstaff/service",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "ts-node --require dotenv/config index.ts"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
+    "nodemon": "^3.0.1",
+    "pino-pretty": "^10.2.3"
+  },
+  "author": "YChebotaev <yury.79120345101@gmail.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@fastify/cors": "^8.4.1",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.24.3",
+    "lodash": "^4.17.21",
+    "pino": "^8.16.1",
+    "simple-json-db": "^2.0.0",
+    "ts-node": "^10.9.1"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "workspaces": [
+    "bot",
+    "console",
+    "service"
+  ],
+  "author": "YChebotaev <yury.79120345101@gmail.com>",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
