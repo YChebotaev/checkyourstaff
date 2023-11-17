@@ -1,10 +1,12 @@
 import path from 'node:path'
+// import { inspect } from 'node:util'
 import cron from 'node-cron'
 import JSONDB from 'simple-json-db'
-import { Telegraf, Markup } from 'telegraf'
+import { Telegraf, Markup, type Context, type NarrowedContext } from 'telegraf'
 import { mkdirpSync } from 'mkdirp'
 import { readTemplate, logger } from './lib'
 import type { Session, SessionAnswer } from './types'
+import { Update, Message } from 'telegraf/typings/core/types/typegram'
 
 mkdirpSync(path.join(__dirname, 'data'))
 
@@ -26,6 +28,9 @@ const question3Template = readTemplate(
 )
 const thanksTemplate = readTemplate(
   path.join(__dirname, './templates/thanks.hbs')
+)
+const closeQuestionTemplate = readTemplate(
+  path.join(__dirname, './templates/closeQuestion.hbs')
 )
 const timezone = process.env['TZ'] ?? 'Europe/Moscow'
 const db = new JSONDB(
@@ -68,11 +73,22 @@ const sendQuestion = (chatId: number, s: number, q: '1' | '2' | '3', mode: 'cron
     chatId,
     text,
     Markup.inlineKeyboard([
-      Markup.button.callback('1', `s=${s}&q=${q}&sc=1&m=${mode}`),
-      Markup.button.callback('2', `s=${s}&q=${q}&sc=2&m=${mode}`),
-      Markup.button.callback('3', `s=${s}&q=${q}&sc=3&m=${mode}`),
-      Markup.button.callback('4', `s=${s}&q=${q}&sc=4&m=${mode}`),
-      Markup.button.callback('5', `s=${s}&q=${q}&sc=5&m=${mode}`),
+      Markup.button.callback('1', `/a?s=${s}&q=${q}&sc=1&m=${mode}`),
+      Markup.button.callback('2', `/a?s=${s}&q=${q}&sc=2&m=${mode}`),
+      Markup.button.callback('3', `/a?s=${s}&q=${q}&sc=3&m=${mode}`),
+      Markup.button.callback('4', `/a?s=${s}&q=${q}&sc=4&m=${mode}`),
+      Markup.button.callback('5', `/a?s=${s}&q=${q}&sc=5&m=${mode}`),
+    ])
+  )
+}
+
+const sendCloseQuestion = (chatId: number, sessionId: number, mode: 'cron' | 'demo') => {
+  return bot.telegram.sendMessage(
+    chatId,
+    closeQuestionTemplate({}),
+    Markup.inlineKeyboard([
+      Markup.button.callback('Да', `/cq?s=${sessionId}&a=1&m=${mode}`),
+      Markup.button.callback('Нет', `/cq?s=${sessionId}&a=0&m=${mode}`)
     ])
   )
 }
@@ -90,7 +106,67 @@ bot.start(async (ctx) => {
   await ctx.sendMessage(welcome2Template({}))
 })
 
-bot.action(/s=(\d)&q=(\d+)&sc=(\d+)&m=(demo|cron)/, async (ctx) => {
+bot.action(/\/cq\?s=(\d+)&a=(1|0)&m=(cron|demo)/, async (ctx) => {
+  const s = Number(ctx.match[1])
+  const a = ctx.match[2] === '1' ? true : false
+  const mode = ctx.match[3] as 'cron' | 'demo'
+
+  const messageId = ctx.update.callback_query.message!.message_id
+
+  await bot.telegram.editMessageReplyMarkup(
+    ctx.chat!.id,
+    messageId,
+    undefined,
+    {
+      inline_keyboard: [],
+    }
+  )
+
+  if (a) {
+    const m = await bot.telegram.sendMessage(
+      ctx.chat!.id,
+      'В ответе напишите, что вас беспокоит',
+      Markup.forceReply()
+    )
+
+    let sessions: Session[]
+
+    switch (mode) {
+      case 'cron': {
+        sessions = db.get('sessions') ?? []
+
+        break
+      }
+      case 'demo': {
+        sessions = demoStore.sessions
+
+        break
+      }
+    }
+
+    const session = sessions[s]
+
+    session.textFeedbacksMessageIds.push(m.message_id)
+
+    switch (mode) {
+      case 'cron':
+        db.set('sessions', sessions)
+
+        break
+      case 'demo':
+        demoStore.sessions = sessions
+
+        break
+    }
+  } else {
+    await bot.telegram.sendMessage(
+      ctx.chat!.id,
+      thanksTemplate({})
+    )
+  }
+})
+
+bot.action(/\/a\?s=(\d)&q=(\d+)&sc=(\d+)&m=(demo|cron)/, async (ctx) => {
   const s = Number(ctx.match[1])
   const q = ctx.match[2] as '1' | '2' | '3'
   const sc = Number(ctx.match[3])
@@ -163,10 +239,7 @@ bot.action(/s=(\d)&q=(\d+)&sc=(\d+)&m=(demo|cron)/, async (ctx) => {
         break
       }
       case '3':
-        await bot.telegram.sendMessage(
-          ctx.chat!.id,
-          thanksTemplate({})
-        )
+        await sendCloseQuestion(ctx.chat!.id, session.id, mode)
 
         break
     }
@@ -186,41 +259,40 @@ bot.action(/s=(\d)&q=(\d+)&sc=(\d+)&m=(demo|cron)/, async (ctx) => {
   }
 })
 
-const findSessionAndQuestion = (sessions: Session[], replyToMessageId: number) => {
-  let session: Session;
-  let question: '1' | '2' | '3'
+const tryFindSessionAndQuestionToAnswerFeedback = async (ctx: NarrowedContext<Context<Update>, Update.MessageUpdate<Message>>) => {
+  let sessions: Session[] = db.get('sessions') ?? []
+  const replyToMessageId: number | undefined = Reflect.get(ctx.update.message, 'reply_to_message')?.message_id
+  let mode: 'cron' | 'demo' = 'cron'
+  const findSessionAndQuestion = (sessions: Session[], replyToMessageId: number) => {
+    let session: Session;
+    let question: '1' | '2' | '3'
 
-  for (const s of sessions) {
-    const { feedbackMessageIds } = s
+    for (const s of sessions) {
+      const { feedbackMessageIds } = s
 
-    for (const [q, feedbackMessageId] of Object.entries(feedbackMessageIds)) {
-      if (feedbackMessageId == null) {
-        continue
+      for (const [q, feedbackMessageId] of Object.entries(feedbackMessageIds)) {
+        if (feedbackMessageId == null) {
+          continue
+        }
+
+        if (feedbackMessageId === replyToMessageId) {
+          session = s
+          question = q as '1' | '2' | '3'
+
+          break
+        }
       }
 
-      if (feedbackMessageId === replyToMessageId) {
-        session = s
-        question = q as '1' | '2' | '3'
-
+      if (session! != null) {
         break
       }
     }
 
-    if (session! != null) {
-      break
+    return {
+      session: session! as Session | undefined,
+      question: question! as '1' | '2' | '3' | undefined
     }
   }
-
-  return {
-    session: session! as Session | undefined,
-    question: question! as '1' | '2' | '3' | undefined
-  }
-}
-
-bot.on('message', async (ctx) => {
-  let sessions: Session[] = db.get('sessions') ?? []
-  const replyToMessageId: number | undefined = Reflect.get(ctx.update.message, 'reply_to_message')?.message_id
-  let mode: 'cron' | 'demo' = 'cron'
 
   if (replyToMessageId == null) {
     const text = Reflect.get(ctx.message, 'text') as string
@@ -229,14 +301,18 @@ bot.on('message', async (ctx) => {
       await startSequence({ mode: 'demo', chatId: ctx.chat.id })
     }
 
-    return
+    return {
+      sessions: undefined,
+      session: undefined,
+      question: undefined,
+      mode: undefined
+    }
   }
 
   let { session, question } = findSessionAndQuestion(sessions, replyToMessageId)
 
   if (!session || !question) {
     mode = 'demo'
-
     sessions = demoStore.sessions;
 
     ({ session, question } = findSessionAndQuestion(sessions, replyToMessageId))
@@ -244,47 +320,164 @@ bot.on('message', async (ctx) => {
     if (!session || !question) {
       logger.warn("Session not found chat_id = %s", ctx.chat.id)
 
+      return {
+        sessions: undefined,
+        session: undefined,
+        question: undefined,
+        mode: undefined
+      }
+    }
+  }
+
+  return {
+    sessions,
+    session,
+    question,
+    mode
+  }
+}
+
+const tryFindSessionToTextFeedback = async (ctx: NarrowedContext<Context<Update>, Update.MessageUpdate<Message>>) => {
+  let sessions: Session[] = db.get('sessions') ?? []
+  const replyToMessageId: number | undefined = Reflect.get(ctx.update.message, 'reply_to_message')?.message_id
+  let mode: 'cron' | 'demo' = 'cron'
+  const findSession = (sessions: Session[], replyToMessageId: number) => {
+    let session: Session;
+
+    for (const s of sessions) {
+      const { textFeedbacksMessageIds } = s
+
+      for (const tfmid of textFeedbacksMessageIds) {
+        if (tfmid === replyToMessageId) {
+          session = s
+
+          break
+        }
+      }
+
+      if (session!) {
+        break
+      }
+    }
+
+    return session! as Session | undefined
+  }
+
+  if (replyToMessageId == null) {
+    return {
+      sessions: undefined,
+      session: undefined,
+      question: undefined,
+      mode: undefined
+    }
+  }
+
+  let session = findSession(sessions, replyToMessageId)
+
+  if (!session) {
+    sessions = demoStore.sessions
+    mode = 'demo'
+    session = findSession(sessions, replyToMessageId)
+
+    if (!session) {
+      logger.warn("Session not found chat_id = %s", ctx.chat.id)
+
+      return {
+        sessions: undefined,
+        session: undefined,
+        mode: undefined
+      }
+    }
+  }
+
+  return {
+    sessions,
+    session,
+    mode
+  }
+}
+
+bot.on('message', async (ctx) => {
+  let { sessions, session, question, mode } = await tryFindSessionAndQuestionToAnswerFeedback(ctx)
+
+  if (sessions && session && question && mode) {
+    const answer = session.answers.find(({ chatId, question: q }) => {
+      return chatId === ctx.chat.id && question === q
+    })
+
+    if (!answer) {
+      logger.warn("Answer not found chatId = %s, question = %s", ctx.chat.id, question)
+
       return
     }
-  }
 
-  const answer = session.answers.find(({ chatId, question: q }) => {
-    return chatId === ctx.chat.id && question === q
-  })
+    answer.feedback = Reflect.get(ctx.message, 'text') as string
 
-  if (!answer) {
-    logger.warn("Answer not found chatId = %s, question = %s", ctx.chat.id, question)
+    switch (question) {
+      case '1': {
+        const m = await sendQuestion(ctx.chat.id, session.id, '2', mode)
 
-    return
-  }
+        session.questionsMessagesIds[1] = m.message_id
 
-  answer.feedback = Reflect.get(ctx.message, 'text') as string
+        break
+      }
+      case '2': {
+        const m = await sendQuestion(ctx.chat.id, session.id, '3', mode)
 
-  switch (question) {
-    case '1': {
-      const m = await sendQuestion(ctx.chat.id, session.id, '2', mode)
+        session.questionsMessagesIds[2] = m.message_id
 
-      session.questionsMessagesIds[1] = m.message_id
+        break
+      }
+      case '3':
+        await sendCloseQuestion(ctx.chat.id, session.id, mode)
 
-      break
+        break
     }
-    case '2': {
-      const m = await sendQuestion(ctx.chat.id, session.id, '3', mode)
 
-      session.questionsMessagesIds[2] = m.message_id
+    switch (mode) {
+      case 'cron': {
+        db.set('sessions', sessions)
 
-      break
+        break
+      }
+      case 'demo': {
+        demoStore.sessions = sessions
+
+        break
+      }
     }
-    case '3':
+  } else {
+    ({ sessions, session, mode } = await tryFindSessionToTextFeedback(ctx));
+
+    if (sessions && session && mode) {
+      session.textFeedbacks.push({
+        id: session.textFeedbacks.length,
+        ts: new Date().toISOString(),
+        chatId: ctx.chat.id,
+        feedback: Reflect.get(ctx.message, 'text') as string
+      })
+
+      switch (mode) {
+        case 'cron': {
+          db.set('sessions', sessions)
+
+          break
+        }
+        case 'demo': {
+          demoStore.sessions = sessions
+
+          break
+        }
+      }
+
       await bot.telegram.sendMessage(
-        ctx.chat.id,
+        ctx.chat!.id,
         thanksTemplate({})
       )
-
-      break
+    } else {
+      // Do nothing yet
+    }
   }
-
-  db.set('sessions', sessions)
 })
 
 const startSequence = async ({
@@ -336,7 +529,9 @@ const startSequence = async ({
       1: null,
       2: null,
       3: null
-    }
+    },
+    textFeedbacks: [],
+    textFeedbacksMessageIds: []
   }
 
   for (const chatId of chats) {

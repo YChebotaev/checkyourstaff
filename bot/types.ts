@@ -10,6 +10,8 @@ export type Session = {
   feedbackMessageIds: {
     [key in '1' | '2' | '3']: number | null
   }
+  textFeedbacks: SessionTextFeedback[],
+  textFeedbacksMessageIds: number[]
 }
 
 export type SessionAnswer = {
@@ -19,4 +21,11 @@ export type SessionAnswer = {
   question: '1' | '2' | '3'
   score: number
   feedback?: string
+}
+
+export type SessionTextFeedback = {
+  id: number
+  ts: string
+  chatId: number
+  feedback: string
 }
