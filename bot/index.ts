@@ -413,6 +413,19 @@ bot.on('message', async (ctx) => {
 
     answer.feedback = Reflect.get(ctx.message, 'text') as string
 
+    switch (mode) {
+      case 'cron': {
+        db.set('sessions', sessions)
+
+        break
+      }
+      case 'demo': {
+        demoStore.sessions = sessions
+
+        break
+      }
+    }
+
     switch (question) {
       case '1': {
         const m = await sendQuestion(ctx.chat.id, session.id, '2', mode)
@@ -432,19 +445,6 @@ bot.on('message', async (ctx) => {
         await sendCloseQuestion(ctx.chat.id, session.id, mode)
 
         break
-    }
-
-    switch (mode) {
-      case 'cron': {
-        db.set('sessions', sessions)
-
-        break
-      }
-      case 'demo': {
-        demoStore.sessions = sessions
-
-        break
-      }
     }
   } else {
     ({ sessions, session, mode } = await tryFindSessionToTextFeedback(ctx));

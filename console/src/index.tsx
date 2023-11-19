@@ -14,6 +14,15 @@ Promise.all([
   fetch(`${process.env["REACT_APP_SERVICE_URL"]}/chart_data`),
   fetch(`${process.env["REACT_APP_SERVICE_URL"]}/text_feedback`),
 ])
+  .catch(e => {
+    if (e instanceof Error) {
+      root.render(
+        <React.StrictMode>
+          {e.message}
+        </React.StrictMode>
+      )
+    }
+  })
   .then((resps) => Promise.all(resps.map((resp) => resp.json())))
   .then(([chartData, textFeedback]) => {
     root.render(
