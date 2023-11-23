@@ -8,9 +8,10 @@ import { parseFeedbackId } from "../../../../../../../utils/parseFeedbackId";
 export const StartCommunicationButton: FC<{
   id: string;
   username: string;
+  role: string
   disable: boolean;
   onSuccess(): void;
-}> = ({ id, username, disable, onSuccess }) => {
+}> = ({ id, username, role, disable, onSuccess }) => {
   const { handleClose } = useInsideDialog();
   const apiClient = useApiClient();
   const { mutate } = useMutation({
@@ -21,6 +22,7 @@ export const StartCommunicationButton: FC<{
         feedbackType,
         feedbackId,
         username,
+        role
       });
 
       return data;

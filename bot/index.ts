@@ -69,11 +69,11 @@ setInterval(async () => {
   const pendingMessages = db.get('pendingMessages') ?? []
 
   for (const pendingMessage of pendingMessages) {
-    const { chatId, username } = pendingMessage
+    const { chatId, username, role } = pendingMessage
 
     await bot.telegram.sendMessage(
       chatId,
-      communicationRequestTemplate({ username })
+      communicationRequestTemplate({ username, role })
     )
 
     db.set('pendingMessages', without(pendingMessages, pendingMessage))

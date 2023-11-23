@@ -35,4 +35,5 @@ export type SessionTextFeedback = {
 export type PendingMessage = {
   chatId: number
   username: string
+  role: string
 }

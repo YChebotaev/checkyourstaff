@@ -175,6 +175,7 @@ service.post<{
     feedbackType: 'a' | 'f'
     feedbackId: string
     username: string
+    role: string
   }
 }>('/sendMessage', {
   schema: {
@@ -185,11 +186,12 @@ service.post<{
         sessionId: { type: 'string' },
         feedbackType: { enum: ['a', 'f'] },
         feedbackId: { type: 'string' },
-        username: { type: 'string' }
+        username: { type: 'string' },
+        role: { type: 'string' }
       }
     }
   },
-  async handler({ body: { sessionId, feedbackType, feedbackId: strFeedbackId, username } }) {
+  async handler({ body: { sessionId, feedbackType, feedbackId: strFeedbackId, username, role } }) {
     const feedbackId = Number(strFeedbackId)
     const db = new JSONDB(process.env['DB_FILE']!)
     const sessions = db.get('sessions') as Session[] ?? []
@@ -216,7 +218,8 @@ service.post<{
         ...(db.get('pendingMessages') ?? []),
         {
           chatId,
-          username: username.trim().startsWith('@') ? username.trim().slice(1).trim() : username.trim()
+          username: username.trim().startsWith('@') ? username.trim().slice(1).trim() : username.trim(),
+          role: role.trim()
         }
       ])
 
