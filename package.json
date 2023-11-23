@@ -2,7 +2,8 @@
   "workspaces": [
     "bot",
     "console",
-    "service"
+    "service",
+    "persistence"
   ],
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",

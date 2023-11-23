@@ -1,9 +1,9 @@
 import path from 'node:path'
-// import { inspect } from 'node:util'
 import cron from 'node-cron'
 import JSONDB from 'simple-json-db'
 import { Telegraf, Markup, type Context, type NarrowedContext } from 'telegraf'
 import { mkdirpSync } from 'mkdirp'
+import { without } from 'lodash'
 import { readTemplate, logger } from './lib'
 import type { Session, SessionAnswer } from './types'
 import { Update, Message } from 'telegraf/typings/core/types/typegram'
@@ -32,8 +32,11 @@ const thanksTemplate = readTemplate(
 const closeQuestionTemplate = readTemplate(
   path.join(__dirname, './templates/closeQuestion.hbs')
 )
+const communicationRequestTemplate = readTemplate(
+  path.join(__dirname, './templates/communicationRequest.hbs')
+)
 const timezone = process.env['TZ'] ?? 'Europe/Moscow'
-const db = new JSONDB(
+let db = new JSONDB(
   path.join(__dirname, 'data/db.json'),
   {
     syncOnWrite: true
@@ -50,6 +53,34 @@ if (!token) {
 }
 
 const bot = new Telegraf(token)
+
+setInterval(async () => {
+  // REFRESH DB
+
+  db = new JSONDB(
+    path.join(__dirname, 'data/db.json'),
+    {
+      syncOnWrite: true
+    }
+  )
+
+  // PROCESS PENDING MESSAGES
+
+  const pendingMessages = db.get('pendingMessages') ?? []
+
+  for (const pendingMessage of pendingMessages) {
+    const { chatId, username } = pendingMessage
+
+    await bot.telegram.sendMessage(
+      chatId,
+      communicationRequestTemplate({ username })
+    )
+
+    db.set('pendingMessages', without(pendingMessages, pendingMessage))
+  }
+
+  db.delete('pendingMessages')
+}, 1000)
 
 const sendQuestion = (chatId: number, s: number, q: '1' | '2' | '3', mode: 'cron' | 'demo') => {
   let text: string
@@ -559,7 +590,8 @@ const startSequence = async ({
 }
 
 cron.schedule(
-  '0 19 * * FRI',
+  // '0 19 * * FRI',
+  '0 * * * * *' /* Every minute */,
   () => startSequence({ mode: 'cron', chatId: undefined }),
   { timezone }
 )

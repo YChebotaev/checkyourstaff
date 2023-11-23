@@ -1,60 +1,120 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { format } from "date-fns";
-import { SummaryChart } from "./components/SummaryChart";
-import { TextFeedback } from "./components/TextFeedback";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import axios from "axios";
+import { useApiClient } from "./hooks/useApiClient";
+import { StatsPage } from "./pages/StatsPage";
+import { ChartsPage } from "./pages/ChartsPage";
+import { FeedbackPage } from "./pages/FeedbackPage";
+import type {
+  ChartsLoaderResult,
+  FeedbackLoaderResult,
+  StatsLoaderResult,
+} from "./types";
 import reportWebVitals from "./reportWebVitals";
 import "./style.css";
+import {
+  StatsResp,
+  ChartsDataResp,
+  TextFeedbackResp,
+} from "@checkyourstaff/service/types";
 
+const queryClient = new QueryClient();
+
+const fetchStats = async () => {
+  const data = await queryClient.fetchQuery({
+    queryKey: ["stats"],
+    async queryFn() {
+      const { data } = await apiClient.get<StatsResp>("/stats");
+
+      return data;
+    },
+  });
+
+  return data;
+};
+
+const fetchChartsData = async () => {
+  const data = await queryClient.fetchQuery({
+    queryKey: ["chartsData"],
+    async queryFn() {
+      const { data } = await apiClient.get<ChartsDataResp>("/chartsData");
+
+      return data;
+    },
+  });
+
+  return data;
+};
+
+const fetchTextFeedback = async () => {
+  const data = await queryClient.fetchQuery({
+    queryKey: ["textFeedback"],
+    async queryFn() {
+      const { data } = await apiClient.get<TextFeedbackResp>("/textFeedback");
+
+      return data;
+    },
+  });
+
+  return data;
+};
+
+const apiClient = axios.create({
+  baseURL: process.env["REACT_APP_SERVICE_URL"],
+});
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
 
-Promise.all([
-  fetch(`${process.env["REACT_APP_SERVICE_URL"]}/chart_data`),
-  fetch(`${process.env["REACT_APP_SERVICE_URL"]}/text_feedback`),
-])
-  .catch(e => {
-    if (e instanceof Error) {
-      root.render(
-        <React.StrictMode>
-          {e.message}
-        </React.StrictMode>
-      )
-    }
-  })
-  .then((resps) => Promise.all(resps.map((resp) => resp.json())))
-  .then(([chartData, textFeedback]) => {
-    root.render(
-      <React.StrictMode>
-        <SummaryChart
-          data={chartData.map((p: any) => ({
-            t: format(Date.parse(p.t), "dd.MM.yyyy"),
-            Удовлетворенность: p["1"],
-            Нагрузка: p["2"],
-            Счастье: p["3"],
-          }))}
-        />
-        <TextFeedback
-          data={textFeedback.map((s: any) => ({
-            ...s,
-            a: s.a.map((a: any) => ({
-              ...a,
-              q:
-                a.q === "1"
-                  ? "Насколько вы удовлетворены результатами своей работы на этой неделе?"
-                  : a.q === "2"
-                  ? "Насколько высокая рабочая нагрузка была на этой неделе?"
-                  : a.q === 3
-                  ? "Оцените по шкале от 0 до 5, насколько вы счастливы на работе?"
-                  : "???",
-            })),
-            t: format(Date.parse(s.t), "dd.MM.yyyy"),
-          }))}
-        />
-      </React.StrictMode>,
-    );
-  });
+const router = createBrowserRouter([
+  {
+    index: true,
+    element: <Navigate replace to="/stats" />,
+  },
+  {
+    path: "/stats",
+    element: <StatsPage />,
+    async loader() {
+      return {
+        stats: await fetchStats(),
+      } satisfies StatsLoaderResult;
+    },
+  },
+  {
+    path: "/charts",
+    element: <ChartsPage />,
+    async loader() {
+      return {
+        chartsData: await fetchChartsData(),
+      } satisfies ChartsLoaderResult;
+    },
+  },
+  {
+    path: "/feedback",
+    element: <FeedbackPage />,
+    async loader() {
+      return {
+        feedbackData: await fetchTextFeedback(),
+      } satisfies FeedbackLoaderResult;
+    },
+  },
+]);
+
+root.render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <useApiClient.Provider apiClient={apiClient}>
+        <RouterProvider router={router} />
+      </useApiClient.Provider>
+    </QueryClientProvider>
+  </React.StrictMode>,
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

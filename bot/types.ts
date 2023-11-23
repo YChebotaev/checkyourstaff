@@ -21,6 +21,7 @@ export type SessionAnswer = {
   question: '1' | '2' | '3'
   score: number
   feedback?: string
+  feedbackDeleted?: boolean
 }
 
 export type SessionTextFeedback = {
@@ -28,4 +29,10 @@ export type SessionTextFeedback = {
   ts: string
   chatId: number
   feedback: string
+  deleted?: boolean
+}
+
+export type PendingMessage = {
+  chatId: number
+  username: string
 }
