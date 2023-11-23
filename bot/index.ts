@@ -590,8 +590,7 @@ const startSequence = async ({
 }
 
 cron.schedule(
-  // '0 19 * * FRI',
-  '0 * * * * *' /* Every minute */,
+  '0 19 * * FRI',
   () => startSequence({ mode: 'cron', chatId: undefined }),
   { timezone }
 )
