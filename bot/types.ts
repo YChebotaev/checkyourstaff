@@ -37,3 +37,11 @@ export type PendingMessage = {
   username: string
   role: string
 }
+
+export type FreeFormFeedback = {
+  id: number
+  ts: string
+  kind?: 'anonymous-feedback' | 'team-question'
+  text: string
+  deleted?: boolean
+}

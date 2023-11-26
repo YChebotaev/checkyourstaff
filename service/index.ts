@@ -4,8 +4,8 @@ import { fastify } from "fastify"
 import fastifyCors from '@fastify/cors'
 import pino from 'pino'
 import JSONDB from 'simple-json-db'
-import { groupBy, last, keys, union } from 'lodash'
-import type { Session } from '@checkyourstaff/bot/types'
+import { groupBy, last, keys, union, identity } from 'lodash'
+import type { FreeFormFeedback, Session } from '@checkyourstaff/bot/types'
 import type { ChartDataResp, TextFeedbackResp, StatsResp } from "./types"
 
 const calculateAveragesOfSession = (session: Session) => {
@@ -129,6 +129,7 @@ service.get<{ Result: ChartDataResp }>('/chartsData', () => {
 service.get<{ Result: TextFeedbackResp }>('/textFeedback', () => {
   const db = new JSONDB(process.env['DB_FILE']!)
   const sessions: Session[] = db.get('sessions') ?? []
+  const freeFormFeedbacks: FreeFormFeedback[] = db.get('freeFormFeedbacks') ?? []
 
   for (let i = 0; i < sessions.length; i++) {
     const session = sessions[i]
@@ -141,32 +142,40 @@ service.get<{ Result: TextFeedbackResp }>('/textFeedback', () => {
     }
   }
 
-  const result = sessions
-    .map(s => ({
-      id: s.id,
-      t: s.ts,
-      a: [
-        ...(s.answers
-          .filter(a => !a.feedbackDeleted)
-          .filter(a => Boolean(a.feedback))
-          .map(a => ({
-            id: a.id,
-            q: a.question,
-            f: a.feedback,
-            s: a.score
-          }))),
-        ...(s.textFeedbacks
-          .filter(tf => !tf.deleted)
-          .map(tf => ({
-            id: tf.id,
-            f: tf.feedback
-          }))
-        )
-      ]
-    }))
-    .filter(s => Boolean(s.a.length))
-
-  return result
+  return {
+    ss: sessions
+      .map(s => ({
+        id: s.id,
+        t: s.ts,
+        a: [
+          ...(s.answers
+            .filter(a => !a.feedbackDeleted)
+            .filter(a => Boolean(a.feedback))
+            .map(a => ({
+              id: a.id,
+              q: a.question,
+              f: a.feedback,
+              s: a.score
+            }))),
+          ...(s.textFeedbacks
+            .filter(tf => !tf.deleted)
+            .map(tf => ({
+              id: tf.id,
+              f: tf.feedback
+            }))
+          )
+        ]
+      }))
+      .filter(s => Boolean(s.a.length)),
+    ff: freeFormFeedbacks
+      .filter(it => it.kind === 'anonymous-feedback')
+      .filter(it => !it.deleted)
+      .map(it => ({
+        id: it.id,
+        t: it.ts,
+        tx: it.text
+      }))
+  }
 })
 
 service.post<{

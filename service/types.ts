@@ -14,12 +14,19 @@ export type ChartsDataResp = {
 }[]
 
 export type TextFeedbackResp = {
-  id: number
-  t: string
-  a: {
+  ss: {
     id: number
-    q: string
-    f: string
-    s: number
+    t: string
+    a: {
+      id: number
+      q: string
+      f: string
+      s: number
+    }[]
+  }[],
+  ff: {
+    id: number
+    t: string
+    tx: string
   }[]
-}[]
+}

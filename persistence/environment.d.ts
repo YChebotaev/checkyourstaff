@@ -3,7 +3,11 @@ import type {
   PollSession,
   PollAnswer,
   PollFeedback,
-  MessageMetadata
+  MessageMetadata,
+  Account,
+  Session,
+  Poll,
+  PollMember
 } from './types'
 
 declare module 'knex/types/tables' {
@@ -13,5 +17,9 @@ declare module 'knex/types/tables' {
     pollAnswer: PollAnswer
     pollFeedback: PollFeedback
     messageMetadata: MessageMetadata
+    account: Account
+    session: Session
+    poll: Poll
+    pollMember: PollMember
   }
 }

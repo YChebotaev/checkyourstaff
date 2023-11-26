@@ -1,11 +1,11 @@
 import path from 'node:path'
 import cron from 'node-cron'
 import JSONDB from 'simple-json-db'
-import { Telegraf, Markup, type Context, type NarrowedContext } from 'telegraf'
+import { Telegraf, Markup, session, type Context, type NarrowedContext } from 'telegraf'
 import { mkdirpSync } from 'mkdirp'
 import { without } from 'lodash'
 import { readTemplate, logger } from './lib'
-import type { Session, SessionAnswer } from './types'
+import type { FreeFormFeedback, Session, SessionAnswer } from './types'
 import { Update, Message } from 'telegraf/typings/core/types/typegram'
 
 mkdirpSync(path.join(__dirname, 'data'))
@@ -34,6 +34,9 @@ const closeQuestionTemplate = readTemplate(
 )
 const communicationRequestTemplate = readTemplate(
   path.join(__dirname, './templates/communicationRequest.hbs')
+)
+const freeFormFeedbackTemplate = readTemplate(
+  path.join(__dirname, './templates/freeFormFeedback.hbs')
 )
 const timezone = process.env['TZ'] ?? 'Europe/Moscow'
 let db = new JSONDB(
@@ -124,6 +127,8 @@ const sendCloseQuestion = (chatId: number, sessionId: number, mode: 'cron' | 'de
   )
 }
 
+bot.use(session())
+
 bot.start(async (ctx) => {
   const chats: number[] = db.get('chats') ?? []
 
@@ -141,7 +146,6 @@ bot.action(/\/cq\?s=(\d+)&a=(1|0)&m=(cron|demo)/, async (ctx) => {
   const s = Number(ctx.match[1])
   const a = ctx.match[2] === '1' ? true : false
   const mode = ctx.match[3] as 'cron' | 'demo'
-
   const messageId = ctx.update.callback_query.message!.message_id
 
   await bot.telegram.editMessageReplyMarkup(
@@ -428,7 +432,7 @@ const tryFindSessionToTextFeedback = async (ctx: NarrowedContext<Context<Update>
   }
 }
 
-bot.on('message', async (ctx) => {
+bot.on('message', async (ctx, next) => {
   let { sessions, session, question, mode } = await tryFindSessionAndQuestionToAnswerFeedback(ctx)
 
   if (sessions && session && question && mode) {
@@ -509,6 +513,60 @@ bot.on('message', async (ctx) => {
       // Do nothing yet
     }
   }
+
+  await next()
+})
+
+bot.on('message', async (ctx, next) => {
+  const text = Reflect.get(ctx.message, 'text') as string
+  const freeFormFeedbacks: FreeFormFeedback[] = db.get('freeFormFeedbacks') ?? []
+  const id = freeFormFeedbacks.length
+
+  db.set('freeFormFeedbacks', [
+    ...freeFormFeedbacks,
+    {
+      id,
+      text,
+      ts: new Date().toISOString()
+    } satisfies FreeFormFeedback
+  ])
+
+  await bot.telegram.sendMessage(
+    ctx.chat.id,
+    freeFormFeedbackTemplate({}),
+    Markup.inlineKeyboard([
+      [Markup.button.callback('Да, отправить фидбек по работе', `/faf?fid=${id}` /* Feedback Anonymous Feedback */)],
+      [Markup.button.callback('Нет, задать вопрос разработчикам', `/ftq?fid=${id}` /* Feedback Team Question */)]
+    ])
+  )
+
+  await next()
+})
+
+bot.action(/\/f(af|tq)\?fid=(\d+)/, async (ctx, next) => {
+  const kind = ctx.match[1] as 'af' | 'tq'
+  const fid = Number(ctx.match[2])
+  const freeFormFeedbacks: FreeFormFeedback[] = db.get('freeFormFeedbacks') ?? []
+  const item = freeFormFeedbacks[fid]
+
+  switch (kind) {
+    case 'af':
+      item.kind = 'anonymous-feedback'
+
+      await ctx.answerCbQuery('Ваше сообщение отправлено!')
+
+      break
+    case 'tq':
+      item.kind = 'team-question'
+
+      await ctx.answerCbQuery('Спасибо! Мы учтем фидбек в новых версиях бота')
+
+      break
+  }
+
+  db.set('freeFormFeedbacks', freeFormFeedbacks)
+
+  await next()
 })
 
 const startSequence = async ({

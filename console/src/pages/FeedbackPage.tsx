@@ -27,7 +27,7 @@ export const FeedbackPage: FC = () => {
   const items = useMemo(() => {
     const items: FeedbackGridItemProps[] = [];
 
-    for (const item of feedbackData) {
+    for (const item of feedbackData.ss) {
       for (const a of item.a) {
         const id = `${item.id}-${a.q ? "a" : "f"}-${a.id}`;
 
@@ -44,6 +44,14 @@ export const FeedbackPage: FC = () => {
         });
       }
     }
+
+    items.push(
+      ...feedbackData.ff.map((it) => ({
+        id: `${it.id}-ff`,
+        date: format(Date.parse(it.t), "dd.MM.yyyy"),
+        text: it.tx,
+      })),
+    );
 
     return items;
   }, [feedbackData, deletedIds]);

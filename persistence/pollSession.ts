@@ -10,5 +10,5 @@ export const createPollSession = async ({
     .into('pollSession')
     .returning('id')
 
-  return id as number
+  return id
 }
