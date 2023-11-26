@@ -1,27 +1,45 @@
 import { styled } from 'styled-components'
 
 export const Inner = styled.div`
+  position: relative;
+  min-width: 500px;
+  min-height: 250px;
+`
+
+export const Text = styled.div`
+  padding: 0 30px 0;
+  font-weight: 400;
+  font-size: 14px;
+  color: #35424A;
+`
+
+export const Backdrop = styled.div`
+  position: absolute;
+  inset: 0;
+  background-color: #ffffffcc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #35424A;
+  text-align: center;
+`
+
+export const Confirmation = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 30vw;
+  justify-content: center;
+  align-items: center;
+  gap: 20px
 `
 
-export const Actions = styled.div`
-  display: flex;
-  justify-content: space-around;
-  padding: 30px 20px;
-  gap: 20px;
-`
-
-export const Button = styled.button`
-  display: block;
-  border: none;
-  background: transparent;
-  padding: 0;
-  font-family: sans-serif;
-  font-size: 14pt;
+export const ConfirmationText = styled.div`
   font-weight: 400;
+  font-size: 14px;
   color: #35424A;
-  cursor: pointer;
 `

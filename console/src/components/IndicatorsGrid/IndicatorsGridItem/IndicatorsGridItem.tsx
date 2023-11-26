@@ -6,8 +6,10 @@ import {
   DeltaPercentage,
   NameRow,
   ViewChart,
+  Separator,
 } from "./styled";
 import type { IndicatorsGridItemProps } from "./types";
+import { Badge, BadgeColor } from "../../Badge";
 
 const renderPercent = (value: number) => {
   if (value > 0) {
@@ -19,25 +21,33 @@ const renderPercent = (value: number) => {
   }
 };
 
+const getPercentColor = (value: number): BadgeColor => {
+  if (value > 0) {
+    return "green";
+  } else if (value === 0) {
+    return "gray";
+  } else {
+    return "red";
+  }
+};
+
 export const IndicatorsGridItem: FC<IndicatorsGridItemProps> = ({
   name,
   value,
   deltaPercent,
 }) => (
   <Root to="/charts">
+    <Separator />
     <ValueRow $withDelta={deltaPercent != null}>
       <ValueContainer>{value}</ValueContainer>
       {deltaPercent != null && (
-        <DeltaPercentage
-          $positive={deltaPercent > 0}
-          $neutral={deltaPercent === 0}
-          $negative={deltaPercent < 0}
-        >
+        <DeltaPercentage color={getPercentColor(deltaPercent)}>
           {renderPercent(deltaPercent)}
         </DeltaPercentage>
       )}
     </ValueRow>
     <NameRow>{name}</NameRow>
+    <Separator />
     <ViewChart>Смотреть график</ViewChart>
   </Root>
 );

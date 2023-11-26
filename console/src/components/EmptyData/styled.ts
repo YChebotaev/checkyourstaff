@@ -1,7 +1,6 @@
 import { styled } from 'styled-components'
 
 export const Root = styled.div`
-  font-family: sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;

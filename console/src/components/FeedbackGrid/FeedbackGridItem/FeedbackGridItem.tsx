@@ -12,7 +12,14 @@ export const FeedbackGridItem: FC<
   }
 > = ({ id, text, score, date, question, onDeleteItem }) => {
   const { element: dialogElement, toggle: toggleDialog } = useDialog(
-    <DetailDialog id={id} date={date} score={score} text={text} onDeleteItem={onDeleteItem} />,
+    <DetailDialog
+      id={id}
+      date={date}
+      score={score}
+      text={text}
+      question={question}
+      onDeleteItem={onDeleteItem}
+    />,
   );
 
   return (

@@ -2,7 +2,7 @@ import { styled } from 'styled-components'
 
 export const Root = styled.div`
   padding: 20px 0;
-  border-radius: 20px;
+  border-radius: 30px;
   background-color: rgb(229, 244, 254);
 `
 

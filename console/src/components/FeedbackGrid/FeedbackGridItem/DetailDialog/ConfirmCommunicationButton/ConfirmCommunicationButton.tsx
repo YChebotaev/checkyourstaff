@@ -1,41 +1,41 @@
 import { type FC } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Root } from "./styled";
-import { useInsideDialog } from "../../../../../../../hooks/useInsideDialog";
-import { useApiClient } from "../../../../../../../hooks/useApiClient";
-import { parseFeedbackId } from "../../../../../../../utils/parseFeedbackId";
+import { ActionButton } from "../../../../Dialog";
+import { useApiClient } from "../../../../../hooks/useApiClient";
+import { parseFeedbackId } from "../../../../../utils/parseFeedbackId";
 
-export const ActuallyDeleteButton: FC<{
+export const ConfirmCommunicationButton: FC<{
   id: string;
+  username: string;
+  role: string;
   onSuccess(id: string): void;
-}> = ({ id, onSuccess }) => {
+}> = ({ id, username, role, onSuccess }) => {
   const apiClient = useApiClient();
-  const { handleClose } = useInsideDialog();
   const { mutate } = useMutation({
     async mutationFn() {
       const { sessionId, feedbackType, feedbackId } = parseFeedbackId(id) ?? {};
-      const { data } = await apiClient.post("/deleteFeedback", {
+      const { data } = await apiClient.post("/sendMessage", {
         sessionId,
         feedbackType,
         feedbackId,
+        username,
+        role,
       });
 
       return data;
     },
     onSuccess() {
       onSuccess(id);
-
-      handleClose();
     },
   });
 
   return (
-    <Root
+    <ActionButton
       onClick={() => {
         mutate();
       }}
     >
-      Подтвердить
-    </Root>
+      Отправить
+    </ActionButton>
   );
 };

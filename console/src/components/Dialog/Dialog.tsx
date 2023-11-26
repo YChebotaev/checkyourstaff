@@ -3,14 +3,12 @@ import { createPortal } from "react-dom";
 import FocusTrap from "focus-trap-react";
 import { Backdrop } from "./Backdrop";
 import { Root } from "./styled";
-
-type ChildrenProps = {
-  handleClose(): void;
-};
+import { useInsideDialog } from "../../hooks/useInsideDialog";
 
 export const Dialog: FC<{
-  children: ReactNode | ((props: ChildrenProps) => ReactNode);
+  children: ReactNode;
 }> = ({ children }) => {
+  const { handleClose } = useInsideDialog();
   useEffect(() => {
     window.document.body.style.overflow = "hidden";
 
@@ -28,10 +26,13 @@ export const Dialog: FC<{
             e.preventDefault();
             e.stopPropagation();
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              handleClose();
+            }
+          }}
         >
-          {typeof children === "function"
-            ? children({ handleClose() {} })
-            : children}
+          {children}
         </Root>
       </FocusTrap>
     </Backdrop>,

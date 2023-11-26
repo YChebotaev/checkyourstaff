@@ -3,7 +3,7 @@ import { styled } from 'styled-components'
 export const Root = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 20px 20px 0;
+  padding: 30px 30px 0;
 `
 
 export const Left = styled.div`
@@ -19,15 +19,13 @@ export const Right = styled.div`
 `
 
 export const Date = styled.div`
-  font-family: sans-serif;
-  font-size: 10pt;
+  font-size: 10px;
   font-weight: 400;
   color: #C2CBCF;
 `
 
 export const IsNew = styled.div`
-  font-family: sans-serif;
-  font-size: 10pt;
+  font-size: 10px;
   font-weight: 400;
   color: #35424A;
 `

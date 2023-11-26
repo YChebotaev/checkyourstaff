@@ -8,7 +8,7 @@ export const Header: FC<{
 }> = ({ date, score }) => (
   <Root>
     <Left>
-      <Date>12.11.23</Date>
+      <Date>{date}</Date>
       <IsNew>Новый отзыв</IsNew>
     </Left>
     <Right>{score != null && <Score score={score} />}</Right>
