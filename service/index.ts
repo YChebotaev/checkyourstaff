@@ -180,8 +180,8 @@ service.get<{ Result: TextFeedbackResp }>('/textFeedback', () => {
 
 service.post<{
   Body: {
-    sessionId: string
-    feedbackType: 'a' | 'f'
+    sessionId?: string
+    feedbackType: 'a' | 'f' | 'ff'
     feedbackId: string
     username: string
     role: string
@@ -190,10 +190,10 @@ service.post<{
   schema: {
     body: {
       type: 'object',
-      required: ['sessionId', 'feedbackType', 'feedbackId'],
+      required: ['feedbackType', 'feedbackId', 'role', 'username'],
       properties: {
         sessionId: { type: 'string' },
-        feedbackType: { enum: ['a', 'f'] },
+        feedbackType: { enum: ['a', 'f', 'ff'] },
         feedbackId: { type: 'string' },
         username: { type: 'string' },
         role: { type: 'string' }
@@ -211,12 +211,29 @@ service.post<{
       switch (feedbackType) {
         case 'a': {
           const answer = session.answers[feedbackId]
-          chatId = answer.chatId
+
+          if (answer) {
+            chatId = answer.chatId
+          }
+
           break
         }
         case 'f': {
           const textFeedback = session.textFeedbacks[feedbackId]
-          chatId = textFeedback.chatId
+
+          if (textFeedback) {
+            chatId = textFeedback.chatId
+          }
+
+          break
+        }
+        case 'ff': {
+          const textFeedback = (db.get('freeFormFeedbacks') ?? [])[feedbackId]
+
+          if (textFeedback) {
+            chatId = textFeedback.chatId
+          }
+
           break
         }
       }
@@ -227,7 +244,9 @@ service.post<{
         ...(db.get('pendingMessages') ?? []),
         {
           chatId,
-          username: username.trim().startsWith('@') ? username.trim().slice(1).trim() : username.trim(),
+          username: username.trim().startsWith('@')
+            ? username.trim().slice(1).trim()
+            : username.trim(),
           role: role.trim()
         }
       ])

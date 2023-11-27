@@ -1,12 +1,12 @@
 import path from 'node:path'
 import cron from 'node-cron'
 import JSONDB from 'simple-json-db'
-import { Telegraf, Markup, session, type Context, type NarrowedContext } from 'telegraf'
+import { Telegraf, Markup, type Context, type NarrowedContext } from 'telegraf'
 import { mkdirpSync } from 'mkdirp'
 import { without } from 'lodash'
 import { readTemplate, logger } from './lib'
 import type { FreeFormFeedback, Session, SessionAnswer } from './types'
-import { Update, Message } from 'telegraf/typings/core/types/typegram'
+import type { Update, Message } from 'telegraf/typings/core/types/typegram'
 
 mkdirpSync(path.join(__dirname, 'data'))
 
@@ -127,8 +127,6 @@ const sendCloseQuestion = (chatId: number, sessionId: number, mode: 'cron' | 'de
   )
 }
 
-bot.use(session())
-
 bot.start(async (ctx) => {
   const chats: number[] = db.get('chats') ?? []
 
@@ -136,7 +134,7 @@ bot.start(async (ctx) => {
     db.set('chats', [...chats, ctx.chat.id])
   }
 
-  logger.info('A new user "%s" joined with id = %s', ctx.message.from.username, ctx.message.from.id)
+  logger.info('A new user joined with id = %s', ctx.message.from.id)
 
   await ctx.sendMessage(welcome1Template({}))
   await ctx.sendMessage(welcome2Template({}))
@@ -330,12 +328,6 @@ const tryFindSessionAndQuestionToAnswerFeedback = async (ctx: NarrowedContext<Co
   }
 
   if (replyToMessageId == null) {
-    const text = Reflect.get(ctx.message, 'text') as string
-
-    if (text.trim().toLowerCase() === 'тест') {
-      await startSequence({ mode: 'demo', chatId: ctx.chat.id })
-    }
-
     return {
       sessions: undefined,
       session: undefined,
@@ -432,6 +424,16 @@ const tryFindSessionToTextFeedback = async (ctx: NarrowedContext<Context<Update>
   }
 }
 
+bot.hears('тест', async (ctx, next) => {
+  const text = Reflect.get(ctx.message, 'text') as string
+
+  if (text.trim().toLowerCase() === 'тест') {
+    await startSequence({ mode: 'demo', chatId: ctx.chat.id })
+  }
+
+  await next()
+})
+
 bot.on('message', async (ctx, next) => {
   let { sessions, session, question, mode } = await tryFindSessionAndQuestionToAnswerFeedback(ctx)
 
@@ -518,27 +520,35 @@ bot.on('message', async (ctx, next) => {
 })
 
 bot.on('message', async (ctx, next) => {
-  const text = Reflect.get(ctx.message, 'text') as string
-  const freeFormFeedbacks: FreeFormFeedback[] = db.get('freeFormFeedbacks') ?? []
-  const id = freeFormFeedbacks.length
+  const replyToMessageId: number | undefined = Reflect.get(ctx.update.message, 'reply_to_message')?.message_id
 
-  db.set('freeFormFeedbacks', [
-    ...freeFormFeedbacks,
-    {
-      id,
-      text,
-      ts: new Date().toISOString()
-    } satisfies FreeFormFeedback
-  ])
+  if (!replyToMessageId) {
+    const text = Reflect.get(ctx.message, 'text') as string
 
-  await bot.telegram.sendMessage(
-    ctx.chat.id,
-    freeFormFeedbackTemplate({}),
-    Markup.inlineKeyboard([
-      [Markup.button.callback('Да, отправить фидбек по работе', `/faf?fid=${id}` /* Feedback Anonymous Feedback */)],
-      [Markup.button.callback('Нет, задать вопрос разработчикам', `/ftq?fid=${id}` /* Feedback Team Question */)]
-    ])
-  )
+    if (text !== 'тест') {
+      const freeFormFeedbacks: FreeFormFeedback[] = db.get('freeFormFeedbacks') ?? []
+      const id = freeFormFeedbacks.length
+
+      db.set('freeFormFeedbacks', [
+        ...freeFormFeedbacks,
+        {
+          id,
+          text,
+          ts: new Date().toISOString(),
+          chatId: ctx.chat.id,
+        } satisfies FreeFormFeedback
+      ])
+
+      await bot.telegram.sendMessage(
+        ctx.chat.id,
+        freeFormFeedbackTemplate({}),
+        Markup.inlineKeyboard([
+          [Markup.button.callback('Да, отправить фидбек по работе', `/faf?fid=${id}` /* Feedback Anonymous Feedback */)],
+          [Markup.button.callback('Нет, задать вопрос разработчикам', `/ftq?fid=${id}` /* Feedback Team Question */)]
+        ])
+      )
+    }
+  }
 
   await next()
 })

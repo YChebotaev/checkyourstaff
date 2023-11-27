@@ -41,6 +41,7 @@ export type PendingMessage = {
 export type FreeFormFeedback = {
   id: number
   ts: string
+  chatId: number
   kind?: 'anonymous-feedback' | 'team-question'
   text: string
   deleted?: boolean
