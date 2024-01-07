@@ -1,13 +1,25 @@
 {
   "workspaces": [
     "bot",
+    "bot2",
     "console",
     "service",
-    "persistence"
+    "persistence",
+    "webapp",
+    "console-backend",
+    "pincodes-service",
+    "webapp-backend",
+    "polling-bot",
+    "control-bot",
+    "common",
+    "workers"
   ],
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "zx": "^7.2.3"
   }
 }

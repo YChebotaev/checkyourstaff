@@ -1,141 +1,190 @@
 export type Account = {
-  id: number
-  name: string
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  name: string | null;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type User = {
-  id: number
-  name: string | null // Актуально для администраторов
-  email: string | null // Актуально для администраторов
-  phone: string | null // Актуально для администраторов
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  name: string | null; // Актуально для администраторов
+  email: string | null; // Актуально для администраторов
+  phone: string | null; // Актуально для администраторов
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type AccountAdministrator = {
-  id: number
-  accountId: number
-  userId: number
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  accountId: number;
+  userId: number;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type SampleGroup = {
-  id: number
-  accountId: number
-  name: string
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  accountId: number;
+  name: string;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type Responder = {
-  id: number
-  sampleGroupId: number
-  pollId: number
-  userId: number
-  phone: string | null // И/или емейл и/или телефон
-  email: string | null // И/или емейл и/или телефон
-  pin: string
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  sampleGroupId: number;
+  userId: number;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type Poll = {
-  id: number
-  name: string
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  accountId: number;
+  name: string;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type PollQuestion = {
-  id: number
-  accountId: number
-  pollId: number
-  text: string
-  minScore: number
-  maxScore: number
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  accountId: number;
+  pollId: number;
+  text: string;
+  minScore: number;
+  maxScore: number;
+  textFeedbackRequestTreshold: number;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PollingState = {
+  [k: number /* responders left ids */]: number[] /* questions left ids */;
+};
 
 export type PollSession = {
-  id: number
-  pollId: number
-  accountId: number
-  sampleGroupId: number
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  pollId: number;
+  accountId: number;
+  sampleGroupId: number;
+  pollingState: PollingState;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type PollAnswer = {
-  id: number
-  pollId: number
-  pollQuestionId: number
-  accountId: number
-  pollSessionId: number
-  score: number
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  pollQuestionId: number;
+  pollSessionId: number;
+  score: number;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export type TextFeedback = {
-  id: number
-  pollId: number | null
-  pollQuestionId: number | null
-  accountId: number | null
-  pollSessionId: number | null
-  text: string
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  pollQuestionId: number | null;
+  pollSessionId: number | null;
+  text: string;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type PinCodeGenerator = {
-  id: number
-  size: number // 4
-  generatedCout: number
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  size: number; // 4
+  accountId: number;
+  sampleGroupId: number;
+  generatedCount: number;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type PinCode = {
-  id: number
-  accountId: number
-  sampleGroupId: number
-  code: string
-  used: boolean
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  accountId: number;
+  sampleGroupId: number;
+  code: string;
+  used: boolean;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type MessageMetaTypes =
+  | "enter-pin"
+  | "enter-account-name"
+  | "enter-group-name"
+  | "invite-user"
+  | "enter-questionary-name"
+  | "enter-question-text"
+  | "enter-text-feedback"
+  | "enter-final-feedback";
 
 export type MessageMeta = {
-  id: number
-  messageId: number // Telegram message id
-  chatId: number // Telegram chat id
-  type: string // To be specified later
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  accountId: number | null;
+  sampleGroupId: number | null;
+  messageId: number; // Telegram message id
+  chatId: number; // Telegram chat id
+  userId: number;
+  pollId: number | null;
+  pollQuestionId: number | null;
+  pollSessionId: number | null;
+  responderId: number | null;
+  type: MessageMetaTypes;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type UserSession = {
+  id: number;
+  userId: number;
+  chatId: number;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Invite = {
+  id: number;
+  // pinCodeId: number
+  sampleGroupId: number;
+  email: string | null;
+  phone: string | null;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type JobTypes = "poll-session";
+
+export type Job = {
+  id: number;
+  pollId: number;
+  sampleGroupId: number;
+  type: JobTypes;
+  cron: string;
+  timeZone: string;
+  deleted: boolean | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
+
+export type Event<T> = {
   id: number
-  userId: number
-  chatId: number
-  deleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  type: string;
+  payload: T;
+};

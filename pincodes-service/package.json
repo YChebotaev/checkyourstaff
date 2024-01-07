@@ -1,0 +1,34 @@
+{
+  "name": "@checkyourstaff/pincodes-service",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "ts-node --require dotenv/config index.ts",
+    "test": "node --test --require ts-node/register ./tests/**/*.ts",
+    "migrate:make": "knex migrate:make $1 --knexfile ./knexfile.ts -x ts",
+    "migrate:up": "knex migrate:up --knexfile ./knexfile.ts",
+    "migrate:latest": "knex migrate:latest --knexfile ./knexfile.ts",
+    "migrate:down": "knex migrate:down --knexfile ./knexfile.ts",
+    "seed:make": "knex seed:make $1 --knexfile ./knexfile.ts -x ts",
+    "seed:run": "knex seed:run --knexfile ./knexfile.ts"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "pino-pretty": "^10.2.3"
+  },
+  "author": "YChebotaev <yury.79120345101@gmail.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@fastify/cors": "^8.4.1",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.24.3",
+    "knex": "^3.0.1",
+    "pino": "^8.16.2",
+    "sqlite3": "^5.1.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  }
+}

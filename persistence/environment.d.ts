@@ -1,25 +1,37 @@
 import type {
-  ChatMetadata,
+  Account,
+  User,
+  AccountAdministrator,
+  SampleGroup,
+  Responder,
+  Poll,
+  PollQuestion,
   PollSession,
   PollAnswer,
-  PollFeedback,
-  MessageMetadata,
-  Account,
-  Session,
-  Poll,
-  PollMember
+  TextFeedback,
+  PinCodeGenerator,
+  PinCode,
+  MessageMeta,
+  UserSession
 } from './types'
 
 declare module 'knex/types/tables' {
   interface Tables {
-    chatMetadata: ChatMetadata
-    pollSession: PollSession
-    pollAnswer: PollAnswer
-    pollFeedback: PollFeedback
-    messageMetadata: MessageMetadata
-    account: Account
-    session: Session
-    poll: Poll
-    pollMember: PollMember
+    accounts: Account
+    users: User
+    accountAdministrators: AccountAdministrator
+    sampleGroups: SampleGroup
+    responders: Responder
+    polls: Poll
+    pollQuestions: PollQuestion
+    pollSessions: PollSession
+    pollAnswers: PollAnswer
+    textFeedbacks: TextFeedback
+    pinCodeGenerators: PinCodeGenerator
+    pinCodes: PinCode
+    messageMetas: MessageMeta
+    userSessions: UserSession
   }
 }
+
+export {}

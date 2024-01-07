@@ -1,4 +1,4 @@
-import React from "react";
+import { StrictMode, type ReactNode } from "react";
 import ReactDOM from "react-dom/client";
 import {
   createBrowserRouter,
@@ -23,6 +23,11 @@ import {
   ChartsDataResp,
   TextFeedbackResp,
 } from "@checkyourstaff/service/types";
+import { AppLoading } from "./layouts/AppLoading";
+import { ForgotPage } from "./pages/ForgotPage";
+import { SignInPage } from "./pages/SignInPage";
+import { SignUpPage } from "./pages/SignUpPage";
+import type { AuthCheckData } from "@checkyourstaff/console-backend/types";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +83,18 @@ const router = createBrowserRouter([
     element: <Navigate replace to="/stats" />,
   },
   {
+    path: "/signin",
+    element: <Navigate replace to="/" />,
+  },
+  {
+    path: "/signup",
+    element: <Navigate replace to="/" />,
+  },
+  {
+    path: "/forgot",
+    element: <Navigate replace to="/" />,
+  },
+  {
     path: "/stats",
     element: <StatsPage />,
     async loader() {
@@ -106,15 +123,72 @@ const router = createBrowserRouter([
   },
 ]);
 
+const authRouter = createBrowserRouter([
+  {
+    index: true,
+    element: <Navigate to="/signin" />,
+  },
+  {
+    path: "/signin",
+    element: <SignInPage />,
+  },
+  {
+    path: "/signup",
+    element: <SignUpPage />,
+  },
+  {
+    path: "/forgot",
+    element: <ForgotPage />,
+  },
+]);
+
 root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <useApiClient.Provider apiClient={apiClient}>
-        <RouterProvider router={router} />
-      </useApiClient.Provider>
-    </QueryClientProvider>
-  </React.StrictMode>,
+  <StrictMode>
+    <AppLoading />
+  </StrictMode>,
 );
+
+let authorizationIterceptorId: number;
+
+const init = async () => {
+  const { data } = await apiClient.post<AuthCheckData>("/auth/check", {
+    accessToken: localStorage.getItem("accessToken"),
+  });
+
+  const wrapper = (children: ReactNode) => (
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <useApiClient.Provider apiClient={apiClient}>
+          {children}
+        </useApiClient.Provider>
+      </QueryClientProvider>
+    </StrictMode>
+  );
+
+  if (data.authenticated) {
+    authorizationIterceptorId = apiClient.interceptors.request.use((config) => {
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+
+      return config;
+    });
+
+    root.render(wrapper(<RouterProvider router={router} />));
+  } else {
+    root.render(wrapper(<RouterProvider router={authRouter} />));
+  }
+};
+
+export const reload = async () => {
+  apiClient.interceptors.request.eject(authorizationIterceptorId);
+
+  await init();
+};
+
+init();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

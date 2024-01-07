@@ -1,0 +1,53 @@
+:root {
+  font-family: "Source Sans 3";
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #ffffff;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #000000;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.primary-loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: primary-loader-rotation 1s linear infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .primary-loader {
+    border: 5px solid #ffffff;
+    border-bottom-color: transparent;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .primary-loader {
+    border: 5px solid #000000;
+    border-bottom-color: transparent;
+  }
+}
+
+@keyframes primary-loader-rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
