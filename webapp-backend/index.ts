@@ -1,24 +1,23 @@
-import querystring from "node:querystring";
-import { createHmac } from "node:crypto";
 import { fastify } from "fastify";
 import fastifyCors from "@fastify/cors";
 import { Telegram } from "telegraf";
-import { Queue } from "bullmq";
+import plural from "plural-ru";
+import { parseContactsList } from "@checkyourstaff/common/parseContactsList";
+import { logger, completeRegistration, verify } from "./lib";
+import type {
+  VerifyBody,
+  CompleteRegistrationBody,
+  ClosePollSessionBody,
+} from "./types";
 import {
-  accountCreate,
-  accountAdministratorCreate,
-  sampleGroupCreate,
-  pollCreate,
-  pollQuestionCreate,
-  inviteCreate,
+  pollAnswerCreate,
+  pollQuestionsGetByPollId,
+  pollSessionGet,
+  textFeedbackCreate,
 } from "@checkyourstaff/persistence";
-import { logger } from "@checkyourstaff/persistence/logger";
-import { parseContactsList } from "@checkyourstaff/common";
-import type { VerifyBody, CompleteRegistrationBody } from "./types";
 
-const service = fastify();
+const service = fastify({ logger });
 const telegram = new Telegram(process.env["BOT_TOKEN"]!);
-const spinInvitesQueue = new Queue("spin-invites");
 
 service.register(fastifyCors, { origin: true });
 
@@ -28,31 +27,17 @@ service.post<{
   schema: {
     body: {
       type: "object",
-      required: ["initData"],
+      required: ["initData", "bot"],
       properties: {
         initData: { type: "string" },
+        bot: {
+          enum: ["polling-bot", "control-bot"],
+        },
       },
     },
   },
-  async handler({ body: { initData } }) {
-    const parsedInitData = querystring.parse(initData) as {
-      query_id: string;
-      user: string;
-      auth_date: string;
-      hash: string;
-    };
-    const secretKey = createHmac("sha256", "WebAppData")
-      .update(process.env["BOT_TOKEN"]!)
-      .digest();
-    const dataCheckString = Object.entries(parsedInitData)
-      .filter(([key]) => key !== "hash")
-      .sort(([aKey], [bKey]) => aKey.localeCompare(bKey))
-      .map(([key, value]) => `${key}=${value}`)
-      .join("\n");
-    const hash = createHmac("sha256", secretKey)
-      .update(dataCheckString)
-      .digest("hex");
-    const valid = hash === parsedInitData.hash;
+  async handler({ body: { initData, bot } }) {
+    const valid = verify({ initData, bot });
 
     if (!valid) {
       logger.warn("Init data invalid!");
@@ -79,76 +64,144 @@ service.post<{
     },
   },
   async handler({
-    body: { name, groupName, list, chatId: chatIdStr, userId: userIdStr },
+    body: {
+      name: accountName,
+      groupName,
+      list,
+      chatId: chatIdStr,
+      userId: userIdStr,
+    },
   }) {
     const chatId = Number(chatIdStr);
     const userId = Number(userIdStr);
+    const contacts = parseContactsList(list);
 
-    // Create account
-    const accountId = await accountCreate({ name });
-
-    // Create account administrator
-    await accountAdministratorCreate({
-      accountId,
+    await completeRegistration({
+      accountName,
+      groupName,
+      contacts,
       userId,
     });
 
-    // Create sample group
-    const sampleGroupId = await sampleGroupCreate({
-      accountId,
-      name: groupName,
-    });
+    await telegram.sendMessage(
+      chatId,
+      `
+      Аккаунт «${accountName}» создан
+    `.trim(),
+    );
+    await telegram.sendMessage(
+      chatId,
+      `
+      Вы стали администратором аккаунта «${accountName}»
+    `.trim(),
+    );
+    await telegram.sendMessage(
+      chatId,
+      `
+      Опрос «Статус сотрудников» создан
+    `.trim(),
+    );
+    await telegram.sendMessage(
+      chatId,
+      `${plural(
+        contacts.length,
+        "%d приглашение",
+        "%d приглашения",
+        "%d приглашений",
+      )} разослано`,
+    );
+  },
+});
 
-    // Create poll from template
-    const pollId = await pollCreate({
-      accountId,
-      name: "Статус сотрудников",
-    });
+service.get<{
+  Querystring: {
+    pollSessionId: string;
+  };
+}>("/pollSession", async ({ query: { pollSessionId: pollSessionIdStr } }) => {
+  const pollSessionId = Number(pollSessionIdStr);
+  const pollSession = await pollSessionGet(pollSessionId);
 
-    await pollQuestionCreate({
-      accountId,
-      pollId,
-      text: "Оцените результаты на работе от 1 до 5",
-    });
-
-    await pollQuestionCreate({
-      accountId,
-      pollId,
-      text: "Оцените нагрузку на работе от 1 до 5",
-    });
-
-    await pollQuestionCreate({
-      accountId,
-      pollId,
-      text: "Оцените счастье на работе от 1 до 5",
-    });
-
-    // Invite recepients
-    await spinInvitesQueue.addBulk(
-      (
-        await Promise.all(
-          parseContactsList(list).map(({ type, value }) =>
-            inviteCreate({
-              sampleGroupId,
-              email: type === "email" ? value : null,
-              phone: type === "phone" ? value : null,
-            }),
-          ),
-        )
-      ).map((inviteId) => ({
-        name: "send-invite",
-        data: { inviteId },
-        opts: {
-          attempts: 3,
-          backoff: {
-            type: "exponential",
-            delay: 3000,
-          },
-        },
-      })),
+  if (!pollSession) {
+    logger.error(
+      "Poll session with id = %s not found or deleted",
+      pollSessionId,
     );
 
-    await telegram.sendMessage(chatId, "Приглашения разосланы");
+    throw new Error(
+      `Poll session with id = ${pollSessionId} not found or deleted`,
+    );
+  }
+
+  const pollQuestions = await pollQuestionsGetByPollId(pollSession.pollId);
+
+  return pollQuestions.map(
+    ({ id, text, minScore, maxScore, textFeedbackRequestTreshold }) => ({
+      id,
+      text,
+      minScore,
+      maxScore,
+      textFeedbackRequestTreshold,
+    }),
+  );
+});
+
+service.post<{
+  Body: ClosePollSessionBody;
+  Querystring: {
+    pollSessionId: string;
+  };
+}>("/closePollSession", {
+  schema: {
+    body: {
+      type: "object",
+      required: ["answers"],
+      properties: {
+        finalFeedback: { type: "string" },
+        answers: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["id", "score"],
+            properties: {
+              id: { type: "number" },
+              score: { type: "number" },
+              textFeedback: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+  },
+  async handler({
+    body: { finalFeedback, answers },
+    query: { pollSessionId: pollSessionIdStr },
+  }) {
+    console.log({ finalFeedback, answers });
+
+    const pollSessionId = Number(pollSessionIdStr);
+
+    for (const answer of answers) {
+      await pollAnswerCreate({
+        pollSessionId,
+        pollQuestionId: answer.id,
+        score: answer.score,
+      });
+
+      if (answer.textFeedback) {
+        await textFeedbackCreate({
+          pollSessionId,
+          pollQuestionId: answer.id,
+          text: answer.textFeedback,
+        });
+      }
+    }
+
+    if (finalFeedback) {
+      await textFeedbackCreate({
+        pollSessionId,
+        text: finalFeedback,
+      });
+    }
   },
 });
 

@@ -1,16 +1,20 @@
-import { useState, type FC, useEffect } from "react";
+import { useState, type FC } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import {
+  parseContactsList,
+  type ContactRecord,
+} from "@checkyourstaff/common/parseContactsList";
 import { useApiClient } from "../../hooks/useApiClient";
 import { AppLayout } from "../../layouts/AppLayout";
 import { FirstStep } from "./FirstStep";
 import { SecondStep } from "./SecodStep";
 import { ThirdStep } from "./ThirdStep";
 import { Text } from "../../components/Text";
-import { parseContactsList, type ContactRecord } from "@checkyourstaff/common";
 import { BullseyeLayout } from "../../layouts/BullseyeLayout";
+import { useCloudStorageItem } from "../../hooks/useCloudStorageItem";
 
-const REQUIRED_MINIMUM_CONTACTS_COUNT = 2 // 10;
+const REQUIRED_MINIMUM_CONTACTS_COUNT = /** @todo: debug only */ 2; // 10;
 
 const isListValid = (list: string) => {
   const contacts = parseContactsList(list);
@@ -21,19 +25,27 @@ const isListValid = (list: string) => {
 export const RegisterPage: FC = () => {
   const apiClient = useApiClient();
   const [searchParams] = useSearchParams();
-  const [registrationComplete, setRegistrationComplete] = useState<
-    boolean | null
-  >(null);
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [groupName, setGroupName] = useState("");
   const [list, setList] = useState("");
   const chatId = searchParams.get("chatId");
   const userId = searchParams.get("userId");
-  const registrationCompleteCloudStorageKey = `registration_complete_${chatId}_${userId}`;
 
   // DEBUG ONLY:
-  // Telegram.WebApp.CloudStorage.removeItem(registrationCompleteCloudStorageKey)
+  // Telegram.WebApp.CloudStorage.removeItem(`registration_complete_${chatId}_${userId}`)
+
+  const [registrationComplete, setRegistrationComplete] = useCloudStorageItem(
+    `registration_complete_${chatId}_${userId}`,
+    {
+      parse(value) {
+        return value === "true";
+      },
+      stringify(value) {
+        return value ? "true" : "fasle";
+      },
+    },
+  );
 
   const { mutate } = useMutation({
     async mutationFn(vars: { name: string; groupName: string; list: string }) {
@@ -45,32 +57,16 @@ export const RegisterPage: FC = () => {
 
       return data;
     },
-    onSuccess() {
-      Telegram.WebApp.close();
-
+    async onSuccess() {
       Telegram.WebApp.MainButton.hideProgress();
 
-      Telegram.WebApp.CloudStorage.setItem(
-        registrationCompleteCloudStorageKey,
-        "true",
-      );
+      await setRegistrationComplete(true);
+
+      Telegram.WebApp.close();
     },
   });
 
-  useEffect(() => {
-    Telegram.WebApp.CloudStorage.getItem(
-      registrationCompleteCloudStorageKey,
-      (error, value) => {
-        if (error) {
-          console.error(error);
-        } else {
-          setRegistrationComplete(value === "true");
-        }
-      },
-    );
-  }, [registrationCompleteCloudStorageKey]);
-
-  if (registrationComplete === null) {
+  if (registrationComplete == null) {
     return null;
   }
 

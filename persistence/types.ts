@@ -149,10 +149,20 @@ export type MessageMeta = {
   updatedAt: Date;
 };
 
-export type UserSession = {
+export type ChatStateType = "noop" | "enter-pin";
+
+export type ChatStatePayload = any;
+
+export type ChatState<P extends ChatStatePayload = ChatStatePayload> = {
+  name: ChatStateType;
+  payload?: P;
+};
+
+export type UserSession<P extends ChatStatePayload = ChatStatePayload> = {
   id: number;
   userId: number;
   chatId: number;
+  chatState: ChatState<P>;
   deleted: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -184,7 +194,7 @@ export type Job = {
 };
 
 export type Event<T> = {
-  id: number
+  id: number;
   type: string;
   payload: T;
 };

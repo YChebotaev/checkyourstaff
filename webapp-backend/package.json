@@ -21,6 +21,7 @@
     "fastify": "^4.24.3",
     "libphonenumber-js": "^1.10.51",
     "pino": "^8.16.2",
+    "plural-ru": "^2.0.2",
     "telegraf": "^4.15.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"

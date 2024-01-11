@@ -5,8 +5,9 @@ export const up = async (knex: Knex): Promise<void> =>
     table.increments('id')
 
     table.integer('userId')
-
     table.integer('chatId')
+
+    table.json('chatState').defaultTo('noop')
 
     table.boolean('deleted')
     table.dateTime('createdAt')

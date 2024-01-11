@@ -2,8 +2,14 @@
   "name": "@checkyourstaff/common",
   "version": "0.1.0",
   "private": true,
-  "main": "index.ts",
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",
-  "dependencies": {}
+  "dependencies": {
+    "pino": "^8.17.2",
+    "pino-elasticsearch": "^8.0.0",
+    "pino-multi-stream": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/pino-multi-stream": "^5.1.6"
+  }
 }

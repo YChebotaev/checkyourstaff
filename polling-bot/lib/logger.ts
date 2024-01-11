@@ -1,3 +1,3 @@
-import pino from 'pino'
+import { createLogger } from '@checkyourstaff/common/createLogger'
 
-export const logger = pino()
+export const logger = createLogger('polling-bot')

@@ -4,6 +4,7 @@ import { logger } from './logger'
 
 export const knex = createKnex({
   ...config,
+  useNullAsDefault: true,
   log: {
     warn(message) {
       logger.warn(message)

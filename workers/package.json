@@ -21,6 +21,7 @@
     "fastify": "^4.24.3",
     "nodemailer": "^6.9.8",
     "pino": "^8.16.2",
+    "telegraf": "^4.15.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"
   }

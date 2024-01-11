@@ -5,10 +5,11 @@ export const sendSMSInvite = async (pinCode: string, phone: string) => {
   logger.info("Sending SMS to: %s", phone);
 
   // const { balance } = await smsTransport.getBalance()
-  const { status: sendStatus, messageId } = await smsTransport.send(
+  const { status: sendStatus, messageId } = await smsTransport.send({
     phone,
-    `Присоединитесь к боту в телеграмме: t.me/checkyourstaffbot и введите пин-код: ${pinCode}`,
-  );
+    code: pinCode,
+    text: `Присоединитесь к боту: t.me/checkyourstaffbot и введите пин-код: ${pinCode}`,
+  });
 
   logger.info("SMS to number = %s status us: %s", phone, sendStatus);
 
@@ -26,7 +27,7 @@ export const sendSMSInvite = async (pinCode: string, phone: string) => {
       return;
     } else {
       logger.info(
-        "SMS to number = %s failed with status:",
+        "SMS to number = %s failed with status: %s",
         phone,
         messageStatus,
       );

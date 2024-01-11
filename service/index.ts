@@ -6,6 +6,7 @@ import pino from 'pino'
 import JSONDB from 'simple-json-db'
 import { groupBy, last, keys, union, identity } from 'lodash'
 import type { FreeFormFeedback, Session } from '@checkyourstaff/bot/types'
+import { createLogger } from '@checkyourstaff/common/createLogger'
 import type { ChartDataResp, TextFeedbackResp, StatsResp } from "./types"
 
 const calculateAveragesOfSession = (session: Session) => {
@@ -46,7 +47,7 @@ const calculateDifferenceOfAverages = (a1: { [key: number]: number }, a2: { [key
   return result
 }
 
-const logger = pino()
+const logger = createLogger('service')
 const service = fastify({ logger })
 
 service.register(fastifyCors, {

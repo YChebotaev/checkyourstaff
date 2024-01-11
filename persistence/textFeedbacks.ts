@@ -21,7 +21,7 @@ export const textFeedbackCreate = async ({
     .returning('id')
 
   logger.info(
-    'Poll answer created with id = %s for poll question id = %s',
+    'Text feedback created with id = %s for poll question id = %s',
     id,
     pollQuestionId
   )

@@ -20,17 +20,26 @@ export type MessageStatusType =
   | "smsc reject"
   | "incorrect id";
 
-const login = process.env["IQSMS_LOGIN"];
-const password = process.env["IQSMS_PASSWORD"];
+const login = process.env["IQSMS_LOGIN"]; //  process.env["SMSC_LOGIN"]; // process.env["IQSMS_LOGIN"];
+const password = process.env["IQSMS_PASSWORD"]; //  process.env["SMSC_PASSWORD"]; // process.env["IQSMS_PASSWORD"];
 
 if (!login || !password) {
   logger.fatal("IQSMS_LOGIN and IQSMS_PASSWORD environment must be provided");
+  // logger.fatal("SMSC_LOGIN and SMSC_PASSWORD environment must be provided");
 
   process.exit(1);
 }
 
 export const smsTransport = {
-  async send(phone: string, text: string) {
+  async send({
+    phone,
+    text,
+    code,
+  }: {
+    phone: string;
+    text: string;
+    code: string;
+  }) {
     const { data } = await axios.get("https://api.iqsms.ru/messages/v2/send", {
       params: {
         login,
@@ -39,16 +48,13 @@ export const smsTransport = {
         text,
       },
     });
-
     const [status, messageId] = data.split(";") as [SendStatusType, string];
-
     if (status === "error") {
       return {
         status: messageId,
         messageId: null,
       };
     }
-
     return {
       status,
       messageId,
@@ -65,44 +71,39 @@ export const smsTransport = {
         },
       },
     );
-
     const [_, status] = data.split(";") as [string, MessageStatusType];
-
     return status;
   },
-  async getBalance() {
-    const { data } = await axios.get(
-      "https://api.iqsms.ru/messages/v2/balance",
-      {
-        params: {
-          login,
-          password,
-        },
-      },
-    );
+  // async getBalance() {
+  //   const { data } = await axios.get(
+  //     "https://api.iqsms.ru/messages/v2/balance",
+  //     {
+  //       params: {
+  //         login,
+  //         password,
+  //       },
+  //     },
+  //   );
 
-    console.log("getBalance()", "data =", data);
+  //   console.log("getBalance()", "data =", data);
 
-    const [currency, balance] = data.split(";");
+  //   const [currency, balance] = data.split(";");
 
-    return {
-      currency,
-      balance: Number(balance),
-    };
-  },
+  //   return {
+  //     currency,
+  //     balance: Number(balance),
+  //   };
+  // },
   async waitForResolution(messageId: string, pollingInterval = 3000) {
-    let messageStatus: MessageStatusType
-
+    let messageStatus: MessageStatusType;
     do {
-      messageStatus = await this.getStatus(messageId)
-
-      if (messageStatus === 'queued') {
+      messageStatus = await this.getStatus(messageId);
+      if (messageStatus === "queued") {
         await new Promise((resolve) => setTimeout(resolve, pollingInterval));
-
-        continue
+        continue;
       } else {
-        return messageStatus
+        return messageStatus;
       }
-    } while (messageStatus === 'queued')
-  }
+    } while (messageStatus === "queued");
+  },
 };

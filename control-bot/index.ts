@@ -39,6 +39,8 @@ bot.start(async (ctx, next) => {
   }
 
   const registerURL = new URL("/register", webappUrl);
+
+  registerURL.searchParams.set("fromBot", "control-bot");
   registerURL.searchParams.set("userId", String(userSession!.userId));
   registerURL.searchParams.set("chatId", String(ctx.chat.id));
 
@@ -49,7 +51,7 @@ bot.start(async (ctx, next) => {
     ]),
   );
 
-  return next()
+  return next();
 });
 
 bot.launch().catch((e) => logger.error(e));

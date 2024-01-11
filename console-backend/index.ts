@@ -2,7 +2,7 @@
 
 import { fastify } from 'fastify'
 import { fastifyCors } from '@fastify/cors'
-import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
+import { isValidPhoneNumber } from 'libphonenumber-js'
 import { logger } from './lib'
 import type { AuthSignupBody } from './types'
 
