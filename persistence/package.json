@@ -1,6 +1,6 @@
 {
   "name": "@checkyourstaff/persistence",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "main": "index.ts",
   "author": "YChebotaev <yury.79120345101@gmail.com>",
