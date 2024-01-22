@@ -17,8 +17,6 @@ export const verify = ({
   initData: string;
   bot: "control-bot" | "polling-bot";
 }) => {
-  console.log("initData =", initData);
-
   const parsedInitData = querystring.parse(initData) as {
     query_id: string;
     user: string;
@@ -37,8 +35,6 @@ export const verify = ({
   const hash = createHmac("sha256", secretKey)
     .update(dataCheckString)
     .digest("hex");
-
-  console.log("hash =", hash);
 
   return hash === parsedInitData.hash;
 };

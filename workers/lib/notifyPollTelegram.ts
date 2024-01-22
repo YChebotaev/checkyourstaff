@@ -1,5 +1,5 @@
 import { Markup } from "telegraf";
-import { pollingTelegram } from "./telegram";
+import { pollingTelegram } from "@checkyourstaff/common/telegram";
 import { logger } from "./logger";
 
 export const notifyPollTelegram = async (

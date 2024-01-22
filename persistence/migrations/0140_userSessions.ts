@@ -4,8 +4,10 @@ export const up = async (knex: Knex): Promise<void> =>
   knex.schema.createTable('userSessions', table => {
     table.increments('id')
 
+    table.enum('type', ['control', 'polling'])
     table.integer('userId')
     table.integer('chatId')
+    table.integer('tgUserId')
 
     table.json('chatState').defaultTo('noop')
 
@@ -18,6 +20,7 @@ export const up = async (knex: Knex): Promise<void> =>
       .inTable('users')
 
     table.index('chatId')
+    table.index('tgUserId')
   })
 
 export const down = async (knex: Knex): Promise<void> =>

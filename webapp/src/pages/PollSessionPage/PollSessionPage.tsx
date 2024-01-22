@@ -55,9 +55,10 @@ export const PollSessionPage: FC = () => {
   );
   const { mutate } = useMutation({
     async mutationFn(vars: ClosePollSessionBody) {
-      const { data } = await apiClient.post("/closePollSession", vars, {
+      const { data } = await apiClient.post<void>("/closePollSession", vars, {
         params: {
           pollSessionId,
+          tgUserId: Telegram.WebApp.initDataUnsafe.user?.id
         },
       });
 

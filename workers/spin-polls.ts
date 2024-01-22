@@ -7,7 +7,7 @@ export const spinPollsWorker = new Worker<
     sampleGroupId: number;
   },
   void,
-  "spin-poll"
+  "spin-poll" | "dummy-spin-poll"
 >(
   "spin-polls",
   (job) => {
@@ -20,6 +20,10 @@ export const spinPollsWorker = new Worker<
     switch (job.name) {
       case "spin-poll":
         return spinPoll(job.data.pollId, job.data.sampleGroupId);
+      case "dummy-spin-poll":
+        logger.info("Process dummy-spin-poll job");
+
+        return Promise.resolve();
       default:
         throw new UnrecoverableError("Job.name unknown");
     }

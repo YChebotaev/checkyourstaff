@@ -1,71 +1,83 @@
-import { knex } from './knex'
-import { logger } from './logger'
-import type { AccountAdministrator } from './types'
+import { knex } from "./knex";
+import { logger } from "./logger";
+import type { AccountAdministrator } from "./types";
 
 export const accountAdministratorCreate = async ({
   accountId,
-  userId
+  userId,
 }: {
-  accountId: number
-  userId: number
+  accountId: number;
+  userId: number;
 }) => {
   const [{ id }] = await knex
     .insert({
       accountId,
       userId,
-      createdAt: knex.fn.now()
+      createdAt: knex.fn.now(),
     })
-    .into('accountAdministrators')
-    .returning('id')
+    .into("accountAdministrators")
+    .returning("id");
 
   logger.info(
-    'Account administrator created with id = %s for account id = %s for user id = %s',
+    "Account administrator created with id = %s for account id = %s for user id = %s",
     id,
     accountId,
-    userId
-  )
+    userId,
+  );
 
-  return id as number
-}
+  return id as number;
+};
 
-export const accountAdministratorGetByAccountIdAndUserId = async (accountId: number, userId: number) => {
+export const accountAdministratorGetByAccountIdAndUserId = async (
+  accountId: number,
+  userId: number,
+) => {
   const accountAdministrator = await knex
-    .select('*')
-    .from('accountAdministrators')
-    .where('accountId', accountId)
-    .andWhere('userId', userId)
-    .first<AccountAdministrator>()
+    .select("*")
+    .from("accountAdministrators")
+    .where("accountId", accountId)
+    .andWhere("userId", userId)
+    .first<AccountAdministrator>();
 
   if (!accountAdministrator) {
     logger.warn(
       "Account administrator with accountId = %s and userId = %s not found",
       accountId,
-      userId
-    )
+      userId,
+    );
 
-    return
+    return;
   }
 
   if (accountAdministrator.deleted) {
     logger.warn(
       "Account administrator with accountId = %s and userId = %s found but deleted",
       accountId,
-      userId
-    )
+      userId,
+    );
 
-    return
+    return;
   }
 
-  return accountAdministrator
-}
+  return accountAdministrator;
+};
+
+export const accountAdministratorsGetByUserId = async (userId: number) => {
+  const accountAdministrators = await knex
+    .select<AccountAdministrator[]>("*")
+    .from("accountAdministrators")
+    .where("userId", userId);
+
+  return accountAdministrators.filter(({ deleted }) => !deleted);
+};
 
 export const accountAdministratorDelete = async (id: number) => {
-  await knex('accountAdministrators')
+  await knex("accountAdministrators")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     })
-    .where('id', id)
+    .where("id", id);
 
-  logger.info('Account administrator with id = %s deleted', id)
-}
+  logger.info("Account administrator with id = %s deleted", id);
+};

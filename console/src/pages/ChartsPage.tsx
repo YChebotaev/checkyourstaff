@@ -1,60 +1,82 @@
-import { type FC } from "react";
-import { useLoaderData } from "react-router-dom";
-import { isEmpty } from "lodash";
+import { useMemo, type FC } from "react";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { AppLayout } from "../layouts/AppLayout/AppLayout";
 import { appMenu } from "../constants/appMenu";
 import { LineChart } from "../components/LineChart";
-import type { ChartsLoaderResult } from "../types";
+import { SampleGroupSelector } from "../components/SampleGroupSelector";
 import { PageHeader } from "../components/PageHeader";
-import { SectionHeader } from "../components/SectionHeader";
-import { EmptyData } from "../components/EmptyData";
+import { ChartSection } from "../components/ChartSection";
+import { useFetchSampleGroups } from "../hooks/useFetchSampleGroups";
+import type { ChartsLoaderResult } from "../types";
 
 export const ChartsPage: FC = () => {
-  const { chartsData } = useLoaderData() as ChartsLoaderResult;
+  const navigate = useNavigate();
+  const { sampleGroupId, chartsData } = useLoaderData() as ChartsLoaderResult;
+  const { data: sampleGroups, isLoading } = useFetchSampleGroups();
 
-  if (isEmpty(chartsData)) {
-    return (
-      <AppLayout navMenu={{ items: appMenu, activeKey: "charts" }}>
-        <PageHeader>Графики</PageHeader>
-        <EmptyData />
-      </AppLayout>
-    );
+  const charts = useMemo(() => {
+    type Value = {
+      date: string;
+      value?: number;
+    };
+    type Chart = {
+      title: string;
+      values: Value[];
+    };
+
+    const charts: Chart[] = [];
+
+    for (const session of chartsData) {
+      for (const question of session.values) {
+        const chart: Chart | undefined = charts.find(
+          ({ title }) => title === question.title,
+        );
+
+        if (!chart) {
+          charts.push({
+            title: question.title,
+            values: chartsData.map(({ date, values }) => ({
+              date,
+              value: values.find(({ title }) => title === question.title)
+                ?.value,
+            })),
+          });
+        }
+      }
+    }
+
+    return charts;
+  }, [chartsData]);
+
+  if (isLoading) {
+    return null;
   }
 
   return (
     <AppLayout navMenu={{ items: appMenu, activeKey: "charts" }}>
       <PageHeader>Графики</PageHeader>
-      <div>
-        <SectionHeader>Результаты работы</SectionHeader>
-        <LineChart
-          name="Результаты работы"
-          data={chartsData.map((d) => ({
-            date: format(Date.parse(d.t), "dd.MM.yyyy"),
-            value: d[1],
-          }))}
-        />
-      </div>
-      <div>
-        <SectionHeader>Нагрузка</SectionHeader>
-        <LineChart
-          name="Нагрузка"
-          data={chartsData.map((d) => ({
-            date: format(Date.parse(d.t), "dd.MM.yyyy"),
-            value: d[2],
-          }))}
-        />
-      </div>
-      <div>
-        <SectionHeader>Счастье</SectionHeader>
-        <LineChart
-          name="Счастье"
-          data={chartsData.map((d) => ({
-            date: format(Date.parse(d.t), "dd.MM.yyyy"),
-            value: d[3],
-          }))}
-        />
-      </div>
+      {sampleGroups!.length > 1 && (
+        <div>
+          <SampleGroupSelector
+            value={sampleGroupId}
+            onChange={(sampleGroupId) => {
+              navigate(`/charts/${sampleGroupId}`);
+            }}
+          />
+        </div>
+      )}
+      {charts.map(({ title, values }) => (
+        <ChartSection key={title} title={title}>
+          <LineChart
+            name={title}
+            data={values.map(({ date, value }) => ({
+              date: format(date, "dd.MM.yyyy"),
+              value: value!,
+            }))}
+          />
+        </ChartSection>
+      ))}
     </AppLayout>
   );
 };

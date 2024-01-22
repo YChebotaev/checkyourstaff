@@ -8,16 +8,19 @@ import type {
   VerifyBody,
   CompleteRegistrationBody,
   ClosePollSessionBody,
+  ClosePollSessionQuery,
 } from "./types";
 import {
   pollAnswerCreate,
   pollQuestionsGetByPollId,
   pollSessionGet,
   textFeedbackCreate,
+  userSessionGetByTgUserId,
 } from "@checkyourstaff/persistence";
 
 const service = fastify({ logger });
-const telegram = new Telegram(process.env["BOT_TOKEN"]!);
+const controlBotTelegram = new Telegram(process.env["CONTROL_BOT_TOKEN"]!);
+const pollingBotTelegram = new Telegram(process.env["POLLING_BOT_TOKEN"]!);
 
 service.register(fastifyCors, { origin: true });
 
@@ -83,25 +86,25 @@ service.post<{
       userId,
     });
 
-    await telegram.sendMessage(
+    await controlBotTelegram.sendMessage(
       chatId,
       `
       Аккаунт «${accountName}» создан
     `.trim(),
     );
-    await telegram.sendMessage(
+    await controlBotTelegram.sendMessage(
       chatId,
       `
       Вы стали администратором аккаунта «${accountName}»
     `.trim(),
     );
-    await telegram.sendMessage(
+    await controlBotTelegram.sendMessage(
       chatId,
       `
       Опрос «Статус сотрудников» создан
     `.trim(),
     );
-    await telegram.sendMessage(
+    await controlBotTelegram.sendMessage(
       chatId,
       `${plural(
         contacts.length,
@@ -147,9 +150,7 @@ service.get<{
 
 service.post<{
   Body: ClosePollSessionBody;
-  Querystring: {
-    pollSessionId: string;
-  };
+  Querystring: ClosePollSessionQuery;
 }>("/closePollSession", {
   schema: {
     body: {
@@ -174,21 +175,46 @@ service.post<{
   },
   async handler({
     body: { finalFeedback, answers },
-    query: { pollSessionId: pollSessionIdStr },
+    query: { pollSessionId: pollSessionIdStr, tgUserId: tgUserIdStr },
   }) {
-    console.log({ finalFeedback, answers });
-
     const pollSessionId = Number(pollSessionIdStr);
+    const pollSession = await pollSessionGet(pollSessionId);
+    const tgUserId = Number(tgUserIdStr);
+    const userSession = await userSessionGetByTgUserId("polling", tgUserId);
+
+    if (!userSession) {
+      logger.info(
+        "User session by tg user id = %s not found or deleted",
+        tgUserId,
+      );
+
+      return;
+    }
+
+    if (!pollSession) {
+      logger.info(
+        "Poll session by id = %s not found or deleted",
+        pollSessionId,
+      );
+
+      return;
+    }
 
     for (const answer of answers) {
       await pollAnswerCreate({
+        userId: userSession.userId,
         pollSessionId,
         pollQuestionId: answer.id,
+        sampleGroupId: pollSession.sampleGroupId,
         score: answer.score,
       });
 
       if (answer.textFeedback) {
         await textFeedbackCreate({
+          accountId: pollSession.accountId,
+          sampleGroupId: pollSession.sampleGroupId,
+          userId: userSession.userId,
+          pollId: pollSession.pollId,
           pollSessionId,
           pollQuestionId: answer.id,
           text: answer.textFeedback,
@@ -198,10 +224,19 @@ service.post<{
 
     if (finalFeedback) {
       await textFeedbackCreate({
+        accountId: pollSession.accountId,
+        sampleGroupId: pollSession.sampleGroupId,
+        userId: userSession.userId,
+        pollId: pollSession.pollId,
         pollSessionId,
         text: finalFeedback,
       });
     }
+
+    await pollingBotTelegram.sendMessage(
+      userSession.chatId,
+      "Спасибо, ваши данные успешно сохранены. Ожидайте следующий опрос в следующую пятницу",
+    );
   },
 });
 

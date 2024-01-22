@@ -4,8 +4,8 @@ const spinPollsQueue = new Queue("spin-polls");
 
 spinPollsQueue
   .add("spin-poll", {
-    pollId: 2,
-    sampleGroupId: 2,
+    pollId: 1,
+    sampleGroupId: 1,
   })
   .then(() => {
     process.exit(1);

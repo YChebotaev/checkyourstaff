@@ -1,13 +1,23 @@
-import type { StatsResp, ChartsDataResp, TextFeedbackResp } from '@checkyourstaff/service/types'
+import type {
+  StatsResp,
+  ChartsDataResp,
+  TextFeedbackResp,
+  AccountsResp,
+} from "@checkyourstaff/console-backend/types";
+
+export type SelectAccountLoaderResult = {
+  accounts: AccountsResp;
+};
 
 export type StatsLoaderResult = {
-  stats: StatsResp
-}
+  stats: StatsResp;
+};
 
 export type ChartsLoaderResult = {
-  chartsData: ChartsDataResp
-}
+  sampleGroupId: number;
+  chartsData: ChartsDataResp;
+};
 
 export type FeedbackLoaderResult = {
-  feedbackData: TextFeedbackResp
-}
+  feedbackData: TextFeedbackResp;
+};

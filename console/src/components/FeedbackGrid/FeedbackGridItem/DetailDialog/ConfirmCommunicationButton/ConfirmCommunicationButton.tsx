@@ -2,22 +2,18 @@ import { type FC } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ActionButton } from "../../../../Dialog";
 import { useApiClient } from "../../../../../hooks/useApiClient";
-import { parseFeedbackId } from "../../../../../utils/parseFeedbackId";
 
 export const ConfirmCommunicationButton: FC<{
-  id: string;
+  id: number;
   username: string;
   role: string;
-  onSuccess(id: string): void;
+  onSuccess(id: number): void;
 }> = ({ id, username, role, onSuccess }) => {
   const apiClient = useApiClient();
   const { mutate } = useMutation({
     async mutationFn() {
-      const { sessionId, feedbackType, feedbackId } = parseFeedbackId(id) ?? {};
       const { data } = await apiClient.post("/sendMessage", {
-        sessionId,
-        feedbackType,
-        feedbackId,
+        feedbackId: id,
         username,
         role,
       });

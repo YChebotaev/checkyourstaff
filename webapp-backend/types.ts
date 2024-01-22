@@ -23,6 +23,11 @@ export type PollSessionData = {
   textFeedbackRequestTreshold: number;
 }[];
 
+export type ClosePollSessionQuery = {
+  pollSessionId: string;
+  tgUserId: string;
+};
+
 export type ClosePollSessionBody = {
   finalFeedback?: string;
   answers: {

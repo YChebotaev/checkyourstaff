@@ -1,36 +1,69 @@
-export type AuthCheckBody = {
-  accessToken: string
-}
+import type { Account, SampleGroup } from "@checkyourstaff/persistence/types";
 
-export type AuthCheckData = {
-  authenticated: boolean
-}
+export type TokenPayoad = {
+  userId: number;
+};
 
-export type AuthSignupBody = {
-  name: string
-  phone: string
-  email: string
-  password: string
-  passwordConfirm: string
-}
+export type AccountsResp = Account[];
 
-export type AuthSignupSuccess = {
-  ok: true
-  accessToken: string
-  refreshToken: string
-}
+export type StatsPollResult = {
+  title: string;
+  value: number;
+  differencePercentage?: number;
+  sampleGroupId?: number;
+};
 
-export type AuthSignupFail = {
-  error:
-    | 'auth-signup-name-empty'
-    | 'auth-signup-phone-empty'
-    | 'auth-signup-phone-invalid'
-    | 'auth-signup-email-empty'
-    | 'auth-signup-email-invalid'
-    | 'auth-signup-password-mismatch'
-    | 'auth-signup-password-empty'
-}
+export type StatsGroup = {
+  title: string;
+  values: StatsPollResult[];
+};
 
-export type AuthSignupResult =
-  | AuthSignupSuccess
-  | AuthSignupFail
+export type StatsResp = {
+  general: StatsPollResult[];
+  groups: StatsGroup[];
+};
+
+export type ChartsDataRespQuestion = {
+  title: string;
+  value: number;
+};
+
+export type ChartsDataRespSession = {
+  date: string;
+  values: ChartsDataRespQuestion[];
+};
+
+export type ChartsDataResp = ChartsDataRespSession[];
+
+export type TextFeedbackValue = {
+  id: number;
+  date: string;
+  text: string;
+  question?: string;
+  score?: number;
+};
+
+export type TextFeedbackSampleGroup = {
+  title: string;
+  values: TextFeedbackValue[];
+};
+
+export type TextFeedbackResp = TextFeedbackSampleGroup[];
+
+export type AuthVerifyQuery = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  photo_url: string;
+  auth_date: string;
+  hash: string;
+};
+
+export type AuthVerifyData = {
+  valid: boolean;
+  token?: string;
+  accountId?: number;
+};
+
+export type SampleGroupsData = SampleGroup[];

@@ -2,8 +2,8 @@ export type Account = {
   id: number;
   name: string | null;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type User = {
@@ -12,8 +12,8 @@ export type User = {
   email: string | null; // Актуально для администраторов
   phone: string | null; // Актуально для администраторов
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type AccountAdministrator = {
@@ -21,8 +21,8 @@ export type AccountAdministrator = {
   accountId: number;
   userId: number;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type SampleGroup = {
@@ -30,8 +30,8 @@ export type SampleGroup = {
   accountId: number;
   name: string;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type Responder = {
@@ -39,8 +39,8 @@ export type Responder = {
   sampleGroupId: number;
   userId: number;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type Poll = {
@@ -48,23 +48,25 @@ export type Poll = {
   accountId: number;
   name: string;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type PollQuestion = {
   id: number;
   accountId: number;
   pollId: number;
+  aggregationIndex: number;
   text: string;
   minScore: number;
   maxScore: number;
   textFeedbackRequestTreshold: number;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
+// TODO: Remove
 export type PollingState = {
   [k: number /* responders left ids */]: number[] /* questions left ids */;
 };
@@ -74,30 +76,36 @@ export type PollSession = {
   pollId: number;
   accountId: number;
   sampleGroupId: number;
-  pollingState: PollingState;
+  pollingState: PollingState; // TODO: Remove
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type PollAnswer = {
   id: number;
+  userId: number;
   pollQuestionId: number;
   pollSessionId: number;
+  sampleGroupId: number;
   score: number;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type TextFeedback = {
   id: number;
+  userId: number
+  accountId: number
+  sampleGroupId: number
+  pollId: number
   pollQuestionId: number | null;
   pollSessionId: number | null;
   text: string;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type PinCodeGenerator = {
@@ -107,8 +115,8 @@ export type PinCodeGenerator = {
   sampleGroupId: number;
   generatedCount: number;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type PinCode = {
@@ -118,8 +126,8 @@ export type PinCode = {
   code: string;
   used: boolean;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type MessageMetaTypes =
@@ -145,8 +153,8 @@ export type MessageMeta = {
   responderId: number | null;
   type: MessageMetaTypes;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type ChatStateType = "noop" | "enter-pin";
@@ -158,14 +166,18 @@ export type ChatState<P extends ChatStatePayload = ChatStatePayload> = {
   payload?: P;
 };
 
+export type UserSessionType = "control" | "polling";
+
 export type UserSession<P extends ChatStatePayload = ChatStatePayload> = {
   id: number;
+  type: UserSessionType;
   userId: number;
   chatId: number;
+  tgUserId: number;
   chatState: ChatState<P>;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type Invite = {
@@ -175,8 +187,8 @@ export type Invite = {
   email: string | null;
   phone: string | null;
   deleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type JobTypes = "poll-session";
@@ -189,8 +201,8 @@ export type Job = {
   cron: string;
   timeZone: string;
   deleted: boolean | null;
-  createdAt: Date;
-  updatedAt: Date | null;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 export type Event<T> = {

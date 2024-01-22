@@ -9,7 +9,7 @@ import {
   Separator,
 } from "./styled";
 import type { IndicatorsGridItemProps } from "./types";
-import { Badge, BadgeColor } from "../../Badge";
+import { BadgeColor } from "../../Badge";
 
 const renderPercent = (value: number) => {
   if (value > 0) {
@@ -35,8 +35,9 @@ export const IndicatorsGridItem: FC<IndicatorsGridItemProps> = ({
   name,
   value,
   deltaPercent,
+  sampleGroupId,
 }) => (
-  <Root to="/charts">
+  <Root to={sampleGroupId ? `/charts/${sampleGroupId}` : undefined}>
     <Separator />
     <ValueRow $withDelta={deltaPercent != null}>
       <ValueContainer>{value}</ValueContainer>

@@ -1,0 +1,57 @@
+import {
+  pollSessionsGetByAccountIdAndSampleGroupId,
+  pollQuestionsGetByPollId,
+  pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId,
+  parseDate,
+} from "@checkyourstaff/persistence";
+import { calculatePollAnswersAverage } from "@checkyourstaff/common/calculatePollAnswersAverage";
+import {
+  ChartsDataResp,
+  ChartsDataRespQuestion,
+  ChartsDataRespSession,
+} from "../types";
+
+export const getCharts = async ({
+  accountId,
+  sampleGroupId,
+}: {
+  accountId: number;
+  sampleGroupId: number;
+}) => {
+  return (await Promise.all(
+    (
+      await pollSessionsGetByAccountIdAndSampleGroupId(accountId, sampleGroupId)
+    )
+      .sort((a, b) => {
+        const dateA = parseDate(a.createdAt).getTime();
+        const dateB = parseDate(b.createdAt).getTime();
+
+        return dateA - dateB;
+      })
+      .map(async (pollSession) => {
+        const pollQuestions = await pollQuestionsGetByPollId(
+          pollSession.pollId,
+        );
+
+        return {
+          date: parseDate(pollSession.createdAt).toISOString(),
+          values: await Promise.all(
+            pollQuestions.map(async (pollQuestion) => {
+              const pollAnswers =
+                await pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId(
+                  pollQuestion.id,
+                  pollSession.id,
+                  sampleGroupId,
+                );
+              const average = calculatePollAnswersAverage(pollAnswers);
+
+              return {
+                title: pollQuestion.text,
+                value: average,
+              } as ChartsDataRespQuestion;
+            }),
+          ),
+        } as ChartsDataRespSession;
+      }),
+  )) as ChartsDataResp;
+};

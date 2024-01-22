@@ -5,16 +5,19 @@ import { PollQuestion } from './types'
 export const pollQuestionCreate = async ({
   accountId,
   pollId,
+  aggregationIndex,
   text
 }: {
   accountId: number
   pollId: number
+  aggregationIndex: number
   text: string
 }) => {
   const [{ id }] = await knex
     .insert({
       accountId,
       pollId,
+      aggregationIndex,
       text,
       minScore: 1,
       maxScore: 5,

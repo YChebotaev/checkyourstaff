@@ -9,6 +9,7 @@ import { Markup } from "telegraf";
 
 const token = process.env["BOT_TOKEN"];
 const webappUrl = process.env["WEBAPP_URL"];
+const consoleUrl = process.env["CONSOLE_URL"];
 
 if (!token) {
   logger.fatal("BOT_TOKEN environment variable must be provided");
@@ -22,6 +23,12 @@ if (!webappUrl) {
   process.exit(1);
 }
 
+if (!consoleUrl) {
+  logger.fatal("CONSOLE_URL environment variable must be provided");
+
+  process.exit(1);
+}
+
 const bot = createBot(token);
 
 bot.start(async (ctx, next) => {
@@ -31,8 +38,10 @@ bot.start(async (ctx, next) => {
     const userId = await userCreate();
 
     const userSessionId = await userSessionCreate({
+      type: "control",
       userId,
       chatId: ctx.chat.id,
+      tgUserId: ctx.message.from.id,
     });
 
     userSession = await userSessionGet(userSessionId);

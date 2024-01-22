@@ -6,6 +6,7 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.integer('accountId')
     table.integer('pollId')
+    table.integer('aggregationIndex')
 
     table.string('text')
     table.integer('minScore')

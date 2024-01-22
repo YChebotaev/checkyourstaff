@@ -32,8 +32,10 @@ bot.start(async (ctx, next) => {
     const userId = await userCreate();
 
     const userSessionId = await userSessionCreate({
+      type: "polling",
       userId,
       chatId: ctx.chat.id,
+      tgUserId: ctx.message.from.id,
     });
 
     userSession = await userSessionGet(userSessionId);
@@ -67,6 +69,8 @@ bot.on("message", async (ctx, next) => {
 
     return next();
   }
+
+  await userSessionSetChatState(userSession.id, "noop");
 
   if (!text) {
     logger.error("Message with id = %s has no text", ctx.message.message_id);

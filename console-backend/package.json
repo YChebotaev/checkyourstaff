@@ -8,6 +8,8 @@
     "start": "ts-node --require dotenv/config index.ts"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/lodash": "^4.14.202",
     "nodemon": "^3.0.1",
     "pino-pretty": "^10.2.3"
   },
@@ -15,10 +17,14 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@fastify/cors": "^8.4.1",
+    "date-fns": "^3.3.0",
     "dotenv": "^16.3.1",
     "fastify": "^4.24.3",
+    "jsonwebtoken": "^9.0.2",
     "libphonenumber-js": "^1.10.51",
+    "lodash": "^4.17.21",
     "pino": "^8.16.2",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.3"
   }
 }

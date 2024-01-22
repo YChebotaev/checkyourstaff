@@ -56,7 +56,11 @@ bot.start(async (ctx, next) => {
   if (!userSession) {
     const userId = await userCreate();
 
-    await userSessionCreate({ userId, chatId: ctx.chat.id });
+    await userSessionCreate({
+      userId,
+      chatId: ctx.chat.id,
+      tgUserId: ctx.message.from.id
+    });
   }
 
   const { message_id } = await ctx.sendMessage(

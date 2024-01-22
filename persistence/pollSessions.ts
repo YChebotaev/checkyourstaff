@@ -1,79 +1,109 @@
-import { without, first } from 'lodash'
-import { knex } from './knex'
-import { logger } from './logger'
-import type { PollSession, PollingState } from './types'
+import { knex } from "./knex";
+import { logger } from "./logger";
+import type { PollSession, PollingState } from "./types";
 
 export const pollSessionCreate = async ({
   pollId,
   accountId,
   sampleGroupId,
-  pollingState
+  pollingState, // TODO: Remove
 }: {
-  pollId: number
-  accountId: number
-  sampleGroupId: number
-  pollingState: PollingState
+  pollId: number;
+  accountId: number;
+  sampleGroupId: number;
+  pollingState?: PollingState; // TODO: Remove
 }) => {
   const [{ id }] = await knex
     .insert({
       pollId,
       accountId,
       sampleGroupId,
-      pollingState: JSON.stringify(pollingState),
-      createdAt: knex.fn.now()
+      pollingState: pollingState ? JSON.stringify(pollingState) : null, // TODO: Remove
+      createdAt: knex.fn.now(),
     })
-    .into('pollSessions')
-    .returning('id')
+    .into("pollSessions")
+    .returning("id");
 
   logger.info(
-    'Poll session created with id = %s for sample group id = %s and poll id = %s',
+    "Poll session created with id = %s for sample group id = %s and poll id = %s",
     id,
     sampleGroupId,
-    pollId
-  )
+    pollId,
+  );
 
-  return id as number
-}
+  return id as number;
+};
 
-export const pollSessionUpdatePollingState = async (id: number, updater: (pollingState: PollingState) => PollingState) => {
+// TODO: Remove
+export const pollSessionUpdatePollingState = async (
+  id: number,
+  updater: (pollingState: PollingState) => PollingState,
+) => {
   const { pollingState } = await knex
-    .select('pollingState')
-    .from('pollSessions')
-    .where('id', id)
-    .first<Pick<PollSession, 'pollingState'>>()
+    .select("pollingState")
+    .from("pollSessions")
+    .where("id", id)
+    .first<Pick<PollSession, "pollingState">>();
 
-  await knex('pollSessions')
+  await knex("pollSessions")
     .update({
-      pollingState: JSON.stringify(
-        updater(
-          JSON.parse(String(pollingState))
-        )
-      )
+      pollingState: JSON.stringify(updater(JSON.parse(String(pollingState)))),
     })
-    .where('id', id)
-}
+    .where("id", id);
+};
 
 export const pollSessionGet = async (id: number) => {
   const pollSession = await knex
-    .select('*')
-    .from('pollSessions')
-    .where('id', id)
-    .first<PollSession>()
+    .select("*")
+    .from("pollSessions")
+    .where("id", id)
+    .first<PollSession>();
 
   if (!pollSession) {
-    logger.warn('Poll session with id = %s not found', id)
+    logger.warn("Poll session with id = %s not found", id);
 
-    return
+    return;
   }
 
   if (pollSession.deleted) {
-    logger.warn("Poll session with id = %s was found but deleted", id)
+    logger.warn("Poll session with id = %s was found but deleted", id);
 
-    return
+    return;
   }
 
   return {
     ...pollSession,
-    pollingState: JSON.parse(String(pollSession.pollingState))
-  } as PollSession
-}
+    pollingState: JSON.parse(String(pollSession.pollingState)), // TODO: Remove
+  } as PollSession;
+};
+
+export const pollSessionsGetByAccountId = async (accountId: number) => {
+  return (
+    await knex
+      .select<PollSession[]>("*")
+      .from("pollSessions")
+      .where("accountId", accountId)
+  ).filter(({ deleted }) => !deleted);
+};
+
+export const pollSessionsGetByAccountIdAndSampleGroupId = async (
+  accountId: number,
+  sampleGroupId: number,
+) => {
+  return (
+    await knex
+      .select<PollSession[]>("*")
+      .from("pollSessions")
+      .where("accountId", accountId)
+      .andWhere("sampleGroupId", sampleGroupId)
+  ).filter(({ deleted }) => !deleted);
+};
+
+export const pollSessionsGetByPollId = async (pollId: number) => {
+  return (
+    await knex
+      .select<PollSession[]>("*")
+      .from("pollSessions")
+      .where("pollId", pollId)
+  ).filter(({ deleted }) => !deleted);
+};

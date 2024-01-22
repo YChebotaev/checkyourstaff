@@ -45,18 +45,21 @@ export const completeRegistration = async ({
   await pollQuestionCreate({
     accountId,
     pollId,
+    aggregationIndex: 0,
     text: "Оцените результаты на работе от 1 до 5",
   });
 
   await pollQuestionCreate({
     accountId,
     pollId,
+    aggregationIndex: 1,
     text: "Оцените нагрузку на работе от 1 до 5",
   });
 
   await pollQuestionCreate({
     accountId,
     pollId,
+    aggregationIndex: 2,
     text: "Оцените счастье на работе от 1 до 5",
   });
 
@@ -86,6 +89,7 @@ export const completeRegistration = async ({
       sampleGroupId,
     },
     {
+      jobId: `spin-poll-${pollId}-${sampleGroupId}`,
       repeat: {
         pattern: "0 17 * * 1-5",
       },

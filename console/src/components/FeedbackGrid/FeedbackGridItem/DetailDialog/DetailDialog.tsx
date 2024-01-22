@@ -16,12 +16,12 @@ import { Preview } from "./Preview";
 import { ConfirmCommunicationButton } from "./ConfirmCommunicationButton";
 
 export const DetailDialog: FC<{
-  id: string;
+  id: number;
   date: string;
   text: string;
   score?: number;
   question?: string;
-  onDeleteItem(id: string): void;
+  onDeleteItem(id: number): void;
 }> = ({ id, date, score, text, question, onDeleteItem }) => {
   const [state, setState] = useState<
     | "detail"
@@ -109,11 +109,7 @@ export const DetailDialog: FC<{
               onSuccess={() => {
                 setState("delete-success");
 
-                // setTimeout(() => {
-                //   handleClose();
-
-                //   onDeleteItem(id);
-                // }, 3000);
+                onDeleteItem(id);
               }}
             />
           </Actions>

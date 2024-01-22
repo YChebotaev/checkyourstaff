@@ -7,12 +7,12 @@ import {
 
 export const FeedbackGrid: FC<{
   items: FeedbackGridItemProps[];
-  onDeleteItem(id: string): void
-}> = ({ items, onDeleteItem }) => (
+  // onDeleteItem(id: string): void
+}> = ({ items /*, onDeleteItem */ }) => (
   <Root>
     {items.map((item) => {
       return (
-        <FeedbackGridItem key={item.id} {...item} onDeleteItem={onDeleteItem} />
+        <FeedbackGridItem key={item.id} {...item} /*onDeleteItem={onDeleteItem}*/F />
       )
     })}
   </Root>

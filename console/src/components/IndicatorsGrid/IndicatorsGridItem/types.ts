@@ -3,4 +3,5 @@ export type IndicatorsGridItemProps = {
   value: number;
   name: string;
   deltaPercent?: number;
+  sampleGroupId?: number
 }

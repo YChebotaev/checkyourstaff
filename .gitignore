@@ -157,4 +157,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-loophole
+loophole/
+bot/
+bot2/
+console-old
