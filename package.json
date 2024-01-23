@@ -1,7 +1,5 @@
 {
   "workspaces": [
-    "bot",
-    "bot2",
     "console",
     "service",
     "persistence",
