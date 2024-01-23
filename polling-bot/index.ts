@@ -13,7 +13,7 @@ import {
   type MessageMeta,
 } from "@checkyourstaff/persistence";
 import { logger, createBot } from "./lib";
-import { joinByPin } from "../bot2/lib";
+import { joinByPin } from "./lib";
 
 const token = process.env["BOT_TOKEN"];
 
@@ -98,18 +98,22 @@ bot.on("message", async (ctx, next) => {
        * респондента
        */
 
-      if (
-        await joinByPin({
-          code: text,
-          userId: userSession.userId,
-        })
-      ) {
-        await ctx.sendMessage(
-          "Вы успешно присоединились к группе. Скоро к вам придут вопросы по поводу вашей работы",
-        );
+      try {
+        if (
+          await joinByPin({
+            code: text,
+            userId: userSession.userId,
+          })
+        ) {
+          await ctx.sendMessage(
+            "Вы успешно присоединились к группе. Скоро к вам придут вопросы по поводу вашей работы",
+          );
+        }
+      } catch (e) {
+        logger.error(e);
+      } finally {
+        await userSessionSetChatState(userSession.id, "noop");
       }
-
-      await userSessionSetChatState(userSession.id, "noop");
     };
 
     switch (action) {

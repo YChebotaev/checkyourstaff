@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosRetry, { exponentialDelay } from "axios-retry";
 import { CreateData, GetData } from "../types";
 
 export const createClient = (
@@ -8,6 +9,11 @@ export const createClient = (
 ) => {
   const client = axios.create({
     baseURL,
+  });
+
+  axiosRetry(client, {
+    retries: 3,
+    retryDelay: exponentialDelay
   });
 
   client.interceptors.request.use((config) => {

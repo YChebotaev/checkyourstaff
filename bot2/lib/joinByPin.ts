@@ -34,12 +34,12 @@ export const joinByPin = async ({
         return false;
       }
 
-      await inviteDelete(invite.id);
-
       await responderCreate({
         sampleGroupId: invite.sampleGroupId,
         userId,
       });
+
+      await inviteDelete(invite.id);
 
       return true;
     }
