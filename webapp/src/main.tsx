@@ -47,7 +47,7 @@ if (!rootEl) {
     .then(({ data }) => {
       Telegram.WebApp.ready();
 
-      if (/** @todo: Debug only */ true || data.valid) {
+      if (data.valid) {
         reactRoot.render(
           <React.StrictMode>
             <useApiClient.Provider apiClient={apiClient}>
@@ -72,6 +72,6 @@ if (!rootEl) {
       }
     })
     .catch((e) => {
-      Telegram.WebApp.showAlert(e.message);
+      Telegram.WebApp.showAlert(e.stack);
     });
 }
