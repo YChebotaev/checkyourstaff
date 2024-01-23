@@ -39,7 +39,7 @@ service.post<{
       },
     },
   },
-  async handler({ body: { initData, bot } }) {
+  async handler({ body: { initData, bot } }) {    
     const valid = verify({ initData, bot });
 
     if (!valid) {
