@@ -53,6 +53,8 @@ bot.start(async (ctx, next) => {
   registerURL.searchParams.set("userId", String(userSession!.userId));
   registerURL.searchParams.set("chatId", String(ctx.chat.id));
 
+  logger.info("registerURL = %s", registerURL.toString());
+
   await ctx.sendMessage(
     "Пройдите регистрацию",
     Markup.inlineKeyboard([
