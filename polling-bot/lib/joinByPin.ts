@@ -10,11 +10,9 @@ import type { PinCodePayload } from "../types";
 export const joinByPin = async ({
   code,
   userId,
-  sendMessage,
 }: {
   code: string;
   userId: number;
-  sendMessage(text: string): Promise<void>;
 }) => {
   const pinCodePayload = await getPinCodePayload<PinCodePayload>(code);
 
@@ -43,15 +41,13 @@ export const joinByPin = async ({
         userId,
       });
 
-      await sendMessage(
-        "Вы успешно присоединились к группе. Скоро к вам придут вопросы по поводу вашей работы",
-      );
-
-      break;
+      return true;
     }
     case "invite-administrator":
       logger.debug("Inviting administrators not supported yet");
 
       break;
   }
+
+  return false;
 };
