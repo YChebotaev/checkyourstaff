@@ -33,7 +33,7 @@ export const RegisterPage: FC = () => {
   const userId = searchParams.get("userId");
 
   // DEBUG ONLY:
-  // Telegram.WebApp.CloudStorage.removeItem(`registration_complete_${chatId}_${userId}`)
+  Telegram.WebApp.CloudStorage.removeItem(`registration_complete_${chatId}_${userId}`)
 
   const [registrationComplete, setRegistrationComplete] = useCloudStorageItem(
     `registration_complete_${chatId}_${userId}`,

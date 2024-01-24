@@ -75,7 +75,7 @@ export const PollSessionPage: FC = () => {
   const isLastQuestion = data ? questionIndex >= data.length : false;
 
   // DEBUG ONLY:
-  // Telegram.WebApp.CloudStorage.removeItem(`poll_session_complete_${pollSessionId}`)
+  Telegram.WebApp.CloudStorage.removeItem(`poll_session_complete_${pollSessionId}`)
 
   const questionElement = useMemo(() => {
     if (!data || isLastQuestion) {
