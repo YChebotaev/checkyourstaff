@@ -11,7 +11,7 @@ export type CompleteRegistrationBody = {
   name: string;
   groupName: string;
   list: string;
-  chatId: string;
+  tgChatId: string;
   userId: string;
 };
 

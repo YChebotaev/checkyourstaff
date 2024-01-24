@@ -95,7 +95,7 @@ export const spinPoll = async (pollId: number, sampleGroupId: number) => {
           return {
             name: "notify-poll-telegram",
             data: {
-              chatId: userSession.chatId,
+              tgChatId: userSession.tgChatId,
               pollSessionURL: pollSessionURL.toString(),
               text: "Пройти опрос",
             },

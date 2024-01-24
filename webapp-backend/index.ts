@@ -56,12 +56,12 @@ service.post<{
   schema: {
     body: {
       type: "object",
-      required: ["name", "groupName", "list", "chatId", "userId"],
+      required: ["name", "groupName", "list", "tgChatId", "userId"],
       properties: {
         name: { type: "string" },
         groupName: { type: "string" },
         list: { type: "string" },
-        chatId: { type: "string" },
+        tgChatId: { type: "string" },
         userId: { type: "string" },
       },
     },
@@ -71,11 +71,11 @@ service.post<{
       name: accountName,
       groupName,
       list,
-      chatId: chatIdStr,
+      tgChatId: tgChatIdStr,
       userId: userIdStr,
     },
   }) {
-    const chatId = Number(chatIdStr);
+    const tgChatId = Number(tgChatIdStr);
     const userId = Number(userIdStr);
     const contacts = parseContactsList(list);
 
@@ -87,25 +87,25 @@ service.post<{
     });
 
     await controlBotTelegram.sendMessage(
-      chatId,
+      tgChatId,
       `
       Аккаунт «${accountName}» создан
     `.trim(),
     );
     await controlBotTelegram.sendMessage(
-      chatId,
+      tgChatId,
       `
       Вы стали администратором аккаунта «${accountName}»
     `.trim(),
     );
     await controlBotTelegram.sendMessage(
-      chatId,
+      tgChatId,
       `
       Опрос «Статус сотрудников» создан
     `.trim(),
     );
     await controlBotTelegram.sendMessage(
-      chatId,
+      tgChatId,
       `${plural(
         contacts.length,
         "%d приглашение",
@@ -234,7 +234,7 @@ service.post<{
     }
 
     await pollingBotTelegram.sendMessage(
-      userSession.chatId,
+      userSession.tgChatId,
       "Спасибо, ваши данные успешно сохранены. Ожидайте следующий опрос в следующую пятницу",
     );
   },

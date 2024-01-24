@@ -9,7 +9,7 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer('userId')
 
     table.integer('messageId').nullable()
-    table.integer('chatId').nullable()
+    table.integer('tgChatId').nullable()
     table.integer('pollId').nullable()
     table.integer('pollQuestionId').nullable()
     table.integer('pollSessionId').nullable()
@@ -31,7 +31,7 @@ export const up = async (knex: Knex): Promise<void> =>
       .inTable('users')
 
     table.index('messageId')
-    table.index('chatId')
+    table.index('tgChatId')
   })
 
 export const down = async (knex: Knex): Promise<void> =>

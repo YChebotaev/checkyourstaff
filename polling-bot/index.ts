@@ -1,3 +1,4 @@
+import { inspect } from "node:util";
 import { deunionize } from "telegraf";
 import {
   userSessionGetByChatId,
@@ -26,10 +27,12 @@ if (!token) {
 
 const bot = createBot(token);
 
-bot.start(async (ctx, next) => {
+bot.start(async (ctx) => {
+  console.log("ctx =", inspect(ctx, true, null));
+
   const userSession = await initializeSession({
     type: "polling",
-    chatId: ctx.chat.id,
+    tgChatId: ctx.chat.id,
     tgUserId: ctx.from.id,
     username: ctx.message.from.username,
     firstName: ctx.message.from.first_name,
@@ -38,12 +41,10 @@ bot.start(async (ctx, next) => {
   });
 
   await requestPinCode(ctx.telegram, ctx.chat.id, userSession.id);
-
-  return next();
 });
 
 bot.on("message", async (ctx, next) => {
-  const userSession = await userSessionGetByChatId(ctx.chat.id);
+  const userSession = await userSessionGetByChatId("polling", ctx.chat.id);
   const replyToMessageId = deunionize(ctx.message).reply_to_message?.message_id;
   const text = deunionize(ctx.message).text?.trim();
 

@@ -29,14 +29,14 @@ export const RegisterPage: FC = () => {
   const [name, setName] = useState("");
   const [groupName, setGroupName] = useState("");
   const [list, setList] = useState("");
-  const chatId = searchParams.get("chatId");
+  const tgChatId = searchParams.get("tgChatId");
   const userId = searchParams.get("userId");
 
   // DEBUG ONLY:
-  Telegram.WebApp.CloudStorage.removeItem(`registration_complete_${chatId}_${userId}`)
+  Telegram.WebApp.CloudStorage.removeItem(`registration_complete_${tgChatId}_${userId}`)
 
   const [registrationComplete, setRegistrationComplete] = useCloudStorageItem(
-    `registration_complete_${chatId}_${userId}`,
+    `registration_complete_${tgChatId}_${userId}`,
     {
       parse(value) {
         return value === "true";
@@ -51,7 +51,7 @@ export const RegisterPage: FC = () => {
     async mutationFn(vars: { name: string; groupName: string; list: string }) {
       const { data } = await apiClient.post("/completeRegistration", {
         ...vars,
-        chatId,
+        tgChatId,
         userId,
       });
 

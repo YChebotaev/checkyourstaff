@@ -4,7 +4,7 @@ import type { MessageMeta, MessageMetaTypes } from './types'
 
 export const messageMetaCreate = async ({
   messageId,
-  chatId,
+  tgChatId,
   type,
   accountId = null,
   sampleGroupId = null,
@@ -14,7 +14,7 @@ export const messageMetaCreate = async ({
   pollId = null
 }: {
   messageId: number
-  chatId: number
+  tgChatId: number
   type: MessageMetaTypes
   accountId?: number | null
   sampleGroupId?: number | null
@@ -26,7 +26,7 @@ export const messageMetaCreate = async ({
   const [{ id }] = await knex
     .insert({
       messageId,
-      chatId,
+      tgChatId,
       type,
       accountId,
       sampleGroupId,
@@ -44,12 +44,12 @@ export const messageMetaCreate = async ({
   return id as number
 }
 
-export const messageMetaGetByChatId = async (chatId: number, messageId: number) => {
+export const messageMetaGetByChatId = async (tgChatId: number, messageId: number) => {
   const messageMeta = await knex
     .select('*')
     .from('messageMetas')
     .where({
-      chatId,
+      tgChatId,
       messageId
     })
     .first<MessageMeta>()

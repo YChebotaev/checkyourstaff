@@ -17,13 +17,13 @@ export const userSessionCreate = async <
 >({
   type,
   userId,
-  chatId,
+  tgChatId,
   tgUserId,
   chatState = DEFAULT_CHAT_STATE,
 }: {
   type: UserSessionType;
   userId: number;
-  chatId: number;
+  tgChatId: number;
   tgUserId: number;
   chatState?: ChatState<P>;
 }) => {
@@ -31,7 +31,7 @@ export const userSessionCreate = async <
     .insert({
       type,
       userId,
-      chatId,
+      tgChatId,
       tgUserId,
       chatState: JSON.stringify(chatState),
       createdAt: new Date().getTime(),
@@ -69,15 +69,19 @@ export const userSessionGet = async (id: number) => {
   } as UserSession;
 };
 
-export const userSessionGetByChatId = async (chatId: number) => {
+export const userSessionGetByChatId = async (
+  type: UserSessionType,
+  tgChatId: number,
+) => {
   const userSession = await knex
     .select("*")
     .from("userSessions")
-    .where("chatId", chatId)
+    .where("tgChatId", tgChatId)
+    .andWhere("type", type)
     .first<UserSession>();
 
   if (!userSession) {
-    logger.warn("User session with chat id = %s not found", chatId);
+    logger.warn("User session with chat id = %s not found", tgChatId);
 
     return;
   }

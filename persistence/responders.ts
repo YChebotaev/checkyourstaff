@@ -71,7 +71,7 @@ export const responderGetBySampleGroupIdAndUserId = async (
 
   if (!responder) {
     logger.warn(
-      "Responder with sample group id = %s and user id not found",
+      "Responder with sample group id = %s and user id = %s not found",
       sampleGroupId,
       userId,
     );
@@ -81,7 +81,7 @@ export const responderGetBySampleGroupIdAndUserId = async (
 
   if (responder.deleted) {
     logger.warn(
-      "Responder with sample group id = %s and user id found, but deleted",
+      "Responder with sample group id = %s and user id = %s found, but deleted",
       sampleGroupId,
       userId,
     );

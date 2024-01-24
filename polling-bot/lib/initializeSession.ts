@@ -7,7 +7,7 @@ import {
 
 export const initializeSession = async ({
   type,
-  chatId,
+  tgChatId,
   tgUserId,
   username,
   firstName,
@@ -15,14 +15,28 @@ export const initializeSession = async ({
   languageCode,
 }: {
   type: "polling" | "control";
-  chatId: number;
+  tgChatId: number;
   tgUserId: number;
   username?: string;
   firstName?: string;
   lastName?: string;
   languageCode?: string;
 }) => {
-  let userSession = await userSessionGetByChatId(chatId);
+  console.group("initializeSession");
+
+  console.log({
+    type,
+    tgChatId,
+    tgUserId,
+    username,
+    firstName,
+    lastName,
+    languageCode,
+  });
+
+  let userSession = await userSessionGetByChatId("polling", tgChatId);
+
+  console.log("userSession =", userSession);
 
   if (!userSession) {
     const userId = await userCreate({
@@ -32,15 +46,23 @@ export const initializeSession = async ({
       languageCode,
     });
 
+    console.log("userId =", userId);
+
     const userSessionId = await userSessionCreate({
       type,
       userId,
-      chatId,
+      tgChatId,
       tgUserId,
     });
 
+    console.log("userSessionId =", userSessionId);
+
     userSession = await userSessionGet(userSessionId);
   }
+
+  console.log("userSession =", userSession);
+
+  console.groupEnd();
 
   return userSession!;
 };

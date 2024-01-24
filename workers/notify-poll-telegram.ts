@@ -3,7 +3,7 @@ import { logger, notifyPollTelegram } from "./lib";
 
 export const notifyPollTelegramWorker = new Worker<
   {
-    chatId: number;
+    tgChatId: number;
     pollSessionURL: string;
     text: string;
   },
@@ -21,7 +21,7 @@ export const notifyPollTelegramWorker = new Worker<
     switch (job.name) {
       case "notify-poll-telegram":
         return notifyPollTelegram(
-          job.data.chatId,
+          job.data.tgChatId,
           job.data.pollSessionURL,
           job.data.text,
         );

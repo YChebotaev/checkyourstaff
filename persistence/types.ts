@@ -149,7 +149,7 @@ export type MessageMeta = {
   accountId: number | null;
   sampleGroupId: number | null;
   messageId: number; // Telegram message id
-  chatId: number; // Telegram chat id
+  tgChatId: number; // Telegram chat id
   userId: number;
   pollId: number | null;
   pollQuestionId: number | null;
@@ -176,7 +176,7 @@ export type UserSession<P extends ChatStatePayload = ChatStatePayload> = {
   id: number;
   type: UserSessionType;
   userId: number;
-  chatId: number;
+  tgChatId: number;
   tgUserId: number;
   chatState: ChatState<P>;
   deleted: boolean;

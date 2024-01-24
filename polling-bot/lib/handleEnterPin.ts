@@ -5,7 +5,7 @@ import { logger } from "./logger";
 
 export const handleEnterPin = async (
   telegram: Telegram,
-  chatId: number,
+  tgChatId: number,
   userId: number,
   code: string,
   userSessionId: number,
@@ -19,12 +19,12 @@ export const handleEnterPin = async (
     if (joinResult) {
       if (joinResult === "already-joined") {
         await telegram.sendMessage(
-          chatId,
+          tgChatId,
           "Вы уже присоединились к этой группе. Повторное присоединение невозможно",
         );
       } else {
         await telegram.sendMessage(
-          chatId,
+          tgChatId,
           "Вы успешно присоединились к группе. Скоро к вам придут вопросы по поводу вашей работы",
         );
       }

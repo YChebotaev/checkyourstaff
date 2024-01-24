@@ -3,18 +3,18 @@ import { pollingTelegram } from "@checkyourstaff/common/telegram";
 import { logger } from "./logger";
 
 export const notifyPollTelegram = async (
-  chatId: number,
+  tgChatId: number,
   pollSessionURL: string,
   text: string,
 ) => {
   logger.info(
     "Notifying chat id = %s about poll session url = %s",
-    chatId,
+    tgChatId,
     pollSessionURL,
   );
 
   await pollingTelegram.sendMessage(
-    chatId,
+    tgChatId,
     "Пройдите опрос",
     Markup.inlineKeyboard([
       Markup.button.webApp(text, pollSessionURL.toString()),

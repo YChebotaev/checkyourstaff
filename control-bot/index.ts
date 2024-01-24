@@ -32,7 +32,7 @@ if (!consoleUrl) {
 const bot = createBot(token);
 
 bot.start(async (ctx, next) => {
-  let userSession = await userSessionGetByChatId(ctx.chat.id);
+  let userSession = await userSessionGetByChatId("control", ctx.chat.id);
 
   if (!userSession) {
     const userId = await userCreate({
@@ -45,7 +45,7 @@ bot.start(async (ctx, next) => {
     const userSessionId = await userSessionCreate({
       type: "control",
       userId,
-      chatId: ctx.chat.id,
+      tgChatId: ctx.chat.id,
       tgUserId: ctx.message.from.id,
     });
 
@@ -56,7 +56,7 @@ bot.start(async (ctx, next) => {
 
   registerURL.searchParams.set("fromBot", "control-bot");
   registerURL.searchParams.set("userId", String(userSession!.userId));
-  registerURL.searchParams.set("chatId", String(ctx.chat.id));
+  registerURL.searchParams.set("tgChatId", String(ctx.chat.id));
 
   logger.info("registerURL = %s", registerURL.toString());
 

@@ -6,18 +6,18 @@ import {
 
 export const requestPinCode = async (
   telegram: Telegram,
-  chatId: number,
+  tgChatId: number,
   userSessionId: number,
 ) => {
   const { message_id } = await telegram.sendMessage(
-    chatId,
+    tgChatId,
     "Введите пин-код",
     Markup.forceReply(),
   );
 
   await messageMetaCreate({
     messageId: message_id,
-    chatId,
+    tgChatId,
     type: "enter-pin",
   });
 
