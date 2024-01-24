@@ -18,7 +18,8 @@ export type MessageStatusType =
   | "delivery error"
   | "smsc submit"
   | "smsc reject"
-  | "incorrect id";
+  | "incorrect id"
+  | "not enough balance";
 
 const login = process.env["IQSMS_LOGIN"]; //  process.env["SMSC_LOGIN"]; // process.env["IQSMS_LOGIN"];
 const password = process.env["IQSMS_PASSWORD"]; //  process.env["SMSC_PASSWORD"]; // process.env["IQSMS_PASSWORD"];

@@ -1,4 +1,5 @@
-import { UnrecoverableError, Worker } from "bullmq";
+import { DelayedError, UnrecoverableError, Worker } from "bullmq";
+import { addHours } from "date-fns";
 import { logger, sendSMSInvite } from "./lib";
 
 export const sendSMSInviteWorker = new Worker<
@@ -10,7 +11,7 @@ export const sendSMSInviteWorker = new Worker<
   "send-sms-invite"
 >(
   "send-sms-invites",
-  (job) => {
+  async (job, token) => {
     logger.info(
       'Start processing job with name = "%s" and data = %s',
       job.name,
@@ -19,7 +20,19 @@ export const sendSMSInviteWorker = new Worker<
 
     switch (job.name) {
       case "send-sms-invite":
-        return sendSMSInvite(job.data.pinCode, job.data.phone);
+        try {
+          return sendSMSInvite(job.data.pinCode, job.data.phone);
+        } catch (e) {
+          if (e instanceof DelayedError) {
+            const timestamp = addHours(new Date(), 2).getTime();
+
+            await job.moveToDelayed(timestamp, token);
+
+            return;
+          }
+
+          throw e;
+        }
       default:
         throw new UnrecoverableError("Job.name unknown");
     }
