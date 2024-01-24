@@ -34,7 +34,7 @@ export const userSessionCreate = async <
       chatId,
       tgUserId,
       chatState: JSON.stringify(chatState),
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("userSessions")
     .returning("id");
@@ -174,7 +174,7 @@ export const userSessionDelete = async (id: number) => {
   await knex("userSessions")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

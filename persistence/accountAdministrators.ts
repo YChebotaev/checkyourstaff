@@ -13,7 +13,7 @@ export const accountAdministratorCreate = async ({
     .insert({
       accountId,
       userId,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("accountAdministrators")
     .returning("id");
@@ -75,7 +75,7 @@ export const accountAdministratorDelete = async (id: number) => {
   await knex("accountAdministrators")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

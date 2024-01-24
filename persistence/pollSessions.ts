@@ -19,7 +19,7 @@ export const pollSessionCreate = async ({
       accountId,
       sampleGroupId,
       pollingState: pollingState ? JSON.stringify(pollingState) : null, // TODO: Remove
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("pollSessions")
     .returning("id");

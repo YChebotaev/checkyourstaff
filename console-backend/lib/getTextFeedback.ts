@@ -1,15 +1,9 @@
 import {
-  parseDate,
-  pollAnswerGetByPollSessionIdAndPollQuestionIdAndUserId,
   pollAnswersGetBySampleGroupId,
-  pollGet,
   pollQuestionGet,
-  sampleGroupGet,
   sampleGroupsGetByAccountId,
-  textFeedbacksGetByAccountId,
   textFeedbacksGetBySampleGroupId,
 } from "@checkyourstaff/persistence";
-import { groupBy } from "lodash";
 import type {
   TextFeedbackResp,
   TextFeedbackSampleGroup,
@@ -39,7 +33,7 @@ export const getTextFeedback = async ({ accountId }: { accountId: number }) => {
 
       const value: TextFeedbackValue = {
         id: textFeedback.id,
-        date: parseDate(textFeedback.createdAt).toISOString(),
+        date: new Date(textFeedback.createdAt).toISOString(),
         text: textFeedback.text,
         question: pollQuestion?.text,
         score: pollAnswers.find(

@@ -13,7 +13,7 @@ export const pollCreate = async ({
     .insert({
       accountId,
       name,
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('polls')
     .returning('id')
@@ -62,7 +62,7 @@ export const pollDelete = async (id: number) => {
   await knex('polls')
     .update({
       deleted: true,
-      updatedAt: knex.fn.now()
+      updatedAt: new Date().getTime()
     })
     .where('id', id)
 

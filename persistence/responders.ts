@@ -13,7 +13,7 @@ export const responderCreate = async ({
     .insert({
       sampleGroupId,
       userId,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("responders")
     .returning("id");
@@ -96,7 +96,7 @@ export const responderDelete = async (id: number) => {
   await knex("responders")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

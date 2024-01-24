@@ -7,7 +7,7 @@ export const accountCreate = async ({ name }: { name: string }) => {
   const [{ id }] = await knex
     .insert({
       name,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("accounts")
     .returning("id");
@@ -75,7 +75,7 @@ export const accountDelete = async (id: number) => {
   await knex("accounts")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

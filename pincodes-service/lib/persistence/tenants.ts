@@ -4,7 +4,7 @@ export const tenantCreate = async ({ name }: { name: string }) => {
   const [{ id }] = await knex
     .insert({
       name,
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('tenants')
     .returning<{ id: number }[]>('id')

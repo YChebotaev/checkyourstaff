@@ -22,7 +22,7 @@ export const pollAnswerCreate = async ({
       pollSessionId,
       sampleGroupId,
       score,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("pollAnswers")
     .returning("id");

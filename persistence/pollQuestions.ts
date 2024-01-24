@@ -22,7 +22,7 @@ export const pollQuestionCreate = async ({
       minScore: 1,
       maxScore: 5,
       textFeedbackRequestTreshold: 3,
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('pollQuestions')
     .returning('id')
@@ -71,7 +71,7 @@ export const pollQuestionDelete = async (id: number) => {
   await knex('pollQuestions')
     .update({
       deleted: true,
-      updatedAt: knex.fn.now()
+      updatedAt: new Date().getTime()
     })
     .where('id', id)
 

@@ -13,7 +13,7 @@ export const sampleGroupCreate = async ({
     .insert({
       name,
       accountId,
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('sampleGroups')
     .returning('id')
@@ -77,7 +77,7 @@ export const sampleGroupDelete = async (id: number) => {
   await knex('sampleGroups')
     .update({
       deleted: true,
-      updatedAt: knex.fn.now()
+      updatedAt: new Date().getTime()
     })
     .where('id', id)
 

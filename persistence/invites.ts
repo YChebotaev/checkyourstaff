@@ -16,7 +16,7 @@ export const inviteCreate = async ({
       sampleGroupId,
       email,
       phone,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("invites")
     .returning("id");
@@ -56,7 +56,7 @@ export const inviteDelete = async (id: number) => {
   await knex("invites")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

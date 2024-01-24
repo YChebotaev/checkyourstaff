@@ -28,7 +28,7 @@ export const textFeedbackCreate = async ({
       pollQuestionId,
       pollSessionId,
       text,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("textFeedbacks")
     .returning("id");
@@ -74,7 +74,7 @@ export const textFeedbackDelete = async (id: number) => {
   await knex("textFeedbacks")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

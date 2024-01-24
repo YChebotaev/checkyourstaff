@@ -19,7 +19,7 @@ export const userCreate = async ({
       firstName,
       lastName,
       languageCode,
-      createdAt: knex.fn.now(),
+      createdAt: new Date().getTime(),
     })
     .into("users")
     .returning("id");
@@ -55,7 +55,7 @@ export const userDelete = async (id: number) => {
   await knex("users")
     .update({
       deleted: true,
-      updatedAt: knex.fn.now(),
+      updatedAt: new Date().getTime(),
     })
     .where("id", id);
 

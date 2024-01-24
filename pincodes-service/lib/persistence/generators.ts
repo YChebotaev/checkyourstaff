@@ -7,7 +7,7 @@ export const generatorCreate = async ({ tenantId }: { tenantId: number }) => {
       tenantId,
       size: 4,
       generatedCount: 0,
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('generators')
     .returning<{ id: number }[]>('id')
@@ -19,7 +19,7 @@ export const generatorSetGeneratedCount = async (id: number, generatedCount: num
   await knex('generators')
     .update({
       generatedCount,
-      updatedAt: knex.fn.now()
+      updatedAt: new Date().getTime()
     })
     .where('id', id)
     .returning('id')
@@ -29,7 +29,7 @@ export const generatorSetSize = async (id: number, size: number) => {
   await knex('generators')
     .update({
       size,
-      updatedAt: knex.fn.now()
+      updatedAt: new Date().getTime()
     })
     .where('id', id)
     .returning('id')

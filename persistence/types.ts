@@ -2,8 +2,8 @@ export type Account = {
   id: number;
   name: string | null;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type User = {
@@ -16,8 +16,8 @@ export type User = {
   lastName: string | null; // Данные из Телеграмма
   languageCode: string | null; // Данные из Телеграмма
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type AccountAdministrator = {
@@ -25,8 +25,8 @@ export type AccountAdministrator = {
   accountId: number;
   userId: number;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type SampleGroup = {
@@ -34,8 +34,8 @@ export type SampleGroup = {
   accountId: number;
   name: string;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type Responder = {
@@ -43,8 +43,8 @@ export type Responder = {
   sampleGroupId: number;
   userId: number;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type Poll = {
@@ -52,8 +52,8 @@ export type Poll = {
   accountId: number;
   name: string;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type PollQuestion = {
@@ -66,8 +66,8 @@ export type PollQuestion = {
   maxScore: number;
   textFeedbackRequestTreshold: number;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 // TODO: Remove
@@ -82,8 +82,8 @@ export type PollSession = {
   sampleGroupId: number;
   pollingState: PollingState; // TODO: Remove
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type PollAnswer = {
@@ -94,8 +94,8 @@ export type PollAnswer = {
   sampleGroupId: number;
   score: number;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type TextFeedback = {
@@ -108,8 +108,8 @@ export type TextFeedback = {
   pollSessionId: number | null;
   text: string;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type PinCodeGenerator = {
@@ -119,8 +119,8 @@ export type PinCodeGenerator = {
   sampleGroupId: number;
   generatedCount: number;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type PinCode = {
@@ -130,8 +130,8 @@ export type PinCode = {
   code: string;
   used: boolean;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type MessageMetaTypes =
@@ -157,8 +157,8 @@ export type MessageMeta = {
   responderId: number | null;
   type: MessageMetaTypes;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type ChatStateType = "noop" | "enter-pin";
@@ -180,8 +180,8 @@ export type UserSession<P extends ChatStatePayload = ChatStatePayload> = {
   tgUserId: number;
   chatState: ChatState<P>;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type Invite = {
@@ -191,8 +191,8 @@ export type Invite = {
   email: string | null;
   phone: string | null;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type JobTypes = "poll-session";
@@ -205,8 +205,8 @@ export type Job = {
   cron: string;
   timeZone: string;
   deleted: boolean | null;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type Event<T> = {

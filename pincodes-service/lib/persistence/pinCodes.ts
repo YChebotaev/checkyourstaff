@@ -18,7 +18,7 @@ export const pinCodeCreate = async ({
       generatorId,
       code,
       payload: JSON.stringify(payload),
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('pinCodes')
     .returning<{ id: number }[]>('id')

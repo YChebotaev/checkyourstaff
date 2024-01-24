@@ -2,7 +2,6 @@ import {
   pollSessionsGetByAccountIdAndSampleGroupId,
   pollQuestionsGetByPollId,
   pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId,
-  parseDate,
 } from "@checkyourstaff/persistence";
 import { calculatePollAnswersAverage } from "@checkyourstaff/common/calculatePollAnswersAverage";
 import {
@@ -23,10 +22,7 @@ export const getCharts = async ({
       await pollSessionsGetByAccountIdAndSampleGroupId(accountId, sampleGroupId)
     )
       .sort((a, b) => {
-        const dateA = parseDate(a.createdAt).getTime();
-        const dateB = parseDate(b.createdAt).getTime();
-
-        return dateA - dateB;
+        return a.createdAt - b.createdAt;
       })
       .map(async (pollSession) => {
         const pollQuestions = await pollQuestionsGetByPollId(
@@ -34,7 +30,7 @@ export const getCharts = async ({
         );
 
         return {
-          date: parseDate(pollSession.createdAt).toISOString(),
+          date: new Date(pollSession.createdAt).toISOString(),
           values: await Promise.all(
             pollQuestions.map(async (pollQuestion) => {
               const pollAnswers =

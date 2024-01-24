@@ -34,7 +34,7 @@ export const messageMetaCreate = async ({
       pollQuestionId,
       pollSessionId,
       responderId,
-      createdAt: knex.fn.now()
+      createdAt: new Date().getTime()
     })
     .into('messageMetas')
     .returning('id')
@@ -67,7 +67,7 @@ export const messageMetaDelete = async (id: number) => {
   await knex('messageMetas')
     .update({
       deleted: true,
-      updatedAt: knex.fn.now()
+      updatedAt: new Date().getTime()
     })
     .where('id', id)
 
