@@ -1,3 +1,6 @@
 export * from './logger'
 export * from './createBot'
 export * from './joinByPin'
+export * from './requestPinCode'
+export * from './initializeSession'
+export * from './handleEnterPin'

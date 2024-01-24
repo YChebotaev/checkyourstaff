@@ -2,6 +2,8 @@ import {
   inviteGet,
   inviteDelete,
   responderCreate,
+  respondersGetBySampleGroupId,
+  responderGetBySampleGroupIdAndUserId,
 } from "@checkyourstaff/persistence";
 import { getPinCodePayload } from "@checkyourstaff/common/getPinCodePayload";
 import { logger } from "./logger";
@@ -36,10 +38,19 @@ export const joinByPin = async ({
 
       await inviteDelete(invite.id);
 
-      await responderCreate({
-        sampleGroupId: invite.sampleGroupId,
+      const responder = await responderGetBySampleGroupIdAndUserId(
+        invite.sampleGroupId,
         userId,
-      });
+      );
+
+      if (responder) {
+        return "already-joined";
+      } else {
+        await responderCreate({
+          sampleGroupId: invite.sampleGroupId,
+          userId,
+        });
+      }
 
       return true;
     }

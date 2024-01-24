@@ -11,7 +11,7 @@ import {
 
 const main = async () => {
   const accountId = await accountCreate({ name: "Тестовый аккаунт 1" });
-  const userId = await userCreate();
+  const userId = await userCreate({});
   await accountAdministratorCreate({
     accountId,
     userId,

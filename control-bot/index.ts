@@ -35,7 +35,12 @@ bot.start(async (ctx, next) => {
   let userSession = await userSessionGetByChatId(ctx.chat.id);
 
   if (!userSession) {
-    const userId = await userCreate();
+    const userId = await userCreate({
+      username: ctx.message.from.username,
+      firstName: ctx.message.from.first_name,
+      lastName: ctx.message.from.last_name,
+      languageCode: ctx.message.from.language_code,
+    });
 
     const userSessionId = await userSessionCreate({
       type: "control",

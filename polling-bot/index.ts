@@ -1,19 +1,20 @@
-import { Markup, deunionize } from "telegraf";
+import { deunionize } from "telegraf";
 import {
   userSessionGetByChatId,
-  userCreate,
-  userSessionCreate,
-  messageMetaCreate,
   userSessionSetChatState,
-  userSessionGet,
   messageMetaGetByChatId,
   type ChatStateType,
   type MessageMetaTypes,
   type ChatStatePayload,
   type MessageMeta,
 } from "@checkyourstaff/persistence";
-import { logger, createBot } from "./lib";
-import { joinByPin } from "./lib";
+import {
+  logger,
+  createBot,
+  requestPinCode,
+  initializeSession,
+  handleEnterPin,
+} from "./lib";
 
 const token = process.env["BOT_TOKEN"];
 
@@ -26,35 +27,17 @@ if (!token) {
 const bot = createBot(token);
 
 bot.start(async (ctx, next) => {
-  let userSession = await userSessionGetByChatId(ctx.chat.id);
-
-  if (!userSession) {
-    const userId = await userCreate();
-
-    const userSessionId = await userSessionCreate({
-      type: "polling",
-      userId,
-      chatId: ctx.chat.id,
-      tgUserId: ctx.message.from.id,
-    });
-
-    userSession = await userSessionGet(userSessionId);
-  }
-
-  // Enter pin-code
-
-  const { message_id } = await ctx.sendMessage(
-    "Введите пин-код",
-    Markup.forceReply(),
-  );
-
-  await messageMetaCreate({
-    messageId: message_id,
+  const userSession = await initializeSession({
+    type: "polling",
     chatId: ctx.chat.id,
-    type: "enter-pin",
+    tgUserId: ctx.from.id,
+    username: ctx.message.from.username,
+    firstName: ctx.message.from.first_name,
+    lastName: ctx.message.from.last_name,
+    languageCode: ctx.message.from.language_code,
   });
 
-  await userSessionSetChatState(userSession!.id, "enter-pin");
+  await requestPinCode(ctx.telegram, ctx.chat.id, userSession.id);
 
   return next();
 });
@@ -82,40 +65,6 @@ bot.on("message", async (ctx, next) => {
     action: ChatStateType | MessageMetaTypes,
     payload: MessageMeta | ChatStatePayload,
   ) => {
-    const handleEnterPin = async () => {
-      /**
-       * @TODO
-       * Если в списке контактов указать одновременно и номер
-       * и емейл одного и того же сотрудника, ему будут
-       * выписаны два инвайта с разными пин-кодами
-       *
-       * Таким образом, сотрудник может
-       * присоединиться к одной группе дважды
-       *
-       * Этот кейс нужно обработать и при попытке заинвайтиться
-       * одному юзеру в одну группу, выдавать сообщение,
-       * что он уже присоединен, и не создавать еще одного
-       * респондента
-       */
-
-      try {
-        if (
-          await joinByPin({
-            code: text,
-            userId: userSession.userId,
-          })
-        ) {
-          await ctx.sendMessage(
-            "Вы успешно присоединились к группе. Скоро к вам придут вопросы по поводу вашей работы",
-          );
-        }
-      } catch (e) {
-        logger.error(e);
-      } finally {
-        await userSessionSetChatState(userSession.id, "noop");
-      }
-    };
-
     switch (action) {
       case "noop": {
         logger.info("Message received in noop state: text = %s", text);
@@ -125,7 +74,13 @@ bot.on("message", async (ctx, next) => {
       case "enter-pin": {
         logger.info("Enter-pin action invoked");
 
-        await handleEnterPin();
+        await handleEnterPin(
+          ctx.telegram,
+          ctx.chat.id,
+          userSession.userId,
+          text,
+          userSession.id,
+        );
 
         break;
       }

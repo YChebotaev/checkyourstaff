@@ -11,6 +11,10 @@ export type User = {
   name: string | null; // Актуально для администраторов
   email: string | null; // Актуально для администраторов
   phone: string | null; // Актуально для администраторов
+  username: string | null; // Данные из Телеграмма
+  firstName: string | null; // Данные из Телеграмма
+  lastName: string | null; // Данные из Телеграмма
+  languageCode: string | null; // Данные из Телеграмма
   deleted: boolean | null;
   createdAt: string;
   updatedAt: string | null;
@@ -96,10 +100,10 @@ export type PollAnswer = {
 
 export type TextFeedback = {
   id: number;
-  userId: number
-  accountId: number
-  sampleGroupId: number
-  pollId: number
+  userId: number;
+  accountId: number;
+  sampleGroupId: number;
+  pollId: number;
   pollQuestionId: number | null;
   pollSessionId: number | null;
   text: string;

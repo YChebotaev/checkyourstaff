@@ -14,7 +14,7 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer('pollQuestionId').nullable()
     table.integer('pollSessionId').nullable()
     table.integer('responderId').nullable()
-    table.string('type')
+    table.string('type') // TODO: Заменить на enum
 
     table.boolean('deleted').nullable()
     table.dateTime('createdAt')
