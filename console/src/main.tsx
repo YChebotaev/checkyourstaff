@@ -244,8 +244,10 @@ export const refresh = () => {
 
 const token = getToken();
 
-if (token == null) {
-  if (window.location.pathname !== '/signin') {
+if (window.location.pathname === "/signin/success") {
+  refresh();
+} else if (token == null) {
+  if (window.location.pathname !== "/signin") {
     window.location.href = "/signin";
   }
 
