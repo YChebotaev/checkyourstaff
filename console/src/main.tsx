@@ -242,36 +242,44 @@ export const refresh = () => {
 // setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcwNTU2ODIyN30.Bxrr4BrRdwjfxoqONaNgdADL59zRCkuTjvgrhTpCYIs')
 // setAccountId(1)
 
-apiClient
-  .get<AccountsResp>("/accounts")
-  .then(({ data: accounts }) => {
-    const accountId = getAccountId();
+const token = getToken();
 
-    /**
-     * @todo
-     * Если `accountId` нет в списке `accounts`,
-     * это значит, что пользователь потерял
-     * свой административный доступ.
-     * В этом случае должно быть
-     * перенаправление куда-то
-     */
+if (token == null) {
+  window.location.href = "/signin";
 
-    if (accountId == null) {
-      if (accounts.length === 0) {
-        // TODO: To implement
-      } else if (accounts.length === 1) {
-        setAccountId(accounts[0].id);
+  refresh();
+} else {
+  apiClient
+    .get<AccountsResp>("/accounts")
+    .then(({ data: accounts }) => {
+      const accountId = getAccountId();
 
-        window.location.href = "/stats";
-      } else {
-        window.location.href = "/selectAccount";
+      /**
+       * @todo
+       * Если `accountId` нет в списке `accounts`,
+       * это значит, что пользователь потерял
+       * свой административный доступ.
+       * В этом случае должно быть
+       * перенаправление куда-то
+       */
+
+      if (accountId == null) {
+        if (accounts.length === 0) {
+          // TODO: To implement
+        } else if (accounts.length === 1) {
+          setAccountId(accounts[0].id);
+
+          window.location.href = "/stats";
+        } else {
+          window.location.href = "/selectAccount";
+        }
       }
-    }
 
-    refresh();
-  })
-  .catch((e) => {
-    // TODO: To implement
+      refresh();
+    })
+    .catch((e) => {
+      // TODO: To implement
 
-    console.error(e);
-  });
+      console.error(e);
+    });
+}
