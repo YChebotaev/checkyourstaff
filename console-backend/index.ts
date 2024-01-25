@@ -92,6 +92,8 @@ app.get<{
     accountId: string;
   };
 }>("/stats", async ({ headers, query: { accountId: accountIdStr } }) => {
+  console.group("/stats");
+
   const token = readTokenFromHeaders(headers);
 
   if (!token) {
@@ -101,6 +103,8 @@ app.get<{
   }
 
   const accountId = Number(accountIdStr);
+
+  console.groupEnd();
 
   return getStats({ accountId });
 });

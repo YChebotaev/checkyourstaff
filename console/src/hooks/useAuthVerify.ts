@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import type {
   AuthVerifyData,
@@ -14,9 +14,9 @@ export const useAuthVerify = ({
 }) => {
   const apiClient = useApiClient();
   const [searchParams] = useSearchParams();
-  const { data, isLoading } = useQuery({
-    queryKey: ["auth", "verify"],
-    async queryFn() {
+
+  const { mutate } = useMutation({
+    async mutationFn() {
       const { data } = await apiClient.get<AuthVerifyData>("/auth/verify", {
         params: {
           id: searchParams.get("id")! /* Telegram user id */,
@@ -31,11 +31,12 @@ export const useAuthVerify = ({
 
       return data;
     },
+    onSuccess(data) {
+      onSuccess(data);
+    },
   });
 
   useEffect(() => {
-    if (!isLoading && data != null) {
-      onSuccess(data);
-    }
-  }, [data, isLoading, onSuccess]);
+    mutate();
+  }, [mutate]);
 };

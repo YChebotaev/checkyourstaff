@@ -84,14 +84,17 @@ export const getStats = async ({ accountId }: { accountId: number }) => {
               lastSession.id,
               sampleGroup.id,
             );
+
           const lastPollAnswersAverage =
             calculatePollAnswersAverage(lastPollAnswers);
+
           const prevPollAnswers =
             await pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId(
               pollQuestionId,
               prevSession.id,
               sampleGroup.id,
             );
+
           const prevPollAnswersAverage =
             calculatePollAnswersAverage(prevPollAnswers);
 
@@ -121,6 +124,7 @@ export const getStats = async ({ accountId }: { accountId: number }) => {
               lastSession.id,
               sampleGroup.id,
             );
+
           const lastPollAnswersAverage =
             calculatePollAnswersAverage(lastPollAnswers);
 
@@ -197,16 +201,25 @@ export const getStats = async ({ accountId }: { accountId: number }) => {
       generalPrevAnswers.find(
         ({ question }) => groupId === String(question.aggregationIndex),
       )?.question;
-    const prev = generalLastAnswersGroupdByQuestions[groupId];
-    const last = generalPrevAnswersGroupdByQuestions[groupId];
-    const lastAverage = calculatePollAnswersAverage(last);
-    const prevAverage = calculatePollAnswersAverage(prev);
+    const prev = generalPrevAnswersGroupdByQuestions[groupId];
+    const last = generalLastAnswersGroupdByQuestions[groupId];
 
-    return {
-      title: question?.text,
-      value: lastAverage,
-      differencePercentage: Math.round((lastAverage / prevAverage - 1) * 100),
-    } as StatsPollResult;
+    const lastAverage = calculatePollAnswersAverage(last);
+
+    if (prev) {
+      const prevAverage = calculatePollAnswersAverage(prev);
+
+      return {
+        title: question?.text,
+        value: lastAverage,
+        differencePercentage: Math.round((lastAverage / prevAverage - 1) * 100),
+      } as StatsPollResult;
+    } else {
+      return {
+        title: question?.text,
+        value: lastAverage,
+      };
+    }
   });
 
   // #region подсчет количества участников опроса в общем
