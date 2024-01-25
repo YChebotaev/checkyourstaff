@@ -5,6 +5,7 @@ import {
   sampleGroupsGetByAccountId,
   textFeedbackDelete,
   textFeedbackGet,
+  userSessionGetByTgUserId,
   userSessionGetByUserId,
 } from "@checkyourstaff/persistence";
 import { pollingTelegram } from "@checkyourstaff/common/telegram";
@@ -50,17 +51,17 @@ app.get<{
     },
   },
   async handler({ query }) {
-    const { valid, token, accountId } = await authVerify(query);
+    const { valid, token } = await authVerify(query);
 
     if (!valid) {
       logger.error("Auth verify hash is invalid: %s", JSON.stringify(query));
     }
 
-    return { valid, token, accountId } satisfies AuthVerifyData;
+    return { valid, token } satisfies AuthVerifyData;
   },
 });
 
-app.get("/accounts", ({ headers }) => {
+app.get("/accounts", async ({ headers }) => {
   const token = readTokenFromHeaders(headers);
 
   if (!token) {
@@ -69,9 +70,21 @@ app.get("/accounts", ({ headers }) => {
     throw new Error("Cannot read and/or parse token from headers");
   }
 
-  const { userId } = token;
+  const { tgUserId } = token;
+  const userSession = await userSessionGetByTgUserId("control", tgUserId);
 
-  return accountsGetByUserId(userId);
+  if (!userSession) {
+    logger.error(
+      "User session by tg user id = %s not found or deleted",
+      tgUserId,
+    );
+
+    throw new Error(
+      `User session by tg user id = ${tgUserId} not found or deleted`,
+    );
+  }
+
+  return accountsGetByUserId(userSession.userId);
 });
 
 app.get<{

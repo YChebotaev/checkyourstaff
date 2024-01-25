@@ -1,7 +1,11 @@
 import type { Account, SampleGroup } from "@checkyourstaff/persistence/types";
 
 export type TokenPayoad = {
-  userId: number;
+  tgUserId: number;
+  firstName: string;
+  lastName: string;
+  username: string;
+  photoUrl: string;
 };
 
 export type AccountsResp = Account[];

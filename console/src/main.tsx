@@ -30,6 +30,7 @@ import { SignInSuccessPage } from "./pages/SignInSuccessPage";
 import { SelectAccountPage } from "./pages/SelectAccountPage";
 import { getToken } from "./utils/getToken";
 import { getAccountId } from "./utils/getAccountId";
+import { setAccountId } from "./utils/setAccountId";
 // import { setAccountId } from "./utils/setAccountId";
 // import { setToken } from "./utils/setToken";
 
@@ -241,4 +242,36 @@ export const refresh = () => {
 // setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcwNTU2ODIyN30.Bxrr4BrRdwjfxoqONaNgdADL59zRCkuTjvgrhTpCYIs')
 // setAccountId(1)
 
-refresh();
+apiClient
+  .get<AccountsResp>("/accounts")
+  .then(({ data: accounts }) => {
+    const accountId = getAccountId();
+
+    /**
+     * @todo
+     * Если `accountId` нет в списке `accounts`,
+     * это значит, что пользователь потерял
+     * свой административный доступ.
+     * В этом случае должно быть
+     * перенаправление куда-то
+     */
+
+    if (accountId == null) {
+      if (accounts.length === 0) {
+        // TODO: To implement
+      } else if (accounts.length === 1) {
+        setAccountId(accounts[0].id);
+
+        window.location.href = "/stats";
+      } else {
+        window.location.href = "/selectAccount";
+      }
+    }
+
+    refresh();
+  })
+  .catch((e) => {
+    // TODO: To implement
+
+    console.error(e);
+  });

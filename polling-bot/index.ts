@@ -1,4 +1,3 @@
-import { inspect } from "node:util";
 import { deunionize } from "telegraf";
 import {
   userSessionGetByChatId,
@@ -28,8 +27,6 @@ if (!token) {
 const bot = createBot(token);
 
 bot.start(async (ctx) => {
-  console.log("ctx =", inspect(ctx, true, null));
-
   const userSession = await initializeSession({
     type: "polling",
     tgChatId: ctx.chat.id,

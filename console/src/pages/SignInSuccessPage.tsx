@@ -4,25 +4,16 @@ import { AuthVerifyData } from "@checkyourstaff/console-backend/types";
 import { useAuthVerify } from "../hooks/useAuthVerify";
 import { setToken } from "../utils/setToken";
 import { refresh } from "../main";
-import { setAccountId } from "../utils/setAccountId";
 
 export const SignInSuccessPage: FC = () => {
-  const [redirectTo, setRedirectTo] = useState<
-    "stats" | "select-account" | "failed" | null
-  >(null);
+  const [redirectTo, setRedirectTo] = useState<"stats" | "failed" | null>(null);
   useAuthVerify({
-    onSuccess: useCallback(({ valid, token, accountId }: AuthVerifyData) => {
+    onSuccess: useCallback(({ valid, token }: AuthVerifyData) => {
       if (valid) {
         if (token) {
           setToken(token);
 
           setRedirectTo("stats");
-        }
-
-        if (accountId) {
-          setAccountId(accountId);
-        } else {
-          setRedirectTo("select-account");
         }
 
         refresh();
