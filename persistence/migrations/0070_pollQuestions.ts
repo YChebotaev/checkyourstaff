@@ -14,8 +14,8 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer('textFeedbackRequestTreshold')
 
     table.boolean('deleted')
-    table.integer('createdAt')
-    table.integer('updatedAt')
+    table.bigInteger('createdAt')
+    table.bigInteger('updatedAt')
 
     table.foreign('accountId')
       .references('id')
