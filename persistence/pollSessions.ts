@@ -99,6 +99,21 @@ export const pollSessionsGetByAccountIdAndSampleGroupId = async (
   ).filter(({ deleted }) => !deleted);
 };
 
+export const pollSessionsGetLastTwoByAccountIdAndSampleGroupId = async (
+  accountId: number,
+  sampleGroupId: number,
+) => {
+  return (
+    await knex
+      .select<PollSession[]>("*")
+      .from("pollSessions")
+      .where("accountId", accountId)
+      .andWhere("sampleGroupId", sampleGroupId)
+      .limit(2)
+      .orderBy("createdAt")
+  ).filter(({ deleted }) => !deleted);
+};
+
 export const pollSessionsGetByPollId = async (pollId: number) => {
   return (
     await knex

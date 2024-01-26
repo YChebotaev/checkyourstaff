@@ -2,11 +2,11 @@ import { groupBy, last, mapValues, union } from "lodash";
 import {
   pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId,
   pollQuestionsGetByPollId,
-  pollSessionsGetByAccountIdAndSampleGroupId,
   sampleGroupsGetByAccountId,
   pollAnswersGetByAndPollSessionIdAndSampleGroupId,
   pollAnswersGetByPollSessionId,
   pollSessionsGetByAccountId,
+  pollSessionsGetLastTwoByAccountIdAndSampleGroupId,
   type PollAnswer,
   type PollQuestion,
 } from "@checkyourstaff/persistence";
@@ -17,14 +17,10 @@ const getPollSessionsByAccountIdAndSampleGroupId = async (
   accountId: number,
   sampleGroupId: number,
 ) => {
-  return (
-    await pollSessionsGetByAccountIdAndSampleGroupId(accountId, sampleGroupId)
-  ).sort((a, b) => {
-    const timeA = new Date(a.createdAt).getTime();
-    const timeB = new Date(b.createdAt).getTime();
-
-    return timeA - timeB;
-  });
+  return pollSessionsGetLastTwoByAccountIdAndSampleGroupId(
+    accountId,
+    sampleGroupId,
+  );
 };
 
 const getPollQuestions = async (pollId: number) => {
