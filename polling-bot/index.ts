@@ -9,7 +9,13 @@ import {
   type MessageMeta,
 } from "@checkyourstaff/persistence";
 import { initializeSession } from "@checkyourstaff/common/initializeSession";
-import { logger, createBot, requestPinCode, handleEnterPin } from "./lib";
+import {
+  logger,
+  createBot,
+  requestPinCode,
+  handleEnterPin,
+  launchBot,
+} from "./lib";
 
 const token = process.env["BOT_TOKEN"];
 
@@ -106,4 +112,6 @@ bot.on("message", async (ctx, next) => {
   return next();
 });
 
-bot.launch().catch((e) => logger.error(e));
+// bot.launch().catch((e) => logger.error(e));
+
+launchBot(bot).catch((e) => logger.error(e));
