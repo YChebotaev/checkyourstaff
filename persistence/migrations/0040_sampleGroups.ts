@@ -9,8 +9,8 @@ export const up = async (knex: Knex): Promise<void> =>
     table.string('name')
 
     table.boolean('deleted').nullable()
-    table.dateTime('createdAt')
-    table.dateTime('updatedAt').nullable()
+    table.integer('createdAt')
+    table.integer('updatedAt').nullable()
 
     table.foreign('accountId')
       .references('id')

@@ -10,8 +10,8 @@ export const up = async (knex: Knex): Promise<void> =>
     table.string("phone").nullable();
 
     table.boolean("deleted").nullable();
-    table.dateTime("createdAt");
-    table.dateTime("updatedAt").nullable();
+    table.integer("createdAt");
+    table.integer("updatedAt").nullable();
 
     table.foreign("sampleGroupId").references("id").inTable("sampleGroups");
 

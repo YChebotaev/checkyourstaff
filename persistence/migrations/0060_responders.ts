@@ -8,8 +8,8 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer('userId')
 
     table.boolean('deleted')
-    table.dateTime('createdAt')
-    table.dateTime('updatedAt')
+    table.integer('createdAt')
+    table.integer('updatedAt')
 
     table.foreign('sampleGroupId')
       .references('id')
