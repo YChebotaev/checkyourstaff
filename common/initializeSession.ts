@@ -22,21 +22,7 @@ export const initializeSession = async ({
   lastName?: string;
   languageCode?: string;
 }) => {
-  console.group("initializeSession");
-
-  console.log({
-    type,
-    tgChatId,
-    tgUserId,
-    username,
-    firstName,
-    lastName,
-    languageCode,
-  });
-
   let userSession = await userSessionGetByChatId("polling", tgChatId);
-
-  console.log("userSession =", userSession);
 
   if (!userSession) {
     const userId = await userCreate({
@@ -46,8 +32,6 @@ export const initializeSession = async ({
       languageCode,
     });
 
-    console.log("userId =", userId);
-
     const userSessionId = await userSessionCreate({
       type,
       userId,
@@ -55,14 +39,8 @@ export const initializeSession = async ({
       tgUserId,
     });
 
-    console.log("userSessionId =", userSessionId);
-
     userSession = await userSessionGet(userSessionId);
   }
-
-  console.log("userSession =", userSession);
-
-  console.groupEnd();
 
   return userSession!;
 };

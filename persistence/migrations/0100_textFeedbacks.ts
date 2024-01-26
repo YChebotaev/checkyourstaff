@@ -8,8 +8,8 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer("pollSessionId").nullable();
     table.integer("userId");
     table.integer("accountId");
-    table.integer("sampleGroupId");
-    table.integer("pollId");
+    table.integer("sampleGroupId").nullable();
+    table.integer("pollId").nullable();
 
     table.string("text");
 
@@ -19,6 +19,10 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.foreign("pollQuestionId").references("id").inTable("pollQuestions");
     table.foreign("pollSessionId").references("id").inTable("pollSessions");
+    table.foreign("userId").references("id").inTable("users");
+    table.foreign("accountId").references("id").inTable("accounts");
+    table.foreign("sampleGroupId").references("id").inTable("sampleGroups");
+    table.foreign("pollId").references("id").inTable("polls");
 
     table.index("pollQuestionId");
     table.index("pollSessionId");

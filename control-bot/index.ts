@@ -1,11 +1,6 @@
-import {
-  userCreate,
-  userSessionCreate,
-  userSessionGet,
-  userSessionGetByChatId,
-} from "@checkyourstaff/persistence";
 import { logger, createBot } from "./lib";
 import { Markup } from "telegraf";
+import { initializeSession } from "@checkyourstaff/common/initializeSession";
 
 const token = process.env["BOT_TOKEN"];
 const webappUrl = process.env["WEBAPP_URL"];
@@ -32,33 +27,21 @@ if (!consoleUrl) {
 const bot = createBot(token);
 
 bot.start(async (ctx, next) => {
-  let userSession = await userSessionGetByChatId("control", ctx.chat.id);
-
-  if (!userSession) {
-    const userId = await userCreate({
-      username: ctx.message.from.username,
-      firstName: ctx.message.from.first_name,
-      lastName: ctx.message.from.last_name,
-      languageCode: ctx.message.from.language_code,
-    });
-
-    const userSessionId = await userSessionCreate({
-      type: "control",
-      userId,
-      tgChatId: ctx.chat.id,
-      tgUserId: ctx.message.from.id,
-    });
-
-    userSession = await userSessionGet(userSessionId);
-  }
+  let userSession = await initializeSession({
+    type: "control",
+    tgChatId: ctx.chat.id,
+    tgUserId: ctx.from.id,
+    username: ctx.message.from.username,
+    firstName: ctx.message.from.first_name,
+    lastName: ctx.message.from.last_name,
+    languageCode: ctx.message.from.language_code,
+  });
 
   const registerURL = new URL("/register", webappUrl);
 
   registerURL.searchParams.set("fromBot", "control-bot");
   registerURL.searchParams.set("userId", String(userSession!.userId));
   registerURL.searchParams.set("tgChatId", String(ctx.chat.id));
-
-  logger.info("registerURL = %s", registerURL.toString());
 
   await ctx.sendMessage(
     "Пройдите регистрацию",

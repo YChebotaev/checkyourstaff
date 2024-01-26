@@ -1,5 +1,5 @@
-import path from 'node:path'
-import { type Knex } from 'knex'
+import path from "node:path";
+import { type Knex } from "knex";
 
 export default {
   client: 'sqlite3',

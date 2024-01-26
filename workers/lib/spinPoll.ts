@@ -50,14 +50,6 @@ export const spinPoll = async (pollId: number, sampleGroupId: number) => {
       pollId,
       accountId: poll.accountId,
       sampleGroupId,
-      /** @todo: Remove pollingState completely */
-      pollingState: responders.reduce(
-        (state, responder) =>
-          Object.assign(state, {
-            [responder.id]: pollQuestions.map(({ id }) => id),
-          }),
-        {},
-      ),
     });
     const pollSession = await pollSessionGet(pollSessionId);
 

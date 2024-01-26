@@ -8,9 +8,6 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer("pollId");
     table.integer("sampleGroupId");
 
-    /** @todo: remove */
-    table.json("pollingState");
-
     table.boolean("deleted");
     table.dateTime("createdAt");
     table.dateTime("updatedAt");

@@ -70,17 +70,11 @@ export type PollQuestion = {
   updatedAt: number | null;
 };
 
-// TODO: Remove
-export type PollingState = {
-  [k: number /* responders left ids */]: number[] /* questions left ids */;
-};
-
 export type PollSession = {
   id: number;
   pollId: number;
   accountId: number;
   sampleGroupId: number;
-  pollingState: PollingState; // TODO: Remove
   deleted: boolean;
   createdAt: number;
   updatedAt: number | null;

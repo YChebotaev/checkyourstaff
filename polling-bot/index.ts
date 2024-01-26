@@ -8,13 +8,8 @@ import {
   type ChatStatePayload,
   type MessageMeta,
 } from "@checkyourstaff/persistence";
-import {
-  logger,
-  createBot,
-  requestPinCode,
-  initializeSession,
-  handleEnterPin,
-} from "./lib";
+import { initializeSession } from "@checkyourstaff/common/initializeSession";
+import { logger, createBot, requestPinCode, handleEnterPin } from "./lib";
 
 const token = process.env["BOT_TOKEN"];
 

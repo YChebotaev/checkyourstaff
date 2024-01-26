@@ -9,7 +9,11 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer("tgChatId");
     table.integer("tgUserId");
 
-    table.json("chatState").defaultTo("noop");
+    table.json("chatState").defaultTo(
+      JSON.stringify({
+        name: "noop",
+      }),
+    );
 
     table.boolean("deleted");
     table.dateTime("createdAt");

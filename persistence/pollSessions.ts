@@ -1,24 +1,21 @@
 import { knex } from "./knex";
 import { logger } from "./logger";
-import type { PollSession, PollingState } from "./types";
+import type { PollSession } from "./types";
 
 export const pollSessionCreate = async ({
   pollId,
   accountId,
   sampleGroupId,
-  pollingState, // TODO: Remove
 }: {
   pollId: number;
   accountId: number;
   sampleGroupId: number;
-  pollingState?: PollingState; // TODO: Remove
 }) => {
   const [{ id }] = await knex
     .insert({
       pollId,
       accountId,
       sampleGroupId,
-      pollingState: pollingState ? JSON.stringify(pollingState) : null, // TODO: Remove
       createdAt: new Date().getTime(),
     })
     .into("pollSessions")
@@ -32,24 +29,6 @@ export const pollSessionCreate = async ({
   );
 
   return id as number;
-};
-
-// TODO: Remove
-export const pollSessionUpdatePollingState = async (
-  id: number,
-  updater: (pollingState: PollingState) => PollingState,
-) => {
-  const { pollingState } = await knex
-    .select("pollingState")
-    .from("pollSessions")
-    .where("id", id)
-    .first<Pick<PollSession, "pollingState">>();
-
-  await knex("pollSessions")
-    .update({
-      pollingState: JSON.stringify(updater(JSON.parse(String(pollingState)))),
-    })
-    .where("id", id);
 };
 
 export const pollSessionGet = async (id: number) => {
@@ -71,10 +50,7 @@ export const pollSessionGet = async (id: number) => {
     return;
   }
 
-  return {
-    ...pollSession,
-    pollingState: JSON.parse(String(pollSession.pollingState)), // TODO: Remove
-  } as PollSession;
+  return pollSession;
 };
 
 export const pollSessionsGetByAccountId = async (accountId: number) => {

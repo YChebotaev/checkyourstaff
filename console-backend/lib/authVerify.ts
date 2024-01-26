@@ -29,7 +29,12 @@ const createToken = (query: AuthVerifyQuery) => {
   return jwt.sign(payload, process.env["JWT_SECRET"]!);
 };
 
-export const authVerify = async (query: AuthVerifyQuery) => {
+export const authVerify = (
+  query: AuthVerifyQuery,
+): {
+  valid: boolean;
+  token?: string;
+} => {
   const valid = isValid(query);
 
   if (valid) {
