@@ -157,7 +157,10 @@ export const userSessionSetChatState = async <
   payload?: P,
 ) => {
   await knex("userSessions")
-    .update({ chatState: JSON.stringify({ name, payload }) })
+    .update({
+      chatState: JSON.stringify({ name, payload }),
+      updatedAt: new Date().getTime(),
+    })
     .where("id", id)
     .returning("id");
 };
