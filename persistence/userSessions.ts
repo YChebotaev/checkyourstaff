@@ -63,10 +63,7 @@ export const userSessionGet = async (id: number) => {
     return;
   }
 
-  return {
-    ...userSession,
-    chatState: JSON.parse(String(userSession.chatState)),
-  } as UserSession;
+  return userSession;
 };
 
 export const userSessionGetByChatId = async (
@@ -95,10 +92,7 @@ export const userSessionGetByChatId = async (
     return;
   }
 
-  return {
-    ...userSession,
-    chatState: JSON.parse(String(userSession.chatState)),
-  } as UserSession;
+  return userSession;
 };
 
 export const userSessionGetByUserId = async (userId: number) => {
@@ -123,10 +117,7 @@ export const userSessionGetByUserId = async (userId: number) => {
     return;
   }
 
-  return {
-    ...userSession,
-    chatState: JSON.parse(String(userSession.chatState)),
-  } as UserSession;
+  return userSession;
 };
 
 export const userSessionGetByTgUserId = async (
@@ -155,10 +146,7 @@ export const userSessionGetByTgUserId = async (
     return;
   }
 
-  return {
-    ...userSession,
-    chatState: JSON.parse(String(userSession.chatState)),
-  } as UserSession;
+  return userSession;
 };
 
 export const userSessionSetChatState = async <
