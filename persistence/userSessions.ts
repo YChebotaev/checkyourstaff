@@ -1,5 +1,6 @@
 import { knex } from "./knex";
 import { logger } from "./logger";
+import { maybeParse } from "./utils";
 import type {
   ChatState,
   ChatStatePayload,
@@ -63,7 +64,10 @@ export const userSessionGet = async (id: number) => {
     return;
   }
 
-  return userSession;
+  return {
+    ...userSession,
+    chatState: maybeParse(userSession.chatState),
+  } as UserSession;
 };
 
 export const userSessionGetByChatId = async (
@@ -92,7 +96,10 @@ export const userSessionGetByChatId = async (
     return;
   }
 
-  return userSession;
+  return {
+    ...userSession,
+    chatState: maybeParse(userSession.chatState),
+  } as UserSession;
 };
 
 export const userSessionGetByUserId = async (userId: number) => {
@@ -117,7 +124,10 @@ export const userSessionGetByUserId = async (userId: number) => {
     return;
   }
 
-  return userSession;
+  return {
+    ...userSession,
+    chatState: maybeParse(userSession.chatState),
+  } as UserSession;
 };
 
 export const userSessionGetByTgUserId = async (
@@ -146,7 +156,10 @@ export const userSessionGetByTgUserId = async (
     return;
   }
 
-  return userSession;
+  return {
+    ...userSession,
+    chatState: maybeParse(userSession.chatState),
+  } as UserSession;
 };
 
 export const userSessionSetChatState = async <
