@@ -91,7 +91,7 @@ export const completeRegistration = async ({
     {
       jobId: `spin-poll-${pollId}-${sampleGroupId}`,
       repeat: {
-        pattern: "0 17 * * 1-5",
+        pattern: "0 12 * * 1-5",
       },
     },
   );
