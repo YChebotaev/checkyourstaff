@@ -1,6 +1,7 @@
 checkyourstaff.ru {
 	log {
 		format console
+		output file /var/log/caddy/checkyourstaff.ru-access.log
 	}
 
 	root * /var/checkyourstaff/landing
@@ -10,6 +11,7 @@ checkyourstaff.ru {
 console.checkyourstaff.ru {
   log {
 		format console
+		output file /var/log/caddy/console.checkyourstaff.ru-access.log
 	}
 
 	root * /var/checkyourstaff/console/dist
@@ -20,6 +22,7 @@ console.checkyourstaff.ru {
 api.console.checkyourstaff.ru {
   log {
 		format console
+		output file /var/log/caddy/api.console.checkyourstaff.ru-access.log
 	}
 
   reverse_proxy http://localhost:3001
@@ -28,6 +31,7 @@ api.console.checkyourstaff.ru {
 webapp.checkyourstaff.ru {
   log {
 		format console
+		output file /var/log/caddy/webapp.checkyourstaff.ru-access.log
 	}
 
   root * /var/checkyourstaff/webapp/dist
@@ -38,6 +42,7 @@ webapp.checkyourstaff.ru {
 api.webapp.checkyourstaff.ru {
   log {
 		format console
+		output file /var/log/caddy/api.webapp.checkyourstaff.ru-access.log
 	}
 
   reverse_proxy http://localhost:3003
@@ -46,6 +51,7 @@ api.webapp.checkyourstaff.ru {
 api.pincodes.checkyourstaff.ru {
   log {
 		format console
+		output file /var/log/caddy/api.pincodes.checkyourstaff.ru-access.log
 	}
 
   reverse_proxy http://localhost:3002
@@ -54,6 +60,7 @@ api.pincodes.checkyourstaff.ru {
 pgadmin.checkyourstaff.ru {
   log {
 		format console
+		output file /var/log/caddy/pgadmin.checkyourstaff.ru-access.log
 	}
 
   reverse_proxy http://localhost:8080
