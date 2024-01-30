@@ -1,0 +1,9 @@
+console.env
+console-backend.env
+control-bot.env
+pincodes-service.env
+persistence.env
+polling-bot.env
+webapp.env
+webapp-backend.env
+workers.env

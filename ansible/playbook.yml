@@ -1,0 +1,302 @@
+---
+- name: checkyourstaff
+  hosts: checkyourstaff
+  remote_user: root
+  tasks:
+    # UFW
+    - name: Install ufw
+      ansible.builtin.apt:
+        name: ufw
+        update_cache: true
+        state: present
+    - name: Set ufw logging
+      community.general.ufw:
+        logging: on
+    - name: Enable ufw ssh
+      community.general.ufw:
+        rule: limit
+        name: OpenSSH
+    - name: Allow ufw outgoing
+      community.general.ufw:
+        state: enabled
+        direction: outgoing
+        policy: allow
+    - name: Disallow ufw incoming
+      community.general.ufw:
+        state: enabled
+        direction: incoming
+        policy: deny
+    - name: Allow ufw http traffic
+      community.general.ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+    - name: Allow ufw https traffic
+      community.general.ufw:
+        rule: allow
+        port: "443"
+        proto: tcp
+    - name: Enable ufw
+      community.general.ufw:
+        state: enabled
+    # Caddy
+    - name: Install Caddy deps
+      ansible.builtin.apt:
+        name:
+          - debian-keyring
+          - debian-archive-keyring
+          - apt-transport-https
+          - curl
+        update_cache: true
+        state: present
+    - name: Add caddy stable archive keyring
+      ansible.builtin.shell: curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    - name: Add caddy source list
+      ansible.builtin.shell: curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+      args:
+        creates: /etc/apt/sources.list.d/caddy-stable.list
+    - name: Install caddy
+      ansible.builtin.apt:
+        name: caddy
+        update_cache: true
+        state: present
+    - name: Enable caddy
+      ansible.builtin.systemd:
+        name: caddy
+        enabled: true
+    - name: Copy Caddyfile
+      ansible.builtin.copy:
+        src: files/Caddyfile
+        dest: /etc/caddy/Caddyfile
+        owner: caddy
+        group: caddy
+        mode: u=rw,g=r,o=r
+    - name: Restart caddy
+      ansible.builtin.systemd:
+        name: caddy
+        state: restarted
+    # Redis
+    - name: Install Redis
+      ansible.builtin.apt:
+        name: redis
+        update_cache: true
+        state: present
+    - name: Set redis to be supervised by systemd
+      ansible.builtin.lineinfile:
+        dest: /etc/redis/redis.conf
+        regexp: supervised
+        line: supervised systemd
+    - name: Set redis password
+      ansible.builtin.lineinfile:
+        dest: /etc/redis/redis.conf
+        regexp: "# requirepass foobared"
+        line: requirepass "{{redis_password}}"
+    - name: Restart redis
+      ansible.builtin.systemd:
+        name: caddy
+        state: restarted
+    - name: Enable redis
+      ansible.builtin.systemd:
+        name: redis-server
+        enabled: true
+    # Postgres
+    - name: Create the file repository configuration
+      ansible.builtin.shell: sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt {{ansible_distribution_release}}-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+      args:
+        creates: /etc/apt/sources.list.d/pgdg.list
+    - name: Import the repository signing key
+      ansible.builtin.shell: wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+      args:
+        creates: /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+    - name: Install Postgres
+      ansible.builtin.apt:
+        name: postgresql
+        update_cache: true
+        state: present
+    - name: Enable postgresql
+      ansible.builtin.systemd:
+        name: postgresql
+        enabled: true
+    # Databases
+    - name: Install ansible postgresql helpers deps
+      ansible.builtin.apt:
+        name:
+          - libpq-dev
+          - python3-psycopg2
+        update_cache: true
+        state: present
+    - name: Create checkyourstaff postgres user
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: checkyourstaff
+        password: "{{checkyourstaff_db_user_password}}"
+    - name: Create checkyourstaff postgres database
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: checkyourstaff
+        encoding: UTF-8
+        owner: checkyourstaff
+    - name: Create pincodes postgres user
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: pincodes
+        password: "{{pincodes_db_user_password}}"
+    - name: Create pincodes postgres database
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: pincodes
+        encoding: UTF-8
+        owner: pincodes
+    # Docker
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+    # Node
+    - name: Install node deps
+      ansible.builtin.apt:
+        name:
+          - curl
+          - software-properties-common
+        update_cache: true
+        state: present
+    - name: Add NodeSource repository
+      ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_21.x | bash -
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+    - name: Install node
+      ansible.builtin.apt:
+        name: nodejs
+        update_cache: true
+        state: present
+    - name: Install pm2
+      community.general.npm:
+        name: pm2
+        global: true
+    # Code
+    - name: Pull the code
+      ansible.builtin.git:
+        repo: https://github.com/YChebotaev/checkyourstaff.git
+        dest: /var/checkyourstaff
+    - name: Install code dependencies
+      community.general.npm:
+        path: /var/checkyourstaff
+    - name: Copy console .env
+      ansible.builtin.copy:
+        src: files/console.env
+        dest: /var/checkyourstaff/console/.env
+    - name: Copy console-backend .env
+      ansible.builtin.copy:
+        src: files/console-backend.env
+        dest: /var/checkyourstaff/console-backend/.env
+    - name: Copy control-bot .env
+      ansible.builtin.copy:
+        src: files/control-bot.env
+        dest: /var/checkyourstaff/control-bot/.env
+    - name: Copy persistence .env
+      ansible.builtin.copy:
+        src: files/persistence.env
+        dest: /var/checkyourstaff/persistence/.env
+    - name: Copy polling-bot .env
+      ansible.builtin.copy:
+        src: files/polling-bot.env
+        dest: /var/checkyourstaff/polling-bot/.env
+    - name: Copy webapp .env
+      ansible.builtin.copy:
+        src: files/webapp.env
+        dest: /var/checkyourstaff/webapp/.env
+    - name: Copy webapp-backend .env
+      ansible.builtin.copy:
+        src: files/webapp-backend.env
+        dest: /var/checkyourstaff/webapp-backend/.env
+    - name: Copy workers .env
+      ansible.builtin.copy:
+        src: files/workers.env
+        dest: /var/checkyourstaff/workers/.env
+    - name: Copy pincodes-service .env
+      ansible.builtin.copy:
+        src: files/pincodes-service.env
+        dest: /var/checkyourstaff/pincodes-service/.env
+    - name: build console
+      ansible.builtin.shell:
+        cmd: npm run build
+        chdir: /var/checkyourstaff/console
+        creates: /var/checkyourstaff/console/dist/index.html
+    - name: build webapp
+      ansible.builtin.shell:
+        cmd: npm run build
+        chdir: /var/checkyourstaff/webapp
+        creates: /var/checkyourstaff/webapp/dist/index.html
+    # Database migrations
+    - name: Migrate persistence
+      ansible.builtin.shell:
+        cmd: npm run migrate:latest
+        chdir: /var/checkyourstaff/persistence
+    - name: Migrate pincodes
+      ansible.builtin.shell:
+        cmd: npm run migrate:latest
+        chdir: /var/checkyourstaff/pincodes-service
+    - name: Seed pincodes
+      ansible.builtin.shell:
+        cmd: npm run seed:run
+        chdir: /var/checkyourstaff/pincodes-service
+    # Start everything
+    - name: Start console-backend
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name console-backend -- start
+        chdir: /var/checkyourstaff/console-backend
+    - name: Start control-bot
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name control-bot -- start
+        chdir: /var/checkyourstaff/control-bot
+    - name: Start polling-bot
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name polling-bot -- start
+        chdir: /var/checkyourstaff/polling-bot
+    - name: Start webapp-backend
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name webapp-backend -- start
+        chdir: /var/checkyourstaff/webapp-backend
+    - name: Start workers
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name workers -- start
+        chdir: /var/checkyourstaff/workers
+    - name: Start pincodes-service
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name pincodes-service -- start
+        chdir: /var/checkyourstaff/pincodes-service
+    - name: pm2 save
+      ansible.builtin.shell:
+        cmd: pm2 save
+    # PgAdmin
+    - name: Install docker python library
+      ansible.builtin.apt:
+        name: python3-docker
+        update_cache: true
+        state: present
+    - name: Install pgadmin docker image
+      community.docker.docker_container:
+        name: pgadmin
+        image: dpage/pgadmin4
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "127.0.0.1:8080:80"
+        env:
+          PGADMIN_DEFAULT_EMAIL: yury.79120345101@gmail.com
+          PGADMIN_DEFAULT_PASSWORD: "{{pgadmin_default_password}}"
