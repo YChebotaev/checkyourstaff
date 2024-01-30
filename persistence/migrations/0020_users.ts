@@ -14,7 +14,7 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.boolean("deleted").nullable();
     table.bigInteger("createdAt");
-    table.integer("updatedAt").nullable();
+    table.bigInteger("updatedAt").nullable();
   });
 
 export const down = async (knex: Knex): Promise<void> =>

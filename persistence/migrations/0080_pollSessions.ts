@@ -10,7 +10,7 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.boolean("deleted");
     table.bigInteger("createdAt");
-    table.integer("updatedAt");
+    table.bigInteger("updatedAt");
 
     table.foreign("accountId").references("id").inTable("accounts");
     table.foreign("pollId").references("id").inTable("polls");

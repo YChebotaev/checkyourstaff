@@ -11,7 +11,7 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.boolean("deleted").nullable();
     table.bigInteger("createdAt");
-    table.integer("updatedAt").nullable();
+    table.bigInteger("updatedAt").nullable();
 
     table.foreign("sampleGroupId").references("id").inTable("sampleGroups");
 
