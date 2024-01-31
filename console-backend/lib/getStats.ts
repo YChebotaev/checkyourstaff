@@ -1,4 +1,5 @@
 import { groupBy, last, mapValues, union } from "lodash";
+import plural from "plural-ru";
 import {
   pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId,
   pollQuestionsGetByPollId,
@@ -25,6 +26,10 @@ const getPollSessionsByAccountIdAndSampleGroupId = async (
 
 const getPollQuestions = async (pollId: number) => {
   return (await pollQuestionsGetByPollId(pollId)).sort((a, b) => a.id - b.id);
+};
+
+const pluralizeEmployees = (count: number) => {
+  return plural(count, "Сотрудник", "Сотрудника", "Сотрудников");
 };
 
 export const getStats = async ({ accountId }: { accountId: number }) => {
@@ -158,19 +163,19 @@ export const getStats = async ({ accountId }: { accountId: number }) => {
         const prevCount = prevPollAnswers.length / pollQuestions.length;
 
         group.values.push({
-          title: "Сотрудников",
+          title: pluralizeEmployees(lastCount),
           value: lastCount,
           differencePercentage: Math.round((lastCount / prevCount - 1) * 100),
         });
       } else {
         group.values.push({
-          title: "Сотрудников",
+          title: pluralizeEmployees(lastCount),
           value: lastCount,
         });
       }
     } else {
       group.values.push({
-        title: "Сотрудников",
+        title: pluralizeEmployees(0),
         value: 0,
       });
     }
@@ -235,19 +240,19 @@ export const getStats = async ({ accountId }: { accountId: number }) => {
       const prevCount = prevPollAnswers.length / pollQuestions.length;
 
       general.push({
-        title: "Сотрудников",
+        title: pluralizeEmployees(lastCount),
         value: lastCount,
         differencePercentage: Math.round((lastCount / prevCount - 1) * 100),
       });
     } else {
       general.push({
-        title: "Сотрудников",
+        title: pluralizeEmployees(lastCount),
         value: lastCount,
       });
     }
   } else {
     general.push({
-      title: "Сотрудников",
+      title: pluralizeEmployees(0),
       value: 0,
     });
   }
