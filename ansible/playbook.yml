@@ -88,11 +88,6 @@
         dest: /etc/redis/redis.conf
         regexp: supervised
         line: supervised systemd
-    - name: Set redis password
-      ansible.builtin.lineinfile:
-        dest: /etc/redis/redis.conf
-        regexp: "# requirepass foobared"
-        line: requirepass "{{redis_password}}"
     - name: Restart redis
       ansible.builtin.systemd:
         name: caddy
