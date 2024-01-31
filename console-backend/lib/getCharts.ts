@@ -22,7 +22,7 @@ export const getCharts = async ({
       await pollSessionsGetByAccountIdAndSampleGroupId(accountId, sampleGroupId)
     )
       .sort((a, b) => {
-        return a.createdAt - b.createdAt;
+        return Number(a.createdAt) - Number(b.createdAt);
       })
       .map(async (pollSession) => {
         const pollQuestions = await pollQuestionsGetByPollId(
@@ -30,7 +30,7 @@ export const getCharts = async ({
         );
 
         return {
-          date: new Date(pollSession.createdAt).toISOString(),
+          date: new Date(Number(pollSession.createdAt)).toISOString(),
           values: await Promise.all(
             pollQuestions.map(async (pollQuestion) => {
               const pollAnswers =

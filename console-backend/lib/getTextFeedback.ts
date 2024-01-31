@@ -33,7 +33,7 @@ export const getTextFeedback = async ({ accountId }: { accountId: number }) => {
 
       const value: TextFeedbackValue = {
         id: textFeedback.id,
-        date: new Date(textFeedback.createdAt).toISOString(),
+        date: new Date(Number(textFeedback.createdAt)).toISOString(),
         text: textFeedback.text,
         question: pollQuestion?.text,
         score: pollAnswers.find(
