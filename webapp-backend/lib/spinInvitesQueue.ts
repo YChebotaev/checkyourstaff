@@ -1,3 +1,6 @@
-import { Queue } from 'bullmq'
+import { Queue } from "bullmq";
+import { redisConnection } from "@checkyourstaff/common/redisConnection";
 
-export const spinInvitesQueue = new Queue("spin-invites");
+export const spinInvitesQueue = new Queue("spin-invites", {
+  connection: redisConnection,
+});

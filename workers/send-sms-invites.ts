@@ -1,5 +1,6 @@
 import { DelayedError, UnrecoverableError, Worker } from "bullmq";
 import { addHours } from "date-fns";
+import { redisConnection } from "@checkyourstaff/common/redisConnection";
 import { logger, sendSMSInvite } from "./lib";
 
 export const sendSMSInviteWorker = new Worker<
@@ -38,9 +39,6 @@ export const sendSMSInviteWorker = new Worker<
     }
   },
   {
-    connection: {
-      host: "localhost",
-      port: 6379,
-    },
+    connection: redisConnection,
   },
 );

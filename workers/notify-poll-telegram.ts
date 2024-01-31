@@ -1,4 +1,5 @@
 import { UnrecoverableError, Worker } from "bullmq";
+import { redisConnection } from '@checkyourstaff/common/redisConnection'
 import { logger, notifyPollTelegram } from "./lib";
 
 export const notifyPollTelegramWorker = new Worker<
@@ -30,9 +31,6 @@ export const notifyPollTelegramWorker = new Worker<
     }
   },
   {
-    connection: {
-      host: "localhost",
-      port: 6379,
-    },
+    connection: redisConnection,
   },
 );

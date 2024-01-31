@@ -1,6 +1,7 @@
 import { Queue } from "bullmq";
+import { redisConnection } from "@checkyourstaff/common/redisConnection";
 
-const spinPollsQueue = new Queue("spin-polls");
+const spinPollsQueue = new Queue("spin-polls", { connection: redisConnection });
 
 spinPollsQueue
   .add("spin-poll", {

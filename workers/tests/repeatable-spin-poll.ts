@@ -1,6 +1,7 @@
 import { Queue } from "bullmq";
+import { redisConnection } from "@checkyourstaff/common/redisConnection";
 
-const spinPollsQueue = new Queue("spin-polls");
+const spinPollsQueue = new Queue("spin-polls", { connection: redisConnection });
 
 spinPollsQueue
   .add(
@@ -10,7 +11,7 @@ spinPollsQueue
       sampleGroupId: 2,
     },
     {
-      jobId: 'second',
+      jobId: "second",
       repeat: {
         pattern: "* * * * *",
       },

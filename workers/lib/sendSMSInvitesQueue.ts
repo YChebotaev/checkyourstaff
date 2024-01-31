@@ -1,3 +1,6 @@
-import { Queue } from 'bullmq'
+import { Queue } from "bullmq";
+import { redisConnection } from "@checkyourstaff/common/redisConnection";
 
-export const sendSMSInvitesQueue = new Queue("send-sms-invites");
+export const sendSMSInvitesQueue = new Queue("send-sms-invites", {
+  connection: redisConnection,
+});

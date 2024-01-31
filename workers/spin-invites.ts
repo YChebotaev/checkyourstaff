@@ -1,4 +1,5 @@
 import { UnrecoverableError, Worker } from "bullmq";
+import { redisConnection } from "@checkyourstaff/common/redisConnection";
 import { logger, sendInvite } from "./lib";
 
 export const spinInvitesWorker = new Worker<
@@ -24,9 +25,6 @@ export const spinInvitesWorker = new Worker<
     }
   },
   {
-    connection: {
-      host: "localhost",
-      port: 6379,
-    },
+    connection: redisConnection,
   },
 );
