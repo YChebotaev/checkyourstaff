@@ -1,4 +1,5 @@
 import { Knex } from "knex";
+import { ChatState, ChatStateType } from "../types";
 
 export const up = async (knex: Knex): Promise<void> =>
   knex.schema.createTable("userSessions", (table) => {
@@ -11,8 +12,8 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.json("chatState").defaultTo(
       JSON.stringify({
-        name: "noop",
-      }),
+        name: "init",
+      } satisfies ChatState),
     );
 
     table.boolean("deleted");

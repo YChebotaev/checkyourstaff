@@ -3,10 +3,15 @@ import {
   userSessionGetByChatId,
   userSessionSetChatState,
   messageMetaGetByChatId,
+  sampleGroupsGetByUserId,
+  userSessionGetByTgUserId,
+  sampleGroupGet,
   type ChatStateType,
   type MessageMetaTypes,
   type ChatStatePayload,
   type MessageMeta,
+  textFeedbackCreate,
+  messageMetaDelete,
 } from "@checkyourstaff/persistence";
 import { initializeSession } from "@checkyourstaff/common/initializeSession";
 import {
@@ -15,6 +20,9 @@ import {
   requestPinCode,
   handleEnterPin,
   launchBot,
+  requestInitFreeFormFeedback,
+  requestEnterFreeFormFeedback,
+  requestSelectSampleGroupIdForFreeFormFeedback,
 } from "./lib";
 
 const token = process.env["BOT_TOKEN"];
@@ -41,6 +49,79 @@ bot.start(async (ctx) => {
   await requestPinCode(ctx.telegram, ctx.chat.id, userSession.id);
 });
 
+const freeFormFeedbackCallbackQueryRegexp = /\/fff\?t=(\d+)(?:\&sg=(\d+))?/;
+
+bot.inlineQuery(freeFormFeedbackCallbackQueryRegexp, async (ctx) => {
+  const m = ctx.inlineQuery.query.match(freeFormFeedbackCallbackQueryRegexp);
+
+  if (!m) {
+    return;
+  }
+
+  const type = m[1] as "0" | "1";
+  const sampleGroupIdStr = m[2] as string | "choose" | undefined;
+
+  switch (type) {
+    case "0" /* Sample group feedback */: {
+      const userSession = await userSessionGetByTgUserId(
+        "polling",
+        ctx.inlineQuery.from.id,
+      );
+
+      if (!userSession) {
+        logger.error(
+          "Can't find user session by tg user id = %s",
+          ctx.inlineQuery.from.id,
+        );
+
+        return;
+      }
+
+      if (sampleGroupIdStr == null) {
+        // Then, type must be 1
+
+        logger.error(
+          "Free form feedback callback query's type not match with sampleGroupId = undefined",
+        );
+
+        return;
+      } else if (sampleGroupIdStr === "choose") {
+        await requestSelectSampleGroupIdForFreeFormFeedback(
+          ctx.telegram,
+          ctx.inlineQuery.from.id, // TODO: Only applicable for private chats
+          userSession.userId,
+        );
+      } else if (!Number.isNaN(parseInt(sampleGroupIdStr))) {
+        const sampleGroupId = Number(sampleGroupIdStr);
+        const sampleGroup = await sampleGroupGet(sampleGroupId);
+
+        if (!sampleGroup) {
+          logger.error(
+            "Sample group with id = %s not found or deleted",
+            sampleGroupId,
+          );
+
+          return;
+        }
+
+        await requestEnterFreeFormFeedback(ctx.telegram, {
+          tgChatId: userSession.tgChatId,
+          userId: userSession.userId,
+          accountId: sampleGroup.accountId,
+          sampleGroupId: sampleGroup.id,
+          userSessionId: userSession.id,
+        });
+      }
+
+      break;
+    }
+    case "1" /* Developer's feedback */: {
+      // TODO: To implement
+      break;
+    }
+  }
+});
+
 bot.on("message", async (ctx, next) => {
   const userSession = await userSessionGetByChatId("polling", ctx.chat.id);
   const replyToMessageId = deunionize(ctx.message).reply_to_message?.message_id;
@@ -51,8 +132,6 @@ bot.on("message", async (ctx, next) => {
 
     return next();
   }
-
-  await userSessionSetChatState(userSession.id, "noop");
 
   if (!text) {
     logger.error("Message with id = %s has no text", ctx.message.message_id);
@@ -66,9 +145,42 @@ bot.on("message", async (ctx, next) => {
   ) => {
     switch (action) {
       case "noop": {
-        logger.info("Message received in noop state: text = %s", text);
+        // Do nothing
 
-        break;
+        return false; // Don't move to init
+      }
+      case "init": {
+        logger.info("Message received in init state: text = %s", text);
+
+        const sampleGroups = await sampleGroupsGetByUserId(userSession.userId);
+
+        if (sampleGroups.length === 1) {
+          await requestInitFreeFormFeedback(
+            ctx.telegram,
+            ctx.chat.id,
+            sampleGroups[0].id,
+          );
+        } else {
+          await requestInitFreeFormFeedback(
+            ctx.telegram,
+            ctx.chat.id,
+            "choose",
+          );
+        }
+
+        await userSessionSetChatState(userSession.id, "noop");
+
+        return false; // Don't move to init
+      }
+      case "enter-free-form-feedback": {
+        await textFeedbackCreate({
+          userId: payload.userId,
+          accountId: payload.accountId,
+          sampleGroupId: payload.sampleGroupId,
+          text,
+        });
+
+        return true; // Move to init
       }
       case "enter-pin": {
         logger.info("Enter-pin action invoked");
@@ -81,7 +193,7 @@ bot.on("message", async (ctx, next) => {
           userSession.id,
         );
 
-        break;
+        return true; // Move to init
       }
     }
   };
@@ -101,17 +213,23 @@ bot.on("message", async (ctx, next) => {
       return next();
     }
 
-    await handleInput(originMessageMeta.type, originMessageMeta);
+    const result = await handleInput(originMessageMeta.type, originMessageMeta);
+
+    if (result != null && result) {
+      await messageMetaDelete(originMessageMeta.id);
+    }
   } else {
-    await handleInput(
+    const result = await handleInput(
       userSession.chatState.name,
       userSession.chatState.payload,
     );
+
+    if (result != null && result) {
+      await userSessionSetChatState(userSession.id, "init");
+    }
   }
 
   return next();
 });
-
-// bot.launch().catch((e) => logger.error(e));
 
 launchBot(bot).catch((e) => logger.error(e));

@@ -92,6 +92,15 @@ export const responderGetBySampleGroupIdAndUserId = async (
   return responder;
 };
 
+export const respondersGetByUserId = async (userId: number) => {
+  return (
+    await knex
+      .select<Responder[]>("*")
+      .from("responders")
+      .where("userId", userId)
+  ).filter(({ deleted }) => !deleted);
+};
+
 export const responderDelete = async (id: number) => {
   await knex("responders")
     .update({

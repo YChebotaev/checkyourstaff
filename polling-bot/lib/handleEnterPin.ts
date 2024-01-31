@@ -38,6 +38,6 @@ export const handleEnterPin = async (
   } catch (e) {
     logger.error(e);
   } finally {
-    await userSessionSetChatState(userSessionId, "noop");
+    await userSessionSetChatState(userSessionId, "init");
   }
 };

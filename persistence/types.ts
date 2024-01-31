@@ -128,15 +128,7 @@ export type PinCode = {
   updatedAt: number | null;
 };
 
-export type MessageMetaTypes =
-  | "enter-pin"
-  | "enter-account-name"
-  | "enter-group-name"
-  | "invite-user"
-  | "enter-questionary-name"
-  | "enter-question-text"
-  | "enter-text-feedback"
-  | "enter-final-feedback";
+export type MessageMetaTypes = "enter-pin" | "enter-free-form-feedback";
 
 export type MessageMeta = {
   id: number;
@@ -155,7 +147,11 @@ export type MessageMeta = {
   updatedAt: number | null;
 };
 
-export type ChatStateType = "noop" | "enter-pin";
+export type ChatStateType =
+  | "init"
+  | "noop"
+  | "enter-pin"
+  | "enter-free-form-feedback";
 
 export type ChatStatePayload = any;
 

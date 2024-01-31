@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 export const DEFAULT_CHAT_STATE: ChatState = {
-  name: "noop",
+  name: "init",
 };
 
 export const userSessionCreate = async <
