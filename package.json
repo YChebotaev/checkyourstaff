@@ -21,6 +21,7 @@
     "zx": "^7.2.3"
   },
   "scripts": {
+    "bootstrap-dev": "zx ./bootstrap-dev",
     "lines-count": "git ls-files | xargs wc -l #11756"
   }
 }
