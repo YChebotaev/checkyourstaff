@@ -1,38 +1,40 @@
+// @ts-nocheck
+
 import pino from "pino";
-// import pinoElasticsearch from "pino-elasticsearch";
-// import { multistream } from "pino-multi-stream";
+import pinoElasticsearch from "pino-elasticsearch";
+import { multistream } from "pino-multi-stream";
+import { HttpConnection } from "@elastic/elasticsearch";
 
-// const username = process.env["OPENOBSERVE_USERNAME"];
-// const password = process.env["OPENOBSERVE_PASSWORD"];
+const username = process.env["OO_USERNAME"];
+const password = process.env["OO_PASSWORD"];
 
-// if (!username || !password) {
-//   console.error(
-//     "Both OPENOBSERVE_USERNAME and OPENOBSERVE_PASSWORD environment variables must be set",
-//   );
+class Connection extends HttpConnection {
+  request(...args: any[]) {
+    args[0].path = `/api/default${args[0].path}`;
 
-//   process.exit(1);
-// }
+    return super.request.apply(this, args);
+  }
+}
 
 export const createLogger = (name: string) => {
-  // const streamToOpenObserve = pinoElasticsearch({
-  //   index,
-  //   node: "http://localhost:5080/api/default/",
-  //   esVersion: 7,
-  //   flushBytes: 1000,
-  //   auth: {
-  //     username,
-  //     password,
-  //   },
-  // });
+  const streamToOpenObserve = pinoElasticsearch({
+    index: name,
+    node: "http://localhost:5080",
+    esVersion: 7,
+    flushBytes: 100,
+    auth: {
+      username,
+      password,
+    },
+    Connection,
+  });
 
-  // return pino(
-  //   { level: "info" },
-  //   multistream([
-  //     { stream: streamToOpenObserve },
-  //     { stream: process.stdout, level: "info" },
-  //     { stream: process.stderr, level: "error" },
-  //   ]),
-  // );
-
-  return pino({ name });
+  return pino(
+    { level: "info" },
+    multistream([
+      { stream: streamToOpenObserve },
+      { stream: process.stdout, level: "info" },
+      { stream: process.stderr, level: "error" },
+    ]),
+  );
 };

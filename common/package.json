@@ -5,6 +5,7 @@
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
+    "@elastic/elasticsearch": "^8.12.0",
     "pino": "^8.17.2",
     "pino-elasticsearch": "^8.0.0",
     "pino-multi-stream": "^6.0.0"
