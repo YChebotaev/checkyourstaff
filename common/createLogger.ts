@@ -8,33 +8,37 @@ import { HttpConnection } from "@elastic/elasticsearch";
 const username = process.env["OO_USERNAME"];
 const password = process.env["OO_PASSWORD"];
 
-class Connection extends HttpConnection {
-  request(...args: any[]) {
-    args[0].path = `/api/default${args[0].path}`;
-
-    return super.request.apply(this, args);
-  }
-}
-
 export const createLogger = (name: string) => {
-  const streamToOpenObserve = pinoElasticsearch({
-    index: name,
-    node: "http://localhost:5080",
-    esVersion: 7,
-    flushBytes: 100,
-    auth: {
-      username,
-      password,
-    },
-    Connection,
-  });
+  if (username && password) {
+    class Connection extends HttpConnection {
+      request(...args: any[]) {
+        args[0].path = `/api/default${args[0].path}`;
 
-  return pino(
-    { level: "info" },
-    multistream([
-      { stream: streamToOpenObserve },
-      { stream: process.stdout, level: "info" },
-      { stream: process.stderr, level: "error" },
-    ]),
-  );
+        return super.request.apply(this, args);
+      }
+    }
+
+    const streamToOpenObserve = pinoElasticsearch({
+      index: name,
+      node: "https://localhost:5080",
+      esVersion: 7,
+      flushBytes: 100,
+      auth: {
+        username,
+        password,
+      },
+      Connection,
+    });
+
+    return pino(
+      { name },
+      multistream([
+        { stream: streamToOpenObserve },
+        { stream: process.stdout, level: "info" },
+        { stream: process.stderr, level: "error" },
+      ]),
+    );
+  } else {
+    return pino({ name });
+  }
 };
