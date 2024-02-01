@@ -65,3 +65,12 @@ pgadmin.checkyourstaff.ru {
 
   reverse_proxy http://localhost:8080
 }
+
+openobserve.checkyourstaff.ru {
+	log {
+		format console
+		output file /var/log/caddy/openobserve.checkyourstaff.ru-access.log
+	}
+
+  reverse_proxy http://localhost:5080
+}

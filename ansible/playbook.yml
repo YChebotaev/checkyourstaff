@@ -148,20 +148,6 @@
         name: pincodes
         encoding: UTF-8
         owner: pincodes
-    # Docker
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
-        state: present
-    - name: Update apt and install docker-ce
-      apt:
-        name: docker-ce
-        state: latest
-        update_cache: true
     # Node
     - name: Install node deps
       ansible.builtin.apt:
@@ -278,12 +264,26 @@
     - name: pm2 save
       ansible.builtin.shell:
         cmd: pm2 save
-    # PgAdmin
+    # Docker
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
     - name: Install docker python library
       ansible.builtin.apt:
         name: python3-docker
         update_cache: true
         state: present
+    # PgAdmin
     - name: Install pgadmin docker image
       community.docker.docker_container:
         name: pgadmin
@@ -295,3 +295,15 @@
         env:
           PGADMIN_DEFAULT_EMAIL: yury.79120345101@gmail.com
           PGADMIN_DEFAULT_PASSWORD: "{{pgadmin_default_password}}"
+    # OpenObserve
+    - name: Instal OpenObserve docker image
+      community.docker.docker_container:
+        name: openobserve
+        image: public.ecr.aws/zinclabs/openobserve:latest
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "127.0.0.1:5080:5080"
+        env:
+          ZO_ROOT_USER_EMAIL: yury.79120345101@gmail.com
+          ZO_ROOT_USER_PASSWORD: "{{openobserve_default_password}}"
