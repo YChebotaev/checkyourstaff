@@ -20,7 +20,7 @@ export const createLogger = (name: string) => {
 
     const streamToOpenObserve = pinoElasticsearch({
       index: name,
-      node: "https://localhost:5080",
+      node: "http://localhost:5080",
       esVersion: 7,
       flushBytes: 100,
       auth: {
