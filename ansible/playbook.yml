@@ -90,7 +90,7 @@
         line: supervised systemd
     - name: Restart redis
       ansible.builtin.systemd:
-        name: caddy
+        name: redis
         state: restarted
     - name: Enable redis
       ansible.builtin.systemd:
