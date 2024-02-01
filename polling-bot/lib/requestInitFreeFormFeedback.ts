@@ -9,11 +9,13 @@ export const requestInitFreeFormFeedback = async (
     tgChatId,
     "Вы хотите оставить фидбек о работе чата, или сообщить сведения руководству?",
     Markup.inlineKeyboard([
-      Markup.button.callback(
-        "Сообщить сведения руководству",
-        `/fff?t=0&sg=${sampleGroupId}`,
-      ),
-      Markup.button.callback("Оставить фидбек о работе чата", `/fff?t=1`),
+      [
+        Markup.button.callback(
+          "Сообщить сведения руководству",
+          `/fff?t=0&sg=${sampleGroupId}`,
+        ),
+        Markup.button.callback("Оставить фидбек о работе чата", `/fff?t=1`),
+      ],
     ]),
   );
 };

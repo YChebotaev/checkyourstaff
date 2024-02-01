@@ -51,8 +51,10 @@ bot.start(async (ctx) => {
 
 const freeFormFeedbackCallbackQueryRegexp = /\/fff\?t=(\d+)(?:\&sg=(\d+))?/;
 
-bot.inlineQuery(freeFormFeedbackCallbackQueryRegexp, async (ctx) => {
-  const m = ctx.inlineQuery.query.match(freeFormFeedbackCallbackQueryRegexp);
+bot.on("callback_query", async (ctx, next) => {
+  const m = deunionize(ctx.callbackQuery).data?.match(
+    freeFormFeedbackCallbackQueryRegexp,
+  );
 
   if (!m) {
     return;
@@ -65,13 +67,13 @@ bot.inlineQuery(freeFormFeedbackCallbackQueryRegexp, async (ctx) => {
     case "0" /* Sample group feedback */: {
       const userSession = await userSessionGetByTgUserId(
         "polling",
-        ctx.inlineQuery.from.id,
+        ctx.callbackQuery.from.id,
       );
 
       if (!userSession) {
         logger.error(
           "Can't find user session by tg user id = %s",
-          ctx.inlineQuery.from.id,
+          ctx.callbackQuery.from.id,
         );
 
         return;
@@ -88,7 +90,7 @@ bot.inlineQuery(freeFormFeedbackCallbackQueryRegexp, async (ctx) => {
       } else if (sampleGroupIdStr === "choose") {
         await requestSelectSampleGroupIdForFreeFormFeedback(
           ctx.telegram,
-          ctx.inlineQuery.from.id, // TODO: Only applicable for private chats
+          ctx.callbackQuery.from.id, // TODO: Only applicable for private chats
           userSession.userId,
         );
       } else if (!Number.isNaN(parseInt(sampleGroupIdStr))) {
