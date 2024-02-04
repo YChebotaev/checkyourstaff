@@ -1,0 +1,8 @@
+checkyourstaff:
+  hosts:
+    <your_host>:
+      redis_password:
+      checkyourstaff_db_user_password:
+      pincodes_db_user_password:
+      pgadmin_default_password:
+      openobserve_default_password:
