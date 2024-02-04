@@ -10,7 +10,9 @@
     "migrate:up": "knex migrate:up --knexfile ./knexfile.ts",
     "migrate:latest": "knex migrate:latest --knexfile ./knexfile.ts",
     "migrate:down": "knex migrate:down --knexfile ./knexfile.ts",
-    "seed:make": "knex seed:make $1 --knexfile ./knexfile.ts -x ts"
+    "migrate:rollback": "knex migrate:rollback --knexfile ./knexfile.ts",
+    "seed:make": "knex seed:make $1 --knexfile ./knexfile.ts -x ts",
+    "reload:db": "npm run migrate:rollback --all && npm run migrate:latest"
   },
   "dependencies": {
     "dotenv": "^16.4.1",

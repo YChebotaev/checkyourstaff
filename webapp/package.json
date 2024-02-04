@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.2.0",
   "type": "module",
+  "author": "YChebotaev <yury.79120345101@gmail.com>",
+  "license": "Unlicense",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

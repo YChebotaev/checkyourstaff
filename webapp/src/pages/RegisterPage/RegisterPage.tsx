@@ -7,9 +7,9 @@ import {
 } from "@checkyourstaff/common/parseContactsList";
 import { useApiClient } from "../../hooks/useApiClient";
 import { AppLayout } from "../../layouts/AppLayout";
-import { FirstStep } from "./FirstStep";
-import { SecondStep } from "./SecodStep";
-import { ThirdStep } from "./ThirdStep";
+import { RegisterCompany } from "./RegisterCompany";
+import { InviteMembers } from "./InviteMembers";
+import { EverythingOk } from "./EverythingOk";
 import { Text } from "../../components/Text";
 import { BullseyeLayout } from "../../layouts/BullseyeLayout";
 import { useCloudStorageItem } from "../../hooks/useCloudStorageItem";
@@ -33,7 +33,9 @@ export const RegisterPage: FC = () => {
   const userId = searchParams.get("userId");
 
   // DEBUG ONLY:
-  Telegram.WebApp.CloudStorage.removeItem(`registration_complete_${tgChatId}_${userId}`)
+  Telegram.WebApp.CloudStorage.removeItem(
+    `registration_complete_${tgChatId}_${userId}`,
+  );
 
   const [registrationComplete, setRegistrationComplete] = useCloudStorageItem(
     `registration_complete_${tgChatId}_${userId}`,
@@ -81,14 +83,14 @@ export const RegisterPage: FC = () => {
   return (
     <AppLayout>
       {step === 1 && (
-        <FirstStep
+        <RegisterCompany
           onChangeName={setName}
           completeDisabled={name == ""}
           onComplete={() => setStep(2)}
         />
       )}
       {step === 2 && (
-        <SecondStep
+        <InviteMembers
           onChangeGroupName={setGroupName}
           onChangeList={setList}
           completeDisabled={groupName == "" || !isListValid(list)}
@@ -97,7 +99,7 @@ export const RegisterPage: FC = () => {
         />
       )}
       {step === 3 && (
-        <ThirdStep
+        <EverythingOk
           name={name}
           groupName={groupName}
           contacts={parseContactsList(list)}

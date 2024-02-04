@@ -70,7 +70,7 @@ export const userSessionGet = async (id: number) => {
   } as UserSession;
 };
 
-export const userSessionGetByChatId = async (
+export const userSessionGetByTgChatId = async (
   type: UserSessionType,
   tgChatId: number,
 ) => {

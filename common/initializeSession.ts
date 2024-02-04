@@ -1,5 +1,5 @@
 import {
-  userSessionGetByChatId,
+  userSessionGetByTgChatId,
   userCreate,
   userSessionCreate,
   userSessionGet,
@@ -22,7 +22,7 @@ export const initializeSession = async ({
   lastName?: string;
   languageCode?: string;
 }) => {
-  let userSession = await userSessionGetByChatId("polling", tgChatId);
+  let userSession = await userSessionGetByTgChatId(type, tgChatId);
 
   if (!userSession) {
     const userId = await userCreate({

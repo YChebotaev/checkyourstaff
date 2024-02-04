@@ -15,12 +15,16 @@
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/yargs": "^17.0.32",
     "nodemon": "^3.0.1"
   },
   "dependencies": {
+    "dotenv": "^16.4.1",
+    "yargs": "^17.7.2",
     "zx": "^7.2.3"
   },
   "scripts": {
+    "force-start-poll-session": "ts-node scripts/force-start-poll-session.ts",
     "bootstrap-dev": "zx ./bootstrap-dev",
     "lines-count": "git ls-files | xargs wc -l #11756"
   }

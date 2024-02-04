@@ -12,15 +12,17 @@ import { logger } from "./logger";
 import { notifyPollTelegramQueue } from "./notifyPollTelegramQueue";
 import { createPollSessionURL } from "./generatePollSessionURL";
 
-const webappUrl = process.env["WEBAPP_URL"];
+export const spinPoll = async (
+  pollId: number,
+  sampleGroupId: number,
+  webappUrl = process.env["WEBAPP_URL"],
+) => {
+  if (!webappUrl) {
+    logger.fatal("WEBAPP_URL environment variable must be provided");
 
-if (!webappUrl) {
-  logger.fatal("WEBAPP_URL environment variable must be provided");
+    throw new Error("WEBAPP_URL environment variable must be provided");
+  }
 
-  process.exit(1);
-}
-
-export const spinPoll = async (pollId: number, sampleGroupId: number) => {
   const poll = await pollGet(pollId);
   const sampleGroup = await sampleGroupGet(sampleGroupId);
   const responders = await respondersGetBySampleGroupId(sampleGroupId);

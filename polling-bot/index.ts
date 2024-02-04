@@ -1,6 +1,6 @@
 import { deunionize } from "telegraf";
 import {
-  userSessionGetByChatId,
+  userSessionGetByTgChatId,
   userSessionSetChatState,
   messageMetaGetByChatId,
   sampleGroupsGetByUserId,
@@ -125,7 +125,7 @@ bot.on("callback_query", async (ctx, next) => {
 });
 
 bot.on("message", async (ctx, next) => {
-  const userSession = await userSessionGetByChatId("polling", ctx.chat.id);
+  const userSession = await userSessionGetByTgChatId("polling", ctx.chat.id);
   const replyToMessageId = deunionize(ctx.message).reply_to_message?.message_id;
   const text = deunionize(ctx.message).text?.trim();
 

@@ -1,9 +1,9 @@
 import { UnrecoverableError } from "bullmq";
 import { inviteGet } from "@checkyourstaff/persistence";
 import { generatePinCode } from "@checkyourstaff/common/generatePinCode";
+import { sendSMSInvitesQueue } from "@checkyourstaff/common/sendSMSInvitesQueue";
+import { sendEmailInvitesQueue } from "@checkyourstaff/common/sendEmailInvitesQueue";
 import { logger } from "./logger";
-import { sendEmailInvitesQueue } from "./sendEmailInvitesQueue";
-import { sendSMSInvitesQueue } from "./sendSMSInvitesQueue";
 
 export const sendInvite = async (inviteId: number) => {
   const invite = await inviteGet(inviteId);

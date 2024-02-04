@@ -1,4 +1,4 @@
-import { logger, createBot } from "./lib";
+import { logger, createBot, createRegisterURL } from "./lib";
 import { Markup } from "telegraf";
 import { initializeSession } from "@checkyourstaff/common/initializeSession";
 
@@ -37,11 +37,14 @@ bot.start(async (ctx, next) => {
     languageCode: ctx.message.from.language_code,
   });
 
-  const registerURL = new URL("/register", webappUrl);
+  const registerURL = createRegisterURL({
+    webappUrl,
+    fromBot: "control-bot",
+    userId: userSession.userId,
+    chatId: ctx.chat.id,
+  });
 
-  registerURL.searchParams.set("fromBot", "control-bot");
-  registerURL.searchParams.set("userId", String(userSession!.userId));
-  registerURL.searchParams.set("tgChatId", String(ctx.chat.id));
+  logger.info("registerURL = %s", registerURL.toString());
 
   await ctx.sendMessage(
     "Пройдите регистрацию",

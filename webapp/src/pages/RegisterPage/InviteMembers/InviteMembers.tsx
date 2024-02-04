@@ -4,7 +4,7 @@ import { Help, Root } from "./styled";
 import { Input } from "../../../components/Input";
 import { Textarea } from "./styled";
 
-export const SecondStep: FC<{
+export const InviteMembers: FC<{
   completeDisabled: boolean;
   minimumContactsCount: number
   onComplete(): void;

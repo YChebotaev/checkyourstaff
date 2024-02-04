@@ -4,7 +4,7 @@ import { Text } from "../../../components/Text";
 import { ContactRecord } from "..";
 import { MainButton } from "../../../components/MainButton";
 
-export const ThirdStep: FC<{
+export const EverythingOk: FC<{
   name: string;
   groupName: string;
   contacts: ContactRecord[];
