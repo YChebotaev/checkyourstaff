@@ -1,23 +1,21 @@
 import { fastify } from "fastify";
 import { fastifyCors } from "@fastify/cors";
 import {
-  accountsGetByUserId,
   sampleGroupsGetByAccountId,
   textFeedbackDelete,
-  textFeedbackGet,
-  userSessionGetByTgUserId,
-  userSessionGetByUserId,
 } from "@checkyourstaff/persistence";
-import { pollingTelegram } from "@checkyourstaff/common/telegram";
 import {
   logger,
   authVerify,
-  readTokenFromHeaders,
   getStats,
   getCharts,
   getTextFeedback,
+  getAccountsOfUser,
+  tokenGuard,
+  accountGuard,
+  sendMessageToTextFeedback,
 } from "./lib";
-import type { AuthVerifyData, AuthVerifyQuery } from "./types";
+import type { AuthVerifyQuery } from "./types";
 
 const app = fastify({ logger });
 
@@ -32,14 +30,7 @@ app.get<{
   schema: {
     querystring: {
       type: "object",
-      required: [
-        "first_name",
-        "last_name",
-        "username",
-        "photo_url",
-        "auth_date",
-        "hash",
-      ],
+      required: ["auth_date", "hash"],
       properties: {
         first_name: { type: "string" },
         last_name: { type: "string" },
@@ -51,40 +42,20 @@ app.get<{
     },
   },
   async handler({ query }) {
-    const { valid, token } = await authVerify(query);
+    const result = await authVerify(query);
 
-    if (!valid) {
+    if (!result.valid) {
       logger.error("Auth verify hash is invalid: %s", JSON.stringify(query));
     }
 
-    return { valid, token } satisfies AuthVerifyData;
+    return result;
   },
 });
 
 app.get("/accounts", async ({ headers }) => {
-  const token = readTokenFromHeaders(headers);
+  const { tgUserId } = tokenGuard(headers);
 
-  if (!token) {
-    logger.error("Cannot read and/or parse token from headers");
-
-    throw new Error("Cannot read and/or parse token from headers");
-  }
-
-  const { tgUserId } = token;
-  const userSession = await userSessionGetByTgUserId("control", tgUserId);
-
-  if (!userSession) {
-    logger.error(
-      "User session by tg user id = %s not found or deleted",
-      tgUserId,
-    );
-
-    throw new Error(
-      `User session by tg user id = ${tgUserId} not found or deleted`,
-    );
-  }
-
-  return accountsGetByUserId(userSession.userId);
+  return getAccountsOfUser({ tgUserId });
 });
 
 app.get<{
@@ -92,19 +63,10 @@ app.get<{
     accountId: string;
   };
 }>("/stats", async ({ headers, query: { accountId: accountIdStr } }) => {
-  console.group("/stats");
-
-  const token = readTokenFromHeaders(headers);
-
-  if (!token) {
-    logger.error("Cannot read and/or parse token from headers");
-
-    throw new Error("Cannot read and/or parse token from headers");
-  }
-
+  const { tgUserId } = tokenGuard(headers);
   const accountId = Number(accountIdStr);
 
-  console.groupEnd();
+  await accountGuard({ tgUserId, accountId });
 
   return getStats({ accountId });
 });
@@ -114,15 +76,10 @@ app.get<{
     accountId: string;
   };
 }>("/sampleGroups", async ({ headers, query: { accountId: accountIdStr } }) => {
-  const token = readTokenFromHeaders(headers);
-
-  if (!token) {
-    logger.error("Cannot read and/or parse token from headers");
-
-    throw new Error("Cannot read and/or parse token from headers");
-  }
-
+  const { tgUserId } = tokenGuard(headers);
   const accountId = Number(accountIdStr);
+
+  await accountGuard({ tgUserId, accountId });
 
   return sampleGroupsGetByAccountId(accountId);
 });
@@ -138,16 +95,11 @@ app.get<{
     headers,
     query: { accountId: accountIdStr, sampleGroupId: sampleGroupIdStr },
   }) => {
-    const token = readTokenFromHeaders(headers);
-
-    if (!token) {
-      logger.error("Cannot read and/or parse token from headers");
-
-      throw new Error("Cannot read and/or parse token from headers");
-    }
-
+    const { tgUserId } = tokenGuard(headers);
     const accountId = Number(accountIdStr);
     const sampleGroupId = Number(sampleGroupIdStr);
+
+    await accountGuard({ tgUserId, accountId });
 
     return getCharts({ accountId, sampleGroupId });
   },
@@ -158,15 +110,10 @@ app.get<{
     accountId: string;
   };
 }>("/textFeedback", async ({ headers, query: { accountId: accountIdStr } }) => {
-  const token = readTokenFromHeaders(headers);
-
-  if (!token) {
-    logger.error("Cannot read and/or parse token from headers");
-
-    throw new Error("Cannot read and/or parse token from headers");
-  }
-
+  const { tgUserId } = tokenGuard(headers);
   const accountId = Number(accountIdStr);
+
+  await accountGuard({ tgUserId, accountId });
 
   return getTextFeedback({ accountId });
 });
@@ -186,13 +133,9 @@ app.post<{
     },
   },
   async handler({ headers, body: { feedbackId: feedbackIdStr } }) {
-    const token = readTokenFromHeaders(headers);
+    tokenGuard(headers);
 
-    if (!token) {
-      logger.error("Cannot read and/or parse token from headers");
-
-      throw new Error("Cannot read and/or parse token from headers");
-    }
+    // TODO: More sophisticated authorization control
 
     const feedbackId = Number(feedbackIdStr);
 
@@ -222,35 +165,17 @@ app.post<{
     headers,
     body: { feedbackId: feedbackIdStr, role, username },
   }) {
-    const token = readTokenFromHeaders(headers);
+    tokenGuard(headers);
 
-    if (!token) {
-      logger.error("Cannot read and/or parse token from headers");
-
-      throw new Error("Cannot read and/or parse token from headers");
-    }
+    // TODO: More sophisticated authorization control
 
     const textFeedbackId = Number(feedbackIdStr);
-    const textFeedback = await textFeedbackGet(textFeedbackId);
 
-    if (!textFeedback) {
-      throw new Error(
-        `Text feedback with id = ${textFeedbackId} not found or deleted`,
-      );
-    }
-
-    const userSession = await userSessionGetByUserId(textFeedback.userId);
-
-    if (!userSession) {
-      throw new Error(
-        `User session with user id = ${textFeedback.userId} not found or deleted`,
-      );
-    }
-
-    await pollingTelegram.sendMessage(
-      userSession.tgChatId,
-      `${role} прочитал ваш анонимный отзыв и хочет подробнее изучить ситуацию и обсудить её с вами. Если вам важно обсудить это, то вы можете лично написать в телеграм ${username}. Если хотите остаться анонимным, то просто проигнорируйте это сообщение`,
-    );
+    await sendMessageToTextFeedback({
+      textFeedbackId,
+      role,
+      username,
+    });
   },
 });
 
