@@ -1,8 +1,8 @@
 export const getCorsOrign = () => {
-  const envOrigin = process.env["ORIGIN"];
+  const consoleOrigin = process.env["CONSOLE_ORIGIN"];
 
-  if (envOrigin) {
-    return envOrigin;
+  if (consoleOrigin) {
+    return consoleOrigin;
   }
 
   return true;
