@@ -6,6 +6,7 @@ import {
 } from "@checkyourstaff/persistence";
 import {
   logger,
+  getCorsOrign,
   authVerify,
   getStats,
   getCharts,
@@ -20,7 +21,7 @@ import type { AuthVerifyQuery } from "./types";
 const app = fastify({ logger });
 
 app.register(fastifyCors, {
-  origin: true,
+  origin: getCorsOrign(),
   credentials: true,
 });
 

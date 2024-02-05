@@ -7,3 +7,4 @@ export * from "./getAccountsOfUser";
 export * from "./tokenGuard";
 export * from "./accountGuard";
 export * from "./sendMessageToTextFeedback";
+export * from "./getCorsOrigin";
