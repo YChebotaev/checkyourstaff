@@ -67,13 +67,23 @@ export const createClient = ({
 
       return data;
     },
-    async getStats() {
-      const { data } = await client.get<StatsResp>("/stats");
+    async getStats({ accountId }: { accountId: number }) {
+      const { data } = await client.get<StatsResp>("/stats", {
+        params: { accountId },
+      });
 
       return data;
     },
-    async getCharts() {
-      const { data } = await client.get<ChartsDataResp>("/charts");
+    async getCharts({
+      accountId,
+      sampleGroupId,
+    }: {
+      accountId: number;
+      sampleGroupId: number;
+    }) {
+      const { data } = await client.get<ChartsDataResp>("/charts", {
+        params: { accountId, sampleGroupId },
+      });
 
       return data;
     },
