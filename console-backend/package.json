@@ -17,6 +17,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@fastify/cors": "^8.4.1",
+    "axios": "^1.6.7",
     "date-fns": "^3.3.0",
     "dotenv": "^16.3.1",
     "fastify": "^4.24.3",

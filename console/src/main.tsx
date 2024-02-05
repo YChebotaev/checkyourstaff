@@ -31,8 +31,6 @@ import { SelectAccountPage } from "./pages/SelectAccountPage";
 import { getToken } from "./utils/getToken";
 import { getAccountId } from "./utils/getAccountId";
 import { setAccountId } from "./utils/setAccountId";
-// import { setAccountId } from "./utils/setAccountId";
-// import { setToken } from "./utils/setToken";
 
 const apiClient = axios.create({
   baseURL: import.meta.env["VITE_BACKEND_URL"],
@@ -238,52 +236,50 @@ export const refresh = () => {
   );
 };
 
-// TODO: Debug only
-// setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcwNTU2ODIyN30.Bxrr4BrRdwjfxoqONaNgdADL59zRCkuTjvgrhTpCYIs')
-// setAccountId(1)
+{
+  const token = getToken();
 
-const token = getToken();
+  if (window.location.pathname === "/signin/success") {
+    refresh();
+  } else if (token == null) {
+    if (window.location.pathname !== "/signin") {
+      window.location.href = "/signin";
+    }
 
-if (window.location.pathname === "/signin/success") {
-  refresh();
-} else if (token == null) {
-  if (window.location.pathname !== "/signin") {
-    window.location.href = "/signin";
-  }
+    refresh();
+  } else {
+    apiClient
+      .get<AccountsResp>("/accounts")
+      .then(({ data: accounts }) => {
+        const accountId = getAccountId();
 
-  refresh();
-} else {
-  apiClient
-    .get<AccountsResp>("/accounts")
-    .then(({ data: accounts }) => {
-      const accountId = getAccountId();
+        /**
+         * @todo
+         * Если `accountId` нет в списке `accounts`,
+         * это значит, что пользователь потерял
+         * свой административный доступ.
+         * В этом случае должно быть
+         * перенаправление куда-то
+         */
 
-      /**
-       * @todo
-       * Если `accountId` нет в списке `accounts`,
-       * это значит, что пользователь потерял
-       * свой административный доступ.
-       * В этом случае должно быть
-       * перенаправление куда-то
-       */
+        if (accountId == null) {
+          if (accounts.length === 0) {
+            // TODO: To implement
+          } else if (accounts.length === 1) {
+            setAccountId(accounts[0].id);
 
-      if (accountId == null) {
-        if (accounts.length === 0) {
-          // TODO: To implement
-        } else if (accounts.length === 1) {
-          setAccountId(accounts[0].id);
-
-          window.location.href = "/stats";
-        } else {
-          window.location.href = "/selectAccount";
+            window.location.href = "/stats";
+          } else {
+            window.location.href = "/selectAccount";
+          }
         }
-      }
 
-      refresh();
-    })
-    .catch((e) => {
-      // TODO: To implement
+        refresh();
+      })
+      .catch((e) => {
+        // TODO: To implement
 
-      console.error(e);
-    });
+        console.error(e);
+      });
+  }
 }
