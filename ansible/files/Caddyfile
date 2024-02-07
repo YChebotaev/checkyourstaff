@@ -74,3 +74,12 @@ openobserve.checkyourstaff.ru {
 
   reverse_proxy http://localhost:5080
 }
+
+bull-monitor.checkyourstaff.ru {
+	log {
+		format console
+		output file /var/log/caddy/bull-monitor.checkyourstaff.ru-access.log
+	}
+
+  reverse_proxy http://localhost:3007
+}

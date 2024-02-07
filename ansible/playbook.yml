@@ -307,14 +307,18 @@
         env:
           ZO_ROOT_USER_EMAIL: yury.79120345101@gmail.com
           ZO_ROOT_USER_PASSWORD: "{{openobserve_default_password}}"
-    # Bull Monitor
-    - name: Install bull monitor docker image
-      community.docker.docker_container:
-        name: bull-monitor
-        image: ejhayes/nodejs-bull-monitor
-        state: started
-        restart_policy: unless-stopped
-        ports:
-          - "127.0.0.1:3007:3000"
-        env:
-          REDIS_HOST: 172.17.0.1
+    # # Bull Monitor
+    # - name: Install bull monitor docker image
+    #   community.docker.docker_container:
+    #     name: bull-monitor
+    #     image: ejhayes/nodejs-bull-monitor
+    #     state: started
+    #     restart_policy: unless-stopped
+    #     etc_hosts:
+    #       host.docker.internal: 172.17.0.1
+    #     ports:
+    #       - "127.0.0.1:3007:3000"
+    #     env:
+    #       REDIS_HOST: host.docker.internal
+    #       REDIS_PORT: "6379"
+    #       PORT: "3000"

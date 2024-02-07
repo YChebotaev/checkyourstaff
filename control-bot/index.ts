@@ -4,7 +4,6 @@ import { initializeSession } from "@checkyourstaff/common/initializeSession";
 
 const token = process.env["BOT_TOKEN"];
 const webappUrl = process.env["WEBAPP_URL"];
-const consoleUrl = process.env["CONSOLE_URL"];
 
 if (!token) {
   logger.fatal("BOT_TOKEN environment variable must be provided");
@@ -14,12 +13,6 @@ if (!token) {
 
 if (!webappUrl) {
   logger.fatal("WEBAPP_URL environment variable must be provided");
-
-  process.exit(1);
-}
-
-if (!consoleUrl) {
-  logger.fatal("CONSOLE_URL environment variable must be provided");
 
   process.exit(1);
 }
