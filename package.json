@@ -1,16 +1,15 @@
 {
   "workspaces": [
     "console",
-    "service",
-    "persistence",
-    "webapp",
     "console-backend",
-    "pincodes-service",
+    "webapp",
     "webapp-backend",
     "polling-bot",
     "control-bot",
+    "persistence",
     "common",
-    "workers"
+    "workers",
+    "pincodes-service"
   ],
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",

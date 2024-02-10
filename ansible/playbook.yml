@@ -261,6 +261,9 @@
       ansible.builtin.shell:
         cmd: pm2 start npm --name pincodes-service -- start
         chdir: /var/checkyourstaff/pincodes-service
+    - name: pm2 startup
+      ansible.builtin.shell:
+        cmd: pm2 startup
     - name: pm2 save
       ansible.builtin.shell:
         cmd: pm2 save
