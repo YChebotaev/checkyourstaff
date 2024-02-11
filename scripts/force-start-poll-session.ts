@@ -7,9 +7,10 @@ import { parse } from "dotenv";
 import { spinPoll } from "@checkyourstaff/workers/lib/spinPoll";
 
 const logger = createLogger("force-start-poll-session");
-const webappUrl = parse(
+
+Object.assign(process.env, parse(
   fs.readFileSync(path.resolve(__dirname, "../workers/.env"), "utf-8"),
-).WEBAPP_URL;
+))
 
 const { pollId, sampleGroupId } = yargs(hideBin(process.argv))
   .option("poll-id", {
