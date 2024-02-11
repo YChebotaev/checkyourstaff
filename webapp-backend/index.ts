@@ -3,7 +3,8 @@ import fastifyCors from "@fastify/cors";
 import { Telegram } from "telegraf";
 import plural from "plural-ru";
 import { parseContactsList } from "@checkyourstaff/common/parseContactsList";
-import { logger, completeRegistration, verify } from "./lib";
+import { keymask } from '@checkyourstaff/common/keymask'
+import { logger, completeRegistration, verify, inviteRecepients } from "./lib";
 import type {
   VerifyBody,
   CompleteRegistrationBody,
@@ -14,17 +15,18 @@ import {
   pollAnswerCreate,
   pollQuestionsGetByPollId,
   pollSessionGet,
+  sampleGroupGet,
   textFeedbackCreate,
   userSessionGetByTgUserId,
 } from "@checkyourstaff/persistence";
 
-const service = fastify({ logger });
+const app = fastify({ logger });
 const controlBotTelegram = new Telegram(process.env["CONTROL_BOT_TOKEN"]!);
 const pollingBotTelegram = new Telegram(process.env["POLLING_BOT_TOKEN"]!);
 
-service.register(fastifyCors, { origin: true });
+app.register(fastifyCors, { origin: true });
 
-service.post<{
+app.post<{
   Body: VerifyBody;
 }>("/verify", {
   schema: {
@@ -39,7 +41,7 @@ service.post<{
       },
     },
   },
-  async handler({ body: { initData, bot } }) {    
+  async handler({ body: { initData, bot } }) {
     const valid = verify({ initData, bot });
 
     if (!valid) {
@@ -50,7 +52,7 @@ service.post<{
   },
 });
 
-service.post<{
+app.post<{
   Body: CompleteRegistrationBody;
 }>("/completeRegistration", {
   schema: {
@@ -79,7 +81,7 @@ service.post<{
     const userId = Number(userIdStr);
     const contacts = parseContactsList(list);
 
-    await completeRegistration({
+    const { sampleGroupId } = await completeRegistration({
       accountName,
       groupName,
       contacts,
@@ -98,6 +100,26 @@ service.post<{
       Вы стали администратором аккаунта «${accountName}»
     `.trim(),
     );
+    {
+      const sampleGroup = await sampleGroupGet(sampleGroupId)
+
+      if (!sampleGroup) {
+        logger.error('Sample group by id = %s not found or deleted', sampleGroupId)
+
+        throw new Error(`Sample group by id = ${sampleGroupId} not found or deleted`)
+      }
+
+      await controlBotTelegram.sendMessage(
+        tgChatId,
+        `
+    Группа «${groupName}» создана
+    
+    /invite_${keymask.mask(sampleGroupId)} — пригласить участников в группу «${sampleGroup.name}»
+    /kick_${keymask.mask(sampleGroupId)} — удалить участников из группы «${sampleGroup.name}»
+    `.trim()
+      )
+    }
+
     await controlBotTelegram.sendMessage(
       tgChatId,
       `
@@ -116,7 +138,7 @@ service.post<{
   },
 });
 
-service.get<{
+app.get<{
   Querystring: {
     pollSessionId: string;
   };
@@ -148,7 +170,7 @@ service.get<{
   );
 });
 
-service.post<{
+app.post<{
   Body: ClosePollSessionBody;
   Querystring: ClosePollSessionQuery;
 }>("/closePollSession", {
@@ -240,7 +262,73 @@ service.post<{
   },
 });
 
-service.listen(
+app.get<{
+  Params: {
+    sampleGroupId: string
+  }
+}>('/sampleGroups/:sampleGroupId', async ({
+  params: { sampleGroupId: sampleGroupIdStr }
+}) => {
+  const sampleGroupId = Number(sampleGroupIdStr)
+
+  return sampleGroupGet(sampleGroupId)
+})
+
+app.post<{
+  Body: {
+    sampleGroupId: number
+    list: string
+    tgChatId: number
+  }
+}>('/inviteMembers', {
+  schema: {
+    body: {
+      type: 'object',
+      required: ['sampleGroupId', 'list', 'tgChatId'],
+      properties: {
+        sampleGroupId: { type: 'number' },
+        list: { type: 'string' },
+        tgChatId: { type: 'number' }
+      }
+    }
+  }
+}, async ({ body: { sampleGroupId, list, tgChatId } }) => {
+  const contacts = parseContactsList(list)
+
+  if (contacts.length <= 0) {
+    throw new Error('Contacts in list must be more than 0')
+  }
+
+  await inviteRecepients({
+    contacts,
+    sampleGroupId
+  })
+
+  const sampleGroup = await sampleGroupGet(sampleGroupId)
+
+  if (!sampleGroup) {
+    logger.error('Sample group by id = %s not found or deleted', sampleGroupId)
+
+    throw new Error(`Sample group by id = ${sampleGroupId} not found or deleted`)
+  }
+
+  await controlBotTelegram.sendMessage(
+    tgChatId,
+    `
+    ${plural(
+      contacts.length,
+      "%d приглашение",
+      "%d приглашения",
+      "%d приглашений",
+    )} разослано
+    
+    /invite_${keymask.mask(sampleGroupId)} — пригласить участников в группу «${sampleGroup.name}»
+    /kick_${keymask.mask(sampleGroupId)} — удалить участников из группы «${sampleGroup.name}»
+    `.trim()
+  )
+})
+
+app.listen(
   {
     port: Number(process.env["PORT"] ?? 3003),
     host: process.env["HOST"] ?? "0.0.0.0",

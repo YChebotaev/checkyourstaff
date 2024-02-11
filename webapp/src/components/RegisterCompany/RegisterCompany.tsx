@@ -1,8 +1,7 @@
 import { type FC } from "react";
-import { MainButton } from "../../../components/MainButton";
-import { Input } from "../../../components/Input";
+import { MainButton } from "../MainButton";
+import { Input } from "../Input";
 import { Root } from "./styled";
-import { PageHeader } from '../styled';
 
 export const RegisterCompany: FC<{
   completeDisabled: boolean;
@@ -11,7 +10,6 @@ export const RegisterCompany: FC<{
 }> = ({ completeDisabled, onComplete, onChangeName }) => {
   return (
     <Root>
-      <PageHeader>Шаг 1: зарегистрируйте компанию</PageHeader>
       <div>
         <Input
           placeholder="Введите название компании"

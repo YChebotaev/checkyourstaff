@@ -1,8 +1,8 @@
 import { type FC } from "react";
+import { type ContactRecord } from "@checkyourstaff/common/parseContactsList";
+import { Text } from "../Text";
+import { MainButton } from "../MainButton";
 import { Root, Label, Block } from "./styled";
-import { Text } from "../../../components/Text";
-import { ContactRecord } from "..";
-import { MainButton } from "../../../components/MainButton";
 
 export const EverythingOk: FC<{
   name: string;

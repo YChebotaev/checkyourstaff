@@ -8,6 +8,7 @@ import { BullseyeLayout } from "./layouts/BullseyeLayout";
 import { useApiClient } from "./hooks/useApiClient";
 import { RegisterPage } from "./pages/RegisterPage";
 import { PollSessionPage } from "./pages/PollSessionPage";
+import { InvitePage } from "./pages/InvitePage";
 import { Text } from "./components/Text";
 import "./global.css";
 
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
   {
     path: "pollSession",
     element: <PollSessionPage />,
+  },
+  {
+    path: "invite",
+    element: <InvitePage />,
   },
 ]);
 

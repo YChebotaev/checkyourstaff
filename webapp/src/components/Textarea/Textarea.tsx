@@ -1,6 +1,9 @@
 import { HTMLAttributes, type FC } from "react";
 import { Root } from "./styled";
 
-export const Textarea: FC<HTMLAttributes<HTMLTextAreaElement>> = (props) => (
-  <Root {...props} />
-);
+export type TextareaProps = HTMLAttributes<HTMLTextAreaElement> & {
+  placeholder?: string;
+  rows?: number;
+};
+
+export const Textarea: FC<TextareaProps> = (props) => <Root {...props} />;

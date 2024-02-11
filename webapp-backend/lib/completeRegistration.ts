@@ -5,10 +5,9 @@ import {
   sampleGroupCreate,
   pollCreate,
   pollQuestionCreate,
-  inviteCreate,
 } from "@checkyourstaff/persistence";
-import { spinInvitesQueue } from "./spinInvitesQueue";
-import { spinPollsQueue } from "./spinPollsQueue";
+import { spinPollsQueue } from "@checkyourstaff/common/spinPollsQueue";
+import { inviteRecepients } from './inviteRecepients'
 
 export const completeRegistration = async ({
   accountName,
@@ -63,23 +62,10 @@ export const completeRegistration = async ({
     text: "Оцените счастье на работе от 1 до 5",
   });
 
-  // Invite recepients
-  await spinInvitesQueue.addBulk(
-    (
-      await Promise.all(
-        contacts.map(({ type, value }) =>
-          inviteCreate({
-            sampleGroupId,
-            email: type === "email" ? value : null,
-            phone: type === "phone" ? value : null,
-          }),
-        ),
-      )
-    ).map((inviteId) => ({
-      name: "send-invite",
-      data: { inviteId },
-    })),
-  );
+  await inviteRecepients({
+    contacts,
+    sampleGroupId
+  })
 
   // Shedule poll session
   await spinPollsQueue.add(
@@ -95,4 +81,8 @@ export const completeRegistration = async ({
       },
     },
   );
+
+  return {
+    sampleGroupId
+  }
 };

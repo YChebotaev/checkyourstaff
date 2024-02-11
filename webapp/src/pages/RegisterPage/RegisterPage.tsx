@@ -7,9 +7,9 @@ import {
 } from "@checkyourstaff/common/parseContactsList";
 import { useApiClient } from "../../hooks/useApiClient";
 import { AppLayout } from "../../layouts/AppLayout";
-import { RegisterCompany } from "./RegisterCompany";
-import { InviteMembers } from "./InviteMembers";
-import { EverythingOk } from "./EverythingOk";
+import { RegisterCompany } from "../../components/RegisterCompany";
+import { CreateSampleGroup } from "../../components/CreateSampleGroup";
+import { EverythingOk } from "../../components/EverythingOk";
 import { Text } from "../../components/Text";
 import { BullseyeLayout } from "../../layouts/BullseyeLayout";
 import { useCloudStorageItem } from "../../hooks/useCloudStorageItem";
@@ -90,7 +90,7 @@ export const RegisterPage: FC = () => {
         />
       )}
       {step === 2 && (
-        <InviteMembers
+        <CreateSampleGroup
           onChangeGroupName={setGroupName}
           onChangeList={setList}
           completeDisabled={groupName == "" || !isListValid(list)}
