@@ -37,7 +37,7 @@ if (!sampleGroupId) {
   process.exit(1);
 }
 
-spinPoll(pollId, sampleGroupId, webappUrl)
+spinPoll(pollId, sampleGroupId)
   .then(() => {
     process.exit(0);
   })
