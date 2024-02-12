@@ -1,4 +1,4 @@
-import { ContactRecord } from "@checkyourstaff/common/parseContactsList";
+import { type ContactsRecord } from "@checkyourstaff/common/parseContactsList";
 import {
   accountCreate,
   accountAdministratorCreate,
@@ -17,7 +17,7 @@ export const completeRegistration = async ({
 }: {
   accountName: string;
   groupName: string;
-  contacts: ContactRecord[];
+  contacts: ContactsRecord[];
   userId: number;
 }) => {
   // Create account

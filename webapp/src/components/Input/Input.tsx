@@ -1,6 +1,8 @@
 import { HTMLAttributes, type FC } from "react";
 import { Root } from "./styled";
 
-export const Input: FC<HTMLAttributes<HTMLInputElement>> = (props) => (
-  <Root {...props} />
-);
+export type InputProps = HTMLAttributes<HTMLInputElement> & {
+  placeholder?: string;
+};
+
+export const Input: FC<InputProps> = (props) => <Root {...props} />;

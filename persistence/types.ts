@@ -174,12 +174,17 @@ export type UserSession<P extends ChatStatePayload = ChatStatePayload> = {
   updatedAt: string | null;
 };
 
+export type ContactRecord = {
+  type: 'email' | 'phone'
+  value: string
+}
+
 export type Invite = {
   id: number;
-  // pinCodeId: number
   sampleGroupId: number;
-  email: string | null;
-  phone: string | null;
+  // email: string | null;
+  // phone: string | null;
+  contacts: ContactRecord[]
   deleted: boolean;
   createdAt: string;
   updatedAt: string | null;

@@ -1,6 +1,6 @@
 import { knex } from "./knex";
 import { logger } from "./logger";
-import { maybeParse } from "./utils";
+import { maybeParseJson } from "./utils";
 import type {
   ChatState,
   ChatStatePayload,
@@ -66,7 +66,7 @@ export const userSessionGet = async (id: number) => {
 
   return {
     ...userSession,
-    chatState: maybeParse(userSession.chatState),
+    chatState: maybeParseJson(userSession.chatState),
   } as UserSession;
 };
 
@@ -98,7 +98,7 @@ export const userSessionGetByTgChatId = async (
 
   return {
     ...userSession,
-    chatState: maybeParse(userSession.chatState),
+    chatState: maybeParseJson(userSession.chatState),
   } as UserSession;
 };
 
@@ -126,7 +126,7 @@ export const userSessionGetByUserId = async (userId: number) => {
 
   return {
     ...userSession,
-    chatState: maybeParse(userSession.chatState),
+    chatState: maybeParseJson(userSession.chatState),
   } as UserSession;
 };
 
@@ -158,7 +158,7 @@ export const userSessionGetByTgUserId = async (
 
   return {
     ...userSession,
-    chatState: maybeParse(userSession.chatState),
+    chatState: maybeParseJson(userSession.chatState),
   } as UserSession;
 };
 

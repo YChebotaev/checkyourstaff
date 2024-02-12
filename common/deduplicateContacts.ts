@@ -1,19 +1,19 @@
-import type { ContactRecord } from "./parseContactsList";
+import type { ContactsRecord } from "./parseContactsList";
 
-export const deduplicateContacts = <T extends ContactRecord>(contacts: T[]) => {
-  const result: T[] = [];
-  const valueIndex: Record<string, true> = {};
+export const deduplicateContacts = <T extends ContactsRecord>(contacts: T) => {
+  const result: T = [] as unknown as T
+  const index: Record<string, true> = {}
 
   for (const contact of contacts) {
-    const { value } = contact;
+    const { value } = contact
 
-    if (valueIndex[value] != null) {
-      continue;
+    if (index[value]) {
+      continue
     } else {
-      valueIndex[value] = true;
-      result.push(contact);
+      index[value] = true
+      result.push(contact)
     }
   }
 
-  return result;
+  return result
 };

@@ -1,21 +1,34 @@
 import { knex } from "./knex";
 import { logger } from "./logger";
-import { Invite } from "./types";
+import type { ContactRecord, Invite } from "./types";
+import { validateInviteContacts } from './schema'
+import { maybeParseJson } from './utils'
 
 export const inviteCreate = async ({
   sampleGroupId,
-  email = null,
-  phone = null,
+  contacts,
+  // email = null,
+  // phone = null,
 }: {
   sampleGroupId: number;
-  email?: string | null;
-  phone?: string | null;
+  contacts: ContactRecord[]
+  // email?: string | null;
+  // phone?: string | null;
 }) => {
+  const contactsStr = validateInviteContacts(contacts)
+    ? JSON.stringify(contacts)
+    : undefined
+
+  if (contactsStr == null) {
+    throw new Error(`Contacts not valid: ${JSON.stringify(validateInviteContacts.errors)}`)
+  }
+
   const [{ id }] = await knex
     .insert({
       sampleGroupId,
-      email,
-      phone,
+      contacts: contactsStr,
+      // email,
+      // phone,
       createdAt: new Date().getTime(),
     })
     .into("invites")
@@ -49,7 +62,10 @@ export const inviteGet = async (id: number) => {
     return;
   }
 
-  return invite;
+  return {
+    ...invite,
+    contacts: maybeParseJson(invite.contacts)
+  } as Invite;
 };
 
 export const inviteDelete = async (id: number) => {

@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import { type ContactRecord } from "@checkyourstaff/common/parseContactsList";
+import { type ContactsRecord } from "@checkyourstaff/common/parseContactsList";
 import { Text } from "../Text";
 import { MainButton } from "../MainButton";
 import { Root, Label, Block } from "./styled";
@@ -7,9 +7,9 @@ import { Root, Label, Block } from "./styled";
 export const EverythingOk: FC<{
   name: string;
   groupName: string;
-  contacts: ContactRecord[];
+  contacts: ContactsRecord[];
   onComplete(): void;
-}> = ({ name, groupName, contacts, onComplete }) => (
+}> = ({ name, groupName, contacts: contactGroups, onComplete }) => (
   <Root>
     <Block>
       <Label>Название компании</Label>
@@ -23,9 +23,9 @@ export const EverythingOk: FC<{
       <Label>Приглашенные сотрудники</Label>
       <table>
         <tbody>
-          {contacts.map(({ value }, i) => (
+          {contactGroups.map((contacts, i) => (
             <tr key={i}>
-              <td>{value}</td>
+              <td>{contacts.map(({ value }) => value).join(", ")}</td>
             </tr>
           ))}
         </tbody>

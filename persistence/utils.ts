@@ -1,4 +1,4 @@
-export const maybeParse = (input: object | string) => {
+export const maybeParseJson = (input: object | string) => {
   if (typeof input === "object") {
     return input;
   } else {

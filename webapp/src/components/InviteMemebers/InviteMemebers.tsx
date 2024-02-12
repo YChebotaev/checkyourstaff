@@ -11,7 +11,7 @@ export const InviteMemebers: FC<{
     <>
       <Textarea
         {...textareaProps}
-        placeholder="В каждой строчке введите номер телефона или email-адрес сотрудника"
+        placeholder="В каждой строчке введите номер телефона или email-адрес сотрудника. Через запятую можно указать несколько контактов"
         onChange={(e) => {
           const value = (Reflect.get(e.target, "value") as string).trim();
 

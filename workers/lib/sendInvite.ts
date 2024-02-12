@@ -1,8 +1,8 @@
 import { UnrecoverableError } from "bullmq";
 import { inviteGet } from "@checkyourstaff/persistence";
 import { generatePinCode } from "@checkyourstaff/common/generatePinCode";
-import { sendSMSInvitesQueue } from "@checkyourstaff/common/sendSMSInvitesQueue";
-import { sendEmailInvitesQueue } from "@checkyourstaff/common/sendEmailInvitesQueue";
+import { sendSmsInvite } from "@checkyourstaff/common/sendSMSInvitesQueue";
+import { sendEmailInvite } from "@checkyourstaff/common/sendEmailInvitesQueue";
 import { logger } from "./logger";
 
 export const sendInvite = async (inviteId: number) => {
@@ -29,27 +29,22 @@ export const sendInvite = async (inviteId: number) => {
     throw new Error("Pin code not generated");
   }
 
-  if (invite.email) {
-    await sendEmailInvitesQueue.add("send-email-invite", {
-      pinCode,
-      email: invite.email,
-    });
-  }
+  for (const { type, value } of invite.contacts) {
+    switch (type) {
+      case 'email':
+        await sendEmailInvite({
+          pinCode,
+          email: value
+        })
 
-  if (invite.phone) {
-    await sendSMSInvitesQueue.add(
-      "send-sms-invite",
-      {
-        pinCode,
-        phone: invite.phone,
-      },
-      {
-        attempts: 3,
-        backoff: {
-          type: "exponential",
-          delay: 65000,
-        },
-      },
-    );
+        return
+      case 'phone':
+        await sendSmsInvite({
+          pinCode,
+          phone: value
+        })
+
+        return
+    }
   }
 };

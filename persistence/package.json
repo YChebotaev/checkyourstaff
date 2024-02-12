@@ -15,6 +15,7 @@
     "reload:db": "npm run migrate:rollback --all && npm run migrate:latest"
   },
   "dependencies": {
+    "ajv": "^8.12.0",
     "dotenv": "^16.4.1",
     "knex": "^3.0.1",
     "pg": "^8.11.3",

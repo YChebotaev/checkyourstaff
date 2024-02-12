@@ -6,8 +6,9 @@ export const up = async (knex: Knex): Promise<void> =>
 
     table.integer("sampleGroupId");
 
-    table.string("email").nullable();
-    table.string("phone").nullable();
+    // table.string("email").nullable();
+    // table.string("phone").nullable();
+    table.json('contacts')
 
     table.boolean("deleted").nullable();
     table.bigInteger("createdAt");

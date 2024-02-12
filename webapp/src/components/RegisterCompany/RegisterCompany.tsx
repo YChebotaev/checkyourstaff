@@ -18,6 +18,11 @@ export const RegisterCompany: FC<{
 
             onChangeName(value);
           }}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              onComplete();
+            }
+          }}
         />
       </div>
       <MainButton

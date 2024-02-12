@@ -1,10 +1,7 @@
 import { useState, type FC } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import {
-  parseContactsList,
-  type ContactRecord,
-} from "@checkyourstaff/common/parseContactsList";
+import { parseContactsList } from "@checkyourstaff/common/parseContactsList";
 import { useApiClient } from "../../hooks/useApiClient";
 import { AppLayout } from "../../layouts/AppLayout";
 import { RegisterCompany } from "../../components/RegisterCompany";
@@ -17,9 +14,9 @@ import { useCloudStorageItem } from "../../hooks/useCloudStorageItem";
 const REQUIRED_MINIMUM_CONTACTS_COUNT = /** @todo: debug only */ 2; // 10;
 
 const isListValid = (list: string) => {
-  const contacts = parseContactsList(list);
+  const contactGroups = parseContactsList(list);
 
-  return contacts.length >= REQUIRED_MINIMUM_CONTACTS_COUNT;
+  return contactGroups.length >= REQUIRED_MINIMUM_CONTACTS_COUNT;
 };
 
 export const RegisterPage: FC = () => {
@@ -113,5 +110,3 @@ export const RegisterPage: FC = () => {
     </AppLayout>
   );
 };
-
-export { ContactRecord };

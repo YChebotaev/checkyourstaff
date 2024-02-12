@@ -1,28 +1,26 @@
-import { ContactRecord } from "@checkyourstaff/common/parseContactsList";
-import { spinInvitesQueue } from "@checkyourstaff/common/spinInvitesQueue";
+import { type ContactsRecord } from "@checkyourstaff/common/parseContactsList";
+import { sendInviteBulk } from "@checkyourstaff/common/spinInvitesQueue";
 import { inviteCreate } from '@checkyourstaff/persistence'
 
 export const inviteRecepients = async ({
-  contacts,
+  contacts: contactGroups,
   sampleGroupId
 }: {
-  contacts: ContactRecord[],
+  contacts: ContactsRecord[],
   sampleGroupId: number
 }) => {
-  await spinInvitesQueue.addBulk(
-    (
-      await Promise.all(
-        contacts.map(({ type, value }) =>
-          inviteCreate({
-            sampleGroupId,
-            email: type === "email" ? value : null,
-            phone: type === "phone" ? value : null,
-          }),
-        ),
+  console.log('contactGroups =', contactGroups)
+
+  await sendInviteBulk(
+    (await Promise.all(
+      contactGroups.map(
+        contacts => inviteCreate({
+          sampleGroupId,
+          contacts
+        })
       )
-    ).map((inviteId) => ({
-      name: "send-invite",
-      data: { inviteId },
-    })),
-  );
+    )).map((inviteId) => ({
+      inviteId
+    }))
+  )
 }
