@@ -12,9 +12,11 @@ import type {
 export const createClient = ({
   baseURL,
   getToken,
+  onError
 }: {
   baseURL: string;
   getToken(): string | undefined;
+  onError?(error: any): void
 }) => {
   const client = axios.create({
     baseURL,
@@ -29,6 +31,12 @@ export const createClient = ({
 
     return config;
   });
+
+  if (onError) {
+    client.interceptors.response.use(undefined, (error) => {
+      onError(error)
+    })
+  }
 
   return {
     async authVerify({
@@ -127,3 +135,5 @@ export const createClient = ({
     },
   };
 };
+
+export type ConsoleBackendClient = ReturnType<typeof createClient>

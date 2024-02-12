@@ -10,11 +10,7 @@ export const ConfirmDeleteButton: FC<{
   const apiClient = useApiClient();
   const { mutate } = useMutation({
     async mutationFn() {
-      const { data } = await apiClient.post("/deleteFeedback", {
-        feedbackId: id,
-      });
-
-      return data;
+      return apiClient.deleteFeedback({ feedbackId: id })
     },
     onSuccess() {
       onSuccess(id);

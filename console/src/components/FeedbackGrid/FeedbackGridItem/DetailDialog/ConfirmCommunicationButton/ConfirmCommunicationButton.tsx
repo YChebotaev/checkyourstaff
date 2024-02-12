@@ -12,13 +12,11 @@ export const ConfirmCommunicationButton: FC<{
   const apiClient = useApiClient();
   const { mutate } = useMutation({
     async mutationFn() {
-      const { data } = await apiClient.post("/sendMessage", {
+      return apiClient.sendMessage({
         feedbackId: id,
         username,
-        role,
-      });
-
-      return data;
+        role
+      })
     },
     onSuccess() {
       onSuccess(id);

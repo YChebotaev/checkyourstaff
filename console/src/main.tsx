@@ -1,6 +1,5 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import axios from "axios";
 import "./index.css";
 import {
   Navigate,
@@ -8,13 +7,7 @@ import {
   createBrowserRouter,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type {
-  StatsResp,
-  ChartsDataResp,
-  TextFeedbackResp,
-  AccountsResp,
-  SampleGroupsData,
-} from "@checkyourstaff/console-backend/types";
+import { createClient } from "@checkyourstaff/console-backend/client";
 import { useApiClient } from "./hooks/useApiClient";
 import { ChartsPage } from "./pages/ChartsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
@@ -32,18 +25,9 @@ import { getToken } from "./utils/getToken";
 import { getAccountId } from "./utils/getAccountId";
 import { setAccountId } from "./utils/setAccountId";
 
-const apiClient = axios.create({
+const apiClient = createClient({
   baseURL: import.meta.env["VITE_BACKEND_URL"],
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = getToken();
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
+  getToken: () => getToken() ?? undefined
 });
 
 const queryClient = new QueryClient();
@@ -52,9 +36,7 @@ const fetchAccounts = async () => {
   const data = await queryClient.fetchQuery({
     queryKey: ["accounts"],
     async queryFn() {
-      const { data } = await apiClient.get<AccountsResp>("/accounts");
-
-      return data;
+      return apiClient.getAccounts()
     },
   });
 
@@ -62,72 +44,48 @@ const fetchAccounts = async () => {
 };
 
 const fetchStats = async () => {
-  const data = await queryClient.fetchQuery({
+  return queryClient.fetchQuery({
     queryKey: ["stats"],
     async queryFn() {
-      const { data } = await apiClient.get<StatsResp>("/stats", {
-        params: {
-          accountId: getAccountId(),
-        },
-      });
-
-      return data;
+      return apiClient.getStats({
+        accountId: getAccountId()!
+      })
     },
   });
-
-  return data;
 };
 
 const fetchCharts = async (sampleGroupId: number) => {
-  const data = await queryClient.fetchQuery({
+  return queryClient.fetchQuery({
     queryKey: ["charts"],
     async queryFn() {
-      const { data } = await apiClient.get<ChartsDataResp>("/charts", {
-        params: {
-          accountId: getAccountId(),
-          sampleGroupId,
-        },
-      });
-
-      return data;
+      return apiClient.getCharts({
+        accountId: getAccountId()!,
+        sampleGroupId
+      })
     },
   });
-
-  return data;
 };
 
 const fetchSampleGroups = async () => {
-  const data = await queryClient.fetchQuery({
+  return queryClient.fetchQuery({
     queryKey: ["sampleGroups"],
     async queryFn() {
-      const { data } = await apiClient.get<SampleGroupsData>("/sampleGroups", {
-        params: {
-          accountId: getAccountId(),
-        },
-      });
-
-      return data;
+      return apiClient.getSampleGroups({
+        accountId: getAccountId()!
+      })
     },
   });
-
-  return data;
 };
 
 const fetchTextFeedback = async () => {
-  const data = await queryClient.fetchQuery({
+  return queryClient.fetchQuery({
     queryKey: ["textFeedback"],
     async queryFn() {
-      const { data } = await apiClient.get<TextFeedbackResp>("/textFeedback", {
-        params: {
-          accountId: getAccountId(),
-        },
-      });
-
-      return data;
+      return apiClient.getTextFeedback({
+        accountId: getAccountId()!
+      })
     },
   });
-
-  return data;
 };
 
 const createRouter = () => {
@@ -249,8 +207,8 @@ export const refresh = () => {
     refresh();
   } else {
     apiClient
-      .get<AccountsResp>("/accounts")
-      .then(({ data: accounts }) => {
+      .getAccounts()
+      .then((accounts) => {
         const accountId = getAccountId();
 
         /**

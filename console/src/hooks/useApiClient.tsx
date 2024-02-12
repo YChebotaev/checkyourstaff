@@ -1,7 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
-import { type AxiosInstance } from "axios";
+import { type ConsoleBackendClient } from "@checkyourstaff/console-backend/client";
 
-const context = createContext<AxiosInstance | null>(null);
+const context = createContext<ConsoleBackendClient | null>(null);
 
 export const useApiClient = () => {
   return useContext(context)!;
@@ -11,7 +11,7 @@ useApiClient.Provider = ({
   apiClient,
   children,
 }: {
-  apiClient: AxiosInstance;
+  apiClient: ConsoleBackendClient;
   children: ReactNode;
 }) => {
   return <context.Provider value={apiClient}>{children}</context.Provider>;

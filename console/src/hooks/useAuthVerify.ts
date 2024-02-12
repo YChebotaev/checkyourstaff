@@ -1,10 +1,7 @@
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import type {
-  AuthVerifyData,
-  AuthVerifyQuery,
-} from "@checkyourstaff/console-backend/types";
+import type { AuthVerifyData, } from "@checkyourstaff/console-backend/types";
 import { useApiClient } from "./useApiClient";
 
 export const useAuthVerify = ({
@@ -17,19 +14,15 @@ export const useAuthVerify = ({
 
   const { mutate } = useMutation({
     async mutationFn() {
-      const { data } = await apiClient.get<AuthVerifyData>("/auth/verify", {
-        params: {
-          id: searchParams.get("id")! /* Telegram user id */,
-          first_name: searchParams.get("first_name")!,
-          last_name: searchParams.get("last_name")!,
-          username: searchParams.get("username")!,
-          photo_url: searchParams.get("photo_url")!,
-          auth_date: searchParams.get("auth_date")!,
-          hash: searchParams.get("hash")!,
-        } satisfies AuthVerifyQuery,
-      });
-
-      return data;
+      return apiClient.authVerify({
+        id: searchParams.get("id")! /* Telegram user id */,
+        firstName: searchParams.get("first_name")!,
+        lastName: searchParams.get("last_name")!,
+        username: searchParams.get("username")!,
+        photoUrl: searchParams.get("photo_url")!,
+        authDate: searchParams.get("auth_date")!,
+        hash: searchParams.get("hash")!,
+      })
     },
     onSuccess(data) {
       onSuccess(data);
