@@ -1,42 +1,28 @@
 // @ts-nocheck
 
 import pino from "pino";
-import pinoElasticsearch from "pino-elasticsearch";
-import { multistream } from "pino-multi-stream";
-import { HttpConnection } from "@elastic/elasticsearch";
+import PinoOpenObserve from '@openobserve/pino-openobserve'
 
 const username = process.env["OO_USERNAME"];
 const password = process.env["OO_PASSWORD"];
 
 export const createLogger = (name: string) => {
   if (username && password) {
-    class Connection extends HttpConnection {
-      request(...args: any[]) {
-        args[0].path = `/api/default${args[0].path}`;
-
-        return super.request.apply(this, args);
-      }
-    }
-
-    const streamToOpenObserve = pinoElasticsearch({
-      index: name,
-      node: "http://localhost:5080",
-      esVersion: 7,
-      flushBytes: 100,
+    const streamToOpenObserve = new PinoOpenObserve({
+      url: 'http://localhost:5080',
+      organization: 'default',
       auth: {
         username,
-        password,
+        password
       },
-      Connection,
-    });
+      streamName: name,
+      batchSize: 1,
+      timeThreshold: 1000
+    })
 
     return pino(
       { name },
-      multistream([
-        { stream: streamToOpenObserve },
-        { stream: process.stdout, level: "info" },
-        { stream: process.stderr, level: "error" },
-      ]),
+      streamToOpenObserve
     );
   } else {
     return pino({ name });

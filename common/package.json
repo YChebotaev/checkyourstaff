@@ -6,6 +6,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@elastic/elasticsearch": "^8.12.0",
+    "@openobserve/pino-openobserve": "^0.0.3",
     "keymask": "^0.10.1",
     "pino": "^8.17.2",
     "pino-elasticsearch": "^8.0.0",
