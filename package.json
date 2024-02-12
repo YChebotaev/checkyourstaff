@@ -24,6 +24,7 @@
   },
   "scripts": {
     "force-start-poll-session": "ts-node scripts/force-start-poll-session.ts",
+    "create-account": "ts-node scripts/create-account.ts",
     "bootstrap-dev": "zx ./bootstrap-dev",
     "lines-count": "git ls-files | xargs wc -l #11756"
   }

@@ -53,6 +53,22 @@ export const accountIsExists = async (id: number) => {
   return false;
 };
 
+export const accountGetByName = async (name: string) => {
+  const account = await knex
+    .select('*')
+    .from('accounts')
+    .where('name', name)
+    .first<Account>()
+
+  if (!account || account.deleted) {
+    logger.error("Account by name = %s not found or deleted", name)
+
+    return
+  }
+
+  return account
+}
+
 export const accountsGetByUserId = async (userId: number) => {
   const accountAdministrators = await accountAdministratorsGetByUserId(userId);
   const accounts: Account[] = [];

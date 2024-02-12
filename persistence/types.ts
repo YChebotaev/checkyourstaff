@@ -1,6 +1,6 @@
 export type Account = {
   id: number;
-  name: string | null;
+  name: string;
   deleted: boolean | null;
   createdAt: string;
   updatedAt: string | null;

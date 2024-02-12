@@ -89,6 +89,23 @@ export const sampleGroupsGetByUserId = async (userId: number) => {
   ) as SampleGroup[];
 };
 
+export const sampleGroupGetByNameAndAccountId = async (name: string, accountId: number,) => {
+  const sampleGroup = await knex
+    .select('*')
+    .from('sampleGroups')
+    .where('name', name)
+    .andWhere('accountId', accountId)
+    .first<SampleGroup>()
+
+  if (!sampleGroup || sampleGroup.deleted) {
+    logger.error("Sample group by name = %s not found or deleted", name)
+
+    return
+  }
+
+  return sampleGroup
+}
+
 export const sampleGroupDelete = async (id: number) => {
   await knex("sampleGroups")
     .update({

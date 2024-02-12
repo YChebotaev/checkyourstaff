@@ -17,6 +17,7 @@ export const up = async (knex: Knex): Promise<void> =>
       .inTable('accounts')
     
     table.index('accountId')
+    table.index('name')
   })
 
 export const down = async (knex: Knex): Promise<void> =>

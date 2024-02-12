@@ -13,6 +13,7 @@ import type {
   ClosePollSessionQuery,
 } from "./types";
 import {
+  accountGetByName,
   invitesGetByContacts,
   pollAnswerCreate,
   pollQuestionsGetByPollId,
@@ -20,6 +21,7 @@ import {
   responderDelete,
   respondersGetByInviteId,
   sampleGroupGet,
+  sampleGroupGetByNameAndAccountId,
   textFeedbackCreate,
   userSessionGetByTgUserId,
 } from "@checkyourstaff/persistence";
@@ -198,6 +200,14 @@ app.post<{
         },
       },
     },
+    querystring: {
+      type: 'object',
+      required: ['pollSessionId', 'tgUserId'],
+      properties: {
+        pollSessionId: { type: 'string' },
+        tgUserId: { type: 'string' }
+      }
+    }
   },
   async handler({
     body: { finalFeedback, answers },
@@ -265,18 +275,6 @@ app.post<{
     );
   },
 });
-
-app.get<{
-  Params: {
-    sampleGroupId: string
-  }
-}>('/sampleGroups/:sampleGroupId', async ({
-  params: { sampleGroupId: sampleGroupIdStr }
-}) => {
-  const sampleGroupId = Number(sampleGroupIdStr)
-
-  return sampleGroupGet(sampleGroupId)
-})
 
 app.post<{
   Body: {
@@ -360,12 +358,8 @@ app.post<{
   {
     const invites = await invitesGetByContacts(contacts)
 
-    console.log('invites =', invites)
-
     for (const { id } of invites) {
       const responders = await respondersGetByInviteId(id)
-
-      console.log('responders =', responders)
 
       for (const { id } of responders) {
         await responderDelete(id)
@@ -396,18 +390,62 @@ app.post<{
   }
 })
 
-app.listen(
-  {
-    port: Number(process.env["PORT"] ?? 3003),
-    host: process.env["HOST"] ?? "0.0.0.0",
-  },
-  (err, address) => {
-    if (err) {
-      logger.fatal(err);
+app.get<{
+  Params: {
+    sampleGroupId: string
+  }
+}>('/sampleGroups/:sampleGroupId', async ({
+  params: { sampleGroupId: sampleGroupIdStr }
+}) => {
+  const sampleGroupId = Number(sampleGroupIdStr)
 
-      return process.exit(1);
+  return sampleGroupGet(sampleGroupId)
+})
+
+app.get<{
+  Querystring: {
+    name: string
+  }
+}>('/accounts', {
+  schema: {
+    querystring: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: { type: 'string' }
+      }
     }
+  }
+}, async ({ query: { name } }) => {
+  const account = await accountGetByName(name)
 
-    logger.info("Webapp backend listening at %s", address);
-  },
-);
+  return account ? [account] : []
+})
+
+app.get<{
+  Querystring: {
+    name: string
+    accountId: string
+  }
+}>('/sampleGroups', {
+  schema: {
+    querystring: {
+      type: 'object',
+      required: ['name', 'accountId'],
+      properties: {
+        name: { type: 'string' },
+        accountId: { type: 'string' }
+      }
+    }
+  }
+}, async ({ query: { name, accountId: accountIdStr } }) => {
+  const accountId = Number(accountIdStr)
+  const sampleGroup = await sampleGroupGetByNameAndAccountId(name, accountId)
+
+  return sampleGroup ? [sampleGroup] : []
+})
+
+app.listen({
+  port: Number(process.env["PORT"] ?? 3003),
+  host: process.env["HOST"] ?? "0.0.0.0",
+});
