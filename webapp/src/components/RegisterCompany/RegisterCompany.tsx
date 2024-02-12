@@ -13,6 +13,7 @@ export const RegisterCompany: FC<{
       <div>
         <Input
           placeholder="Введите название компании"
+          maxLength={250}
           onChange={(e) => {
             const value = (Reflect.get(e.target, "value") as string).trim();
 

@@ -20,6 +20,7 @@ export const CreateSampleGroup: FC<{
   <Root>
     <Input
       placeholder="Введите название группы сотрудников"
+      maxLength={250}
       onChange={(e) => {
         const value = (Reflect.get(e.target, "value") as string).trim();
 
