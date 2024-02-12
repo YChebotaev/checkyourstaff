@@ -1,8 +1,31 @@
 checkyourstaff:
   hosts:
-    <your_host>:
-      redis_password:
+    <<your-host>>:
+      project:
+      project_git_url:
+      primary_origin:
+      console_origin:
+      webapp_origin:
+      pincodes_origin:
+      project_dir:
+      control_bot_name:
+      control_bot_token:
+      polling_bot_token:
+      console_jwt_secret:
+      api_console_port:
+      api_webapp_port:
+      api_pincodes_port:
+      openobserve_port:
+      pgadmin_port:
+      bull_monitor_port:
+      checkyourstaff_db_user:
       checkyourstaff_db_user_password:
+      pincodes_db_user:
       pincodes_db_user_password:
       pgadmin_default_password:
+      openobserve_default_username:
       openobserve_default_password:
+      keymask_seed:
+      smtp_pass:
+      iqsms_login:
+      iqsms_password:

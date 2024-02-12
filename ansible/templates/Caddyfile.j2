@@ -1,0 +1,76 @@
+{{primary_origin}} {
+	log {
+		output file /var/log/caddy/{{primary_origin}}-access.log
+	}
+
+	root * /var/{{project}}/landing
+	file_server
+}
+
+{{console_origin}} {
+  log {
+		output file /var/log/caddy/console.{{primary_origin}}-access.log
+	}
+
+	root * {{project_dir}}/console/dist
+	try_files {path} /index.html
+	file_server
+}
+
+api.{{console_origin}} {
+  log {
+		output file /var/log/caddy/api.console.{{primary_origin}}-access.log
+	}
+
+  reverse_proxy http://localhost:{{api_console_port}}
+}
+
+{{webapp_origin}} {
+  log {
+		output file /var/log/caddy/webapp.{{primary_origin}}-access.log
+	}
+
+  root * {{project_dir}}/webapp/dist
+	try_files {path} /index.html
+	file_server
+}
+
+api.{{webapp_origin}} {
+  log {
+		output file /var/log/caddy/api.webapp.{{primary_origin}}-access.log
+	}
+
+  reverse_proxy http://localhost:{{api_webapp_port}}
+}
+
+api.{{pincodes_origin}} {
+  log {
+		output file /var/log/caddy/api.{{pincodes_origin}}-access.log
+	}
+
+  reverse_proxy http://localhost:{{api_pincodes_port}}
+}
+
+pgadmin.{{primary_origin}} {
+  log {
+		output file /var/log/caddy/pgadmin.{{primary_origin}}-access.log
+	}
+
+  reverse_proxy http://localhost:{{pgadmin_port}}
+}
+
+openobserve.{{primary_origin}} {
+	log {
+		output file /var/log/caddy/openobserve.{{primary_origin}}-access.log
+	}
+
+  reverse_proxy http://localhost:{{openobserve_port}}
+}
+
+bull-monitor.{{primary_origin}} {
+	log {
+		output file /var/log/caddy/bull-monitor.{{primary_origin}}-access.log
+	}
+
+  reverse_proxy http://localhost:{{bull_monitor_port}}
+}

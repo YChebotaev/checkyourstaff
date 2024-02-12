@@ -67,8 +67,8 @@
         name: caddy
         enabled: true
     - name: Copy Caddyfile
-      ansible.builtin.copy:
-        src: files/Caddyfile
+      ansible.builtin.template:
+        src: templates/Caddyfile.j2
         dest: /etc/caddy/Caddyfile
         owner: caddy
         group: caddy
@@ -122,32 +122,32 @@
           - python3-psycopg2
         update_cache: true
         state: present
-    - name: Create checkyourstaff postgres user
+    - name: Create {{checkyourstaff_db_user}} postgres user
       become: true
       become_user: postgres
       community.postgresql.postgresql_user:
-        name: checkyourstaff
+        name: "{{checkyourstaff_db_user}}"
         password: "{{checkyourstaff_db_user_password}}"
-    - name: Create checkyourstaff postgres database
+    - name: Create {{checkyourstaff_db}} postgres database
       become: true
       become_user: postgres
       community.postgresql.postgresql_db:
-        name: checkyourstaff
+        name: "{{checkyourstaff_db}}"
         encoding: UTF-8
-        owner: checkyourstaff
-    - name: Create pincodes postgres user
+        owner: "{{checkyourstaff_db_user}}"
+    - name: Create {{pincodes_db_user}} postgres user
       become: true
       become_user: postgres
       community.postgresql.postgresql_user:
-        name: pincodes
+        name: "{{pincodes_db_user}}"
         password: "{{pincodes_db_user_password}}"
-    - name: Create pincodes postgres database
+    - name: Create {{pincodes_db}} postgres database
       become: true
       become_user: postgres
       community.postgresql.postgresql_db:
-        name: pincodes
+        name: "{{pincodes_db}}"
         encoding: UTF-8
-        owner: pincodes
+        owner: "{{pincodes_db_user}}"
     # Node
     - name: Install node deps
       ansible.builtin.apt:
@@ -172,95 +172,95 @@
     # Code
     - name: Pull the code
       ansible.builtin.git:
-        repo: https://github.com/YChebotaev/checkyourstaff.git
-        dest: /var/checkyourstaff
+        repo: "{{project_git_url}}"
+        dest: "{{project_dir}}"
     - name: Install code dependencies
       community.general.npm:
-        path: /var/checkyourstaff
+        path: "{{project_dir}}"
     - name: Copy console .env
-      ansible.builtin.copy:
-        src: files/console.env
-        dest: /var/checkyourstaff/console/.env
+      ansible.builtin.template:
+        src: templates/console.env.j2
+        dest: "{{project_dir}}/console/.env"
     - name: Copy console-backend .env
-      ansible.builtin.copy:
-        src: files/console-backend.env
-        dest: /var/checkyourstaff/console-backend/.env
+      ansible.builtin.template:
+        src: templates/console-backend.env.j2
+        dest: "{{project_dir}}/console-backend/.env"
     - name: Copy control-bot .env
-      ansible.builtin.copy:
-        src: files/control-bot.env
-        dest: /var/checkyourstaff/control-bot/.env
+      ansible.builtin.template:
+        src: templates/control-bot.env.j2
+        dest: "{{project_dir}}/control-bot/.env"
     - name: Copy persistence .env
-      ansible.builtin.copy:
-        src: files/persistence.env
-        dest: /var/checkyourstaff/persistence/.env
+      ansible.builtin.template:
+        src: templates/persistence.env.j2
+        dest: "{{project_dir}}/persistence/.env"
     - name: Copy polling-bot .env
-      ansible.builtin.copy:
-        src: files/polling-bot.env
-        dest: /var/checkyourstaff/polling-bot/.env
+      ansible.builtin.template:
+        src: templates/polling-bot.env.j2
+        dest: "{{project_dir}}/polling-bot/.env"
     - name: Copy webapp .env
-      ansible.builtin.copy:
-        src: files/webapp.env
-        dest: /var/checkyourstaff/webapp/.env
+      ansible.builtin.template:
+        src: templates/webapp.env.j2
+        dest: "{{project_dir}}/webapp/.env"
     - name: Copy webapp-backend .env
-      ansible.builtin.copy:
-        src: files/webapp-backend.env
-        dest: /var/checkyourstaff/webapp-backend/.env
+      ansible.builtin.template:
+        src: templates/webapp-backend.env.j2
+        dest: "{{project_dir}}/webapp-backend/.env"
     - name: Copy workers .env
-      ansible.builtin.copy:
-        src: files/workers.env
-        dest: /var/checkyourstaff/workers/.env
+      ansible.builtin.template:
+        src: templates/workers.env.j2
+        dest: "{{project_dir}}/workers/.env"
     - name: Copy pincodes-service .env
-      ansible.builtin.copy:
-        src: files/pincodes-service.env
-        dest: /var/checkyourstaff/pincodes-service/.env
+      ansible.builtin.template:
+        src: templates/pincodes-service.env.j2
+        dest: "{{project_dir}}/pincodes-service/.env"
     - name: build console
       ansible.builtin.shell:
         cmd: npm run build
-        chdir: /var/checkyourstaff/console
-        creates: /var/checkyourstaff/console/dist/index.html
+        chdir: "{{project_dir}}/console"
+        creates: "{{project_dir}}/console/dist/index.html"
     - name: build webapp
       ansible.builtin.shell:
         cmd: npm run build
-        chdir: /var/checkyourstaff/webapp
-        creates: /var/checkyourstaff/webapp/dist/index.html
+        chdir: "{{project_dir}}/webapp"
+        creates: "{{project_dir}}/webapp/dist/index.html"
     # Database migrations
     - name: Migrate persistence
       ansible.builtin.shell:
         cmd: npm run migrate:latest
-        chdir: /var/checkyourstaff/persistence
+        chdir: "{{project_dir}}/persistence"
     - name: Migrate pincodes
       ansible.builtin.shell:
         cmd: npm run migrate:latest
-        chdir: /var/checkyourstaff/pincodes-service
+        chdir: "{{project_dir}}/pincodes-service"
     - name: Seed pincodes
       ansible.builtin.shell:
         cmd: npm run seed:run
-        chdir: /var/checkyourstaff/pincodes-service
+        chdir: "{{project_dir}}/pincodes-service"
     # Start everything
     - name: Start console-backend
       ansible.builtin.shell:
         cmd: pm2 start npm --name console-backend -- start
-        chdir: /var/checkyourstaff/console-backend
+        chdir: "{{project_dir}}/console-backend"
     - name: Start control-bot
       ansible.builtin.shell:
         cmd: pm2 start npm --name control-bot -- start
-        chdir: /var/checkyourstaff/control-bot
+        chdir: "{{project_dir}}/control-bot"
     - name: Start polling-bot
       ansible.builtin.shell:
         cmd: pm2 start npm --name polling-bot -- start
-        chdir: /var/checkyourstaff/polling-bot
+        chdir: "{{project_dir}}/polling-bot"
     - name: Start webapp-backend
       ansible.builtin.shell:
         cmd: pm2 start npm --name webapp-backend -- start
-        chdir: /var/checkyourstaff/webapp-backend
+        chdir: "{{project_dir}}/webapp-backend"
     - name: Start workers
       ansible.builtin.shell:
         cmd: pm2 start npm --name workers -- start
-        chdir: /var/checkyourstaff/workers
+        chdir: "{{project_dir}}/workers"
     - name: Start pincodes-service
       ansible.builtin.shell:
         cmd: pm2 start npm --name pincodes-service -- start
-        chdir: /var/checkyourstaff/pincodes-service
+        chdir: "{{project_dir}}/pincodes-service"
     - name: pm2 startup
       ansible.builtin.shell:
         cmd: pm2 startup
@@ -294,9 +294,9 @@
         state: started
         restart_policy: unless-stopped
         ports:
-          - "127.0.0.1:8080:80"
+          - "127.0.0.1:{{pgadmin_port}}:80"
         env:
-          PGADMIN_DEFAULT_EMAIL: yury.79120345101@gmail.com
+          PGADMIN_DEFAULT_EMAIL: "{{pgadmin_default_email}}"
           PGADMIN_DEFAULT_PASSWORD: "{{pgadmin_default_password}}"
     # OpenObserve
     - name: Instal OpenObserve docker image
@@ -308,7 +308,7 @@
         ports:
           - "127.0.0.1:5080:5080"
         env:
-          ZO_ROOT_USER_EMAIL: yury.79120345101@gmail.com
+          ZO_ROOT_USER_EMAIL: "{{openobserve_default_username}}"
           ZO_ROOT_USER_PASSWORD: "{{openobserve_default_password}}"
     # # Bull Monitor
     # - name: Install bull monitor docker image
@@ -317,10 +317,8 @@
     #     image: ejhayes/nodejs-bull-monitor
     #     state: started
     #     restart_policy: unless-stopped
-    #     etc_hosts:
-    #       host.docker.internal: 172.17.0.1
     #     ports:
-    #       - "127.0.0.1:3007:3000"
+    #       - "127.0.0.1:{{bull_monitor_port}}:3000"
     #     env:
     #       REDIS_HOST: host.docker.internal
     #       REDIS_PORT: "6379"
