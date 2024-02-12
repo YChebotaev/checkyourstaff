@@ -3,6 +3,7 @@ import fastifyCors from "@fastify/cors";
 import { Telegram } from "telegraf";
 import plural from "plural-ru";
 import { parseContactsList } from "@checkyourstaff/common/parseContactsList";
+import { normalizeTelegramMessage } from '@checkyourstaff/common/normalizeTelegramMessage'
 import { keymask } from '@checkyourstaff/common/keymask'
 import { logger, completeRegistration, verify, inviteRecepients } from "./lib";
 import type {
@@ -12,9 +13,12 @@ import type {
   ClosePollSessionQuery,
 } from "./types";
 import {
+  invitesGetByContacts,
   pollAnswerCreate,
   pollQuestionsGetByPollId,
   pollSessionGet,
+  responderDelete,
+  respondersGetByInviteId,
   sampleGroupGet,
   textFeedbackCreate,
   userSessionGetByTgUserId,
@@ -111,12 +115,12 @@ app.post<{
 
       await controlBotTelegram.sendMessage(
         tgChatId,
-        `
-    Группа «${groupName}» создана
-    
-    /invite_${keymask.mask(sampleGroupId)} — пригласить участников в группу «${sampleGroup.name}»
-    /kick_${keymask.mask(sampleGroupId)} — удалить участников из группы «${sampleGroup.name}»
-    `.trim()
+        normalizeTelegramMessage(`
+          Группа «${groupName}» создана
+
+          /invite_${keymask.mask(sampleGroupId)} — пригласить участников в группу «${sampleGroup.name}»
+          /kick_${keymask.mask(sampleGroupId)} — удалить участников из группы «${sampleGroup.name}»
+        `)
       )
     }
 
@@ -304,28 +308,92 @@ app.post<{
     sampleGroupId
   })
 
-  const sampleGroup = await sampleGroupGet(sampleGroupId)
+  {
+    const sampleGroup = await sampleGroupGet(sampleGroupId)
 
-  if (!sampleGroup) {
-    logger.error('Sample group by id = %s not found or deleted', sampleGroupId)
+    if (!sampleGroup) {
+      logger.error('Sample group by id = %s not found or deleted', sampleGroupId)
 
-    throw new Error(`Sample group by id = ${sampleGroupId} not found or deleted`)
+      throw new Error(`Sample group by id = ${sampleGroupId} not found or deleted`)
+    }
+
+    await controlBotTelegram.sendMessage(
+      tgChatId,
+      normalizeTelegramMessage(`
+      ${plural(
+        contacts.length,
+        "%d приглашение",
+        "%d приглашения",
+        "%d приглашений",
+      )} разослано
+    `)
+    )
+  }
+})
+
+app.post<{
+  Body: {
+    sampleGroupId: number
+    list: string
+    tgChatId: number
+  }
+}>('/kickMembers', {
+  schema: {
+    body: {
+      type: 'object',
+      required: ['sampleGroupId', 'list', 'tgChatId'],
+      properties: {
+        sampleGroupId: { type: 'number' },
+        list: { type: 'string' },
+        tgChatId: { type: 'number' }
+      }
+    }
+  }
+}, async ({ body: { sampleGroupId, list, tgChatId } }) => {
+  const contacts = parseContactsList(list)
+    .flatMap(contacts => contacts.map(({ value }) => value))
+
+  if (contacts.length <= 0) {
+    throw new Error('Contacts in list must be more than 0')
   }
 
-  await controlBotTelegram.sendMessage(
-    tgChatId,
-    `
-    ${plural(
-      contacts.length,
-      "%d приглашение",
-      "%d приглашения",
-      "%d приглашений",
-    )} разослано
-    
-    /invite_${keymask.mask(sampleGroupId)} — пригласить участников в группу «${sampleGroup.name}»
-    /kick_${keymask.mask(sampleGroupId)} — удалить участников из группы «${sampleGroup.name}»
-    `.trim()
-  )
+  {
+    const invites = await invitesGetByContacts(contacts)
+
+    console.log('invites =', invites)
+
+    for (const { id } of invites) {
+      const responders = await respondersGetByInviteId(id)
+
+      console.log('responders =', responders)
+
+      for (const { id } of responders) {
+        await responderDelete(id)
+      }
+    }
+  }
+
+  {
+    const sampleGroup = await sampleGroupGet(sampleGroupId)
+
+    if (!sampleGroup) {
+      logger.error('Sample group by id = %s not found or deleted', sampleGroupId)
+
+      throw new Error(`Sample group by id = ${sampleGroupId} not found or deleted`)
+    }
+
+    await controlBotTelegram.sendMessage(
+      tgChatId,
+      normalizeTelegramMessage(`
+      ${plural(
+        contacts.length,
+        "%d участников",
+        "%d участников",
+        "%d участников",
+      )} удалено
+    `)
+    )
+  }
 })
 
 app.listen(

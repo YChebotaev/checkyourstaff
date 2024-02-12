@@ -21,7 +21,7 @@ export const joinByPin = async ({
   if (!pinCodePayload) {
     logger.warn('Pin code "%s" not found', code);
 
-    return;
+    return 'wrong-pin-code';
   }
 
   const { type, inviteId } = pinCodePayload;
@@ -48,6 +48,7 @@ export const joinByPin = async ({
       } else {
         await responderCreate({
           sampleGroupId: invite.sampleGroupId,
+          inviteId: invite.id,
           userId,
         });
       }

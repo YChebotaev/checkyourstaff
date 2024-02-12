@@ -5,14 +5,17 @@ import type { Responder } from "./types";
 export const responderCreate = async ({
   sampleGroupId,
   userId,
+  inviteId,
 }: {
   sampleGroupId: number;
   userId: number;
+  inviteId: number
 }) => {
   const [{ id }] = await knex
     .insert({
       sampleGroupId,
       userId,
+      inviteId,
       createdAt: new Date().getTime(),
     })
     .into("responders")
@@ -100,6 +103,15 @@ export const respondersGetByUserId = async (userId: number) => {
       .where("userId", userId)
   ).filter(({ deleted }) => !deleted);
 };
+
+export const respondersGetByInviteId = async (inviteId: number) => {
+  return (
+    await knex
+      .select<Responder[]>("*")
+      .from("responders")
+      .where("inviteId", inviteId)
+  ).filter(({ deleted }) => !deleted);
+}
 
 export const responderDelete = async (id: number) => {
   await knex("responders")

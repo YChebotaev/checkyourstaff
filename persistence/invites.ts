@@ -68,6 +68,19 @@ export const inviteGet = async (id: number) => {
   } as Invite;
 };
 
+/**
+ * @todo Make query more efficient
+ */
+export const invitesGetByContacts = async (contacts: string[]) => {
+  return (await knex
+    .select<Invite[]>('*')
+    .from('invites')).filter(invite => {
+      for (const { value } of maybeParseJson<ContactRecord[]>(invite.contacts)) {
+        return contacts.includes(value)
+      }
+    })
+}
+
 export const inviteDelete = async (id: number) => {
   await knex("invites")
     .update({

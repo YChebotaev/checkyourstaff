@@ -1,4 +1,10 @@
-import { logger, createBot, createRegisterURL, createInviteURL } from "./lib";
+import {
+  logger,
+  createBot,
+  createRegisterURL,
+  createInviteURL,
+  createKickURL
+} from "./lib";
 import { Markup } from "telegraf";
 import { initializeSession } from "@checkyourstaff/common/initializeSession";
 import { keymask } from "@checkyourstaff/common/keymask";
@@ -51,46 +57,90 @@ bot.start(async (ctx, next) => {
   return next();
 });
 
+{
+  const inviteCommandRegex = /invite_([a-zA-Z0-9]+)/
 
-const inviteCommandRegex = /invite_([a-zA-Z0-9]+)/
+  const inviteGetCommandArg = (command: string) => {
+    const m = command.match(inviteCommandRegex)
 
-const inviteGetCommandArg = (command: string) => {
-  const m = command.match(inviteCommandRegex)
-
-  if (m) {
-    return m[1]
+    if (m) {
+      return m[1]
+    }
   }
+
+  bot.command(inviteCommandRegex, async (ctx, next) => {
+    const sampleGroupIdMasked = inviteGetCommandArg(ctx.command)!
+    const sampleGroupId = Number(keymask.unmask(sampleGroupIdMasked))
+    const userSession = await userSessionGetByTgChatId('control', ctx.chat.id)
+
+    if (!userSession) {
+      logger.error("User session by chat id = %s not found", ctx.chat.id)
+
+      throw new Error(`User session by chat id = ${ctx.chat.id} not found`)
+    }
+
+    const inviteURL = createInviteURL({
+      sampleGroupId,
+      webappUrl,
+      fromBot: 'control-bot',
+      userId: userSession.userId,
+      chatId: ctx.chat.id
+    })
+
+    logger.info('inviteURL = %s', inviteURL.toString())
+
+    await ctx.sendMessage(
+      'Пригласите респондентов',
+      Markup.inlineKeyboard([
+        Markup.button.webApp('Пригласить', inviteURL.toString())
+      ])
+    )
+
+    return next()
+  })
 }
 
-bot.command(inviteCommandRegex, async (ctx, next) => {
-  const sampleGroupIdMasked = inviteGetCommandArg(ctx.command)!
-  const sampleGroupId = Number(keymask.unmask(sampleGroupIdMasked))
-  const userSession = await userSessionGetByTgChatId('control', ctx.chat.id)
+{
+  const kickCommandRegex = /kick_([a-zA-Z0-9]+)/
 
-  if (!userSession) {
-    logger.error("User session by chat id = %s not found", ctx.chat.id)
+  const kickGetCommandArg = (command: string) => {
+    const m = command.match(kickCommandRegex)
 
-    throw new Error(`User session by chat id = ${ctx.chat.id} not found`)
+    if (m) {
+      return m[1]
+    }
   }
 
-  const inviteURL = createInviteURL({
-    sampleGroupId,
-    webappUrl,
-    fromBot: 'control-bot',
-    userId: userSession.userId,
-    chatId: ctx.chat.id
+  bot.command(kickCommandRegex, async (ctx, next) => {
+    const sampleGroupIdMasked = kickGetCommandArg(ctx.command)!
+    const sampleGroupId = Number(keymask.unmask(sampleGroupIdMasked))
+    const userSession = await userSessionGetByTgChatId('control', ctx.chat.id)
+
+    if (!userSession) {
+      logger.error("User session by chat id = %s not found", ctx.chat.id)
+
+      throw new Error(`User session by chat id = ${ctx.chat.id} not found`)
+    }
+
+    const kickURL = createKickURL({
+      sampleGroupId,
+      webappUrl,
+      fromBot: 'control-bot',
+      userId: userSession.userId,
+      chatId: ctx.chat.id
+    })
+
+    logger.info('kickURL = %s', kickURL.toString())
+
+    await ctx.sendMessage(
+      'Убрать респондентов',
+      Markup.inlineKeyboard([
+        Markup.button.webApp('Убрать', kickURL.toString())
+      ])
+    )
+
+    return next()
   })
-
-  logger.info('inviteURL = %s', inviteURL.toString())
-
-  await ctx.sendMessage(
-    'Пригласите респондентов',
-    Markup.inlineKeyboard([
-      Markup.button.webApp('Пригласить', inviteURL.toString())
-    ])
-  )
-
-  return next()
-})
+}
 
 bot.launch().catch((e) => logger.error(e));

@@ -9,6 +9,7 @@ import { useApiClient } from "./hooks/useApiClient";
 import { RegisterPage } from "./pages/RegisterPage";
 import { PollSessionPage } from "./pages/PollSessionPage";
 import { InvitePage } from "./pages/InvitePage";
+import { KickPage } from "./pages/KickPage";
 import { Text } from "./components/Text";
 import "./global.css";
 
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "invite",
     element: <InvitePage />,
+  },
+  {
+    path: "kick",
+    element: <KickPage />,
   },
 ]);
 
