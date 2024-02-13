@@ -4,8 +4,6 @@ import {
   userSessionSetChatState,
   messageMetaGetByChatId,
   sampleGroupsGetByUserId,
-  userSessionGetByTgUserId,
-  sampleGroupGet,
   type ChatStateType,
   type MessageMetaTypes,
   type ChatStatePayload,
@@ -21,8 +19,7 @@ import {
   handleEnterPin,
   launchBot,
   requestInitFreeFormFeedback,
-  requestEnterFreeFormFeedback,
-  requestSelectSampleGroupIdForFreeFormFeedback,
+  handleFreeFormFeedbackCallbackQuery,
 } from "./lib";
 
 const token = process.env["BOT_TOKEN"];
@@ -49,80 +46,54 @@ bot.start(async (ctx) => {
   await requestPinCode(ctx.telegram, ctx.chat.id, userSession.id);
 });
 
-const freeFormFeedbackCallbackQueryRegexp = /\/fff\?t=(\d+)(?:\&sg=(\d+))?/;
+{
+  const freeFormFeedbackCallbackQueryRegexp = /\/fff\?t=(\d+)(?:\&sg=(\d+))?/;
 
-bot.on("callback_query", async (ctx, next) => {
-  const m = deunionize(ctx.callbackQuery).data?.match(
-    freeFormFeedbackCallbackQueryRegexp,
-  );
-
-  if (!m) {
-    return;
-  }
-
-  const type = m[1] as "0" | "1";
-  const sampleGroupIdStr = m[2] as string | "choose" | undefined;
-
-  switch (type) {
-    case "0" /* Sample group feedback */: {
-      const userSession = await userSessionGetByTgUserId(
-        "polling",
-        ctx.callbackQuery.from.id,
-      );
-
-      if (!userSession) {
-        logger.error(
-          "Can't find user session by tg user id = %s",
-          ctx.callbackQuery.from.id,
-        );
-
-        return;
-      }
-
-      if (sampleGroupIdStr == null) {
-        // Then, type must be 1
-
-        logger.error(
-          "Free form feedback callback query's type not match with sampleGroupId = undefined",
-        );
-
-        return;
-      } else if (sampleGroupIdStr === "choose") {
-        await requestSelectSampleGroupIdForFreeFormFeedback(
-          ctx.telegram,
-          ctx.callbackQuery.from.id, // TODO: Only applicable for private chats
-          userSession.userId,
-        );
-      } else if (!Number.isNaN(parseInt(sampleGroupIdStr))) {
-        const sampleGroupId = Number(sampleGroupIdStr);
-        const sampleGroup = await sampleGroupGet(sampleGroupId);
-
-        if (!sampleGroup) {
-          logger.error(
-            "Sample group with id = %s not found or deleted",
-            sampleGroupId,
-          );
-
-          return;
-        }
-
-        await requestEnterFreeFormFeedback(ctx.telegram, {
-          tgChatId: userSession.tgChatId,
-          userId: userSession.userId,
-          accountId: sampleGroup.accountId,
-          sampleGroupId: sampleGroup.id,
-          userSessionId: userSession.id,
-        });
-      }
-
-      break;
+  const getFreeFormFeedbackCallbackParams = (data?: string) => {
+    if (!data) {
+      return
     }
-    case "1" /* Developer's feedback */: {
-      // TODO: To implement
-      break;
+
+    const m = data.match(freeFormFeedbackCallbackQueryRegexp)
+
+    if (!m) {
+      return
+    }
+
+    const type = m[1] as '0' | '1'
+    const sampleGroupIdStr = m[2] as string | 'choose' | undefined
+    const sampleGroupId = sampleGroupIdStr === 'choose'
+      ? ('choose' as const)
+      : (
+        sampleGroupIdStr
+          ? Number(sampleGroupIdStr)
+          : undefined
+      )
+
+    return {
+      type,
+      sampleGroupId
     }
   }
-});
+
+  bot.on("callback_query", async (ctx) => {
+    const params = getFreeFormFeedbackCallbackParams(
+      deunionize(ctx.callbackQuery).data
+    )
+
+    if (!params) {
+      logger.warn('Cannot parse free form feedback callback query params')
+
+      return
+    }
+
+    await handleFreeFormFeedbackCallbackQuery({
+      telegram: ctx.telegram,
+      fromId: ctx.callbackQuery.from.id,
+      ...params
+    })
+  });
+}
 
 bot.on("message", async (ctx, next) => {
   const userSession = await userSessionGetByTgChatId("polling", ctx.chat.id);
