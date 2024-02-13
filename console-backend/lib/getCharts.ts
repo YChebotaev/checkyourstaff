@@ -1,7 +1,7 @@
 import {
   pollSessionsGetByAccountIdAndSampleGroupId,
   pollQuestionsGetByPollId,
-  pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId,
+  pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId
 } from "@checkyourstaff/persistence";
 import { calculatePollAnswersAverage } from "@checkyourstaff/common/calculatePollAnswersAverage";
 import {

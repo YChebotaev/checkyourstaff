@@ -3,6 +3,7 @@ import {
   pollQuestionGet,
   sampleGroupsGetByAccountId,
   textFeedbacksGetBySampleGroupId,
+  parseDate
 } from "@checkyourstaff/persistence";
 import type {
   TextFeedbackResp,
@@ -33,7 +34,7 @@ export const getTextFeedback = async ({ accountId }: { accountId: number }) => {
 
       const value: TextFeedbackValue = {
         id: textFeedback.id,
-        date: new Date(Number(textFeedback.createdAt)).toISOString(),
+        date: parseDate(textFeedback.createdAt)!.toISOString(),
         text: textFeedback.text,
         question: pollQuestion?.text,
         score: pollAnswers.find(
