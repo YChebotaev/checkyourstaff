@@ -96,7 +96,11 @@ const createRouter = () => {
   const hasAccount = accountId != null;
 
   if (isAuthenticated) {
+    console.log(99)
+
     if (hasAccount) {
+      console.log(102)
+
       return createBrowserRouter([
         {
           index: true,
@@ -151,6 +155,8 @@ const createRouter = () => {
         },
       ]);
     } else {
+      console.log(158)
+
       return createBrowserRouter([
         {
           path: "*",
@@ -172,6 +178,8 @@ const createRouter = () => {
       ]);
     }
   } else {
+    console.log(181)
+
     return createBrowserRouter([
       {
         path: "/signin",
