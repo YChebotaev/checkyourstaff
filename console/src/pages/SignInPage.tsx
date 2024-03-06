@@ -8,7 +8,7 @@ export const SignInPage: FC = () => {
     const s = document.createElement("script");
 
     s.src = "https://telegram.org/js/telegram-widget.js?22";
-    s.dataset.telegramLogin = process.env['VITE_CONTROL_BOT_NAME'];
+    s.dataset.telegramLogin = import.meta.env['VITE_CONTROL_BOT_NAME'];
     s.dataset.size = "large";
 
     const authURL = new URL(

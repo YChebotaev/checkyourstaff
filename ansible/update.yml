@@ -45,7 +45,7 @@
         dest: "{{project_dir}}/workers/.env"
     - name: Copy pincodes-service .env
       ansible.builtin.template:
-        src: templates/pincodes-service.env.j2
+      src: templates/pincodes-service.env.j2
         dest: "{{project_dir}}/pincodes-service/.env"
     - name: Build console
       ansible.builtin.shell:
