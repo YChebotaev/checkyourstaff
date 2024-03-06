@@ -21,13 +21,14 @@ import type {
 import { SignInPage } from "./pages/SignInPage";
 import { SignInSuccessPage } from "./pages/SignInSuccessPage";
 import { SelectAccountPage } from "./pages/SelectAccountPage";
+import { LogoutPage } from "./pages/LogoutPage";
 import { getToken } from "./utils/getToken";
 import { getAccountId } from "./utils/getAccountId";
 import { setAccountId } from "./utils/setAccountId";
 
 const apiClient = createClient({
   baseURL: import.meta.env["VITE_BACKEND_URL"],
-  getToken: () => getToken() ?? undefined
+  getToken: () => getToken() ?? undefined,
 });
 
 const queryClient = new QueryClient();
@@ -36,7 +37,7 @@ const fetchAccounts = async () => {
   const data = await queryClient.fetchQuery({
     queryKey: ["accounts"],
     async queryFn() {
-      return apiClient.getAccounts()
+      return apiClient.getAccounts();
     },
   });
 
@@ -48,8 +49,8 @@ const fetchStats = async () => {
     queryKey: ["stats"],
     async queryFn() {
       return apiClient.getStats({
-        accountId: getAccountId()!
-      })
+        accountId: getAccountId()!,
+      });
     },
   });
 };
@@ -60,8 +61,8 @@ const fetchCharts = async (sampleGroupId: number) => {
     async queryFn() {
       return apiClient.getCharts({
         accountId: getAccountId()!,
-        sampleGroupId
-      })
+        sampleGroupId,
+      });
     },
   });
 };
@@ -71,8 +72,8 @@ const fetchSampleGroups = async () => {
     queryKey: ["sampleGroups"],
     async queryFn() {
       return apiClient.getSampleGroups({
-        accountId: getAccountId()!
-      })
+        accountId: getAccountId()!,
+      });
     },
   });
 };
@@ -82,8 +83,8 @@ const fetchTextFeedback = async () => {
     queryKey: ["textFeedback"],
     async queryFn() {
       return apiClient.getTextFeedback({
-        accountId: getAccountId()!
-      })
+        accountId: getAccountId()!,
+      });
     },
   });
 };
@@ -144,6 +145,10 @@ const createRouter = () => {
             } satisfies FeedbackLoaderResult;
           },
         },
+        {
+          path: "/signout",
+          element: <LogoutPage />,
+        },
       ]);
     } else {
       return createBrowserRouter([
@@ -160,6 +165,10 @@ const createRouter = () => {
             } satisfies SelectAccountLoaderResult;
           },
         },
+        {
+          path: "/signout",
+          element: <LogoutPage />,
+        },
       ]);
     }
   } else {
@@ -171,6 +180,10 @@ const createRouter = () => {
       {
         path: "/signin/success",
         element: <SignInSuccessPage />,
+      },
+      {
+        path: "/signout",
+        element: <LogoutPage />,
       },
       {
         path: "*",

@@ -1,0 +1,97 @@
+---
+- name: Update checkyourstaff
+  hosts: checkyourstaff
+  remote_user: root
+  tasks:
+    # Code
+    - name: Pull the code
+      ansible.builtin.git:
+        repo: "{{project_git_url}}"
+        dest: "{{project_dir}}"
+    - name: Install code dependencies
+      community.general.npm:
+        path: "{{project_dir}}"
+    - name: Copy console .env
+      ansible.builtin.template:
+        src: templates/console.env.j2
+        dest: "{{project_dir}}/console/.env"
+    - name: Copy console-backend .env
+      ansible.builtin.template:
+        src: templates/console-backend.env.j2
+        dest: "{{project_dir}}/console-backend/.env"
+    - name: Copy control-bot .env
+      ansible.builtin.template:
+        src: templates/control-bot.env.j2
+        dest: "{{project_dir}}/control-bot/.env"
+    - name: Copy persistence .env
+      ansible.builtin.template:
+        src: templates/persistence.env.j2
+        dest: "{{project_dir}}/persistence/.env"
+    - name: Copy polling-bot .env
+      ansible.builtin.template:
+        src: templates/polling-bot.env.j2
+        dest: "{{project_dir}}/polling-bot/.env"
+    - name: Copy webapp .env
+      ansible.builtin.template:
+        src: templates/webapp.env.j2
+        dest: "{{project_dir}}/webapp/.env"
+    - name: Copy webapp-backend .env
+      ansible.builtin.template:
+        src: templates/webapp-backend.env.j2
+        dest: "{{project_dir}}/webapp-backend/.env"
+    - name: Copy workers .env
+      ansible.builtin.template:
+        src: templates/workers.env.j2
+        dest: "{{project_dir}}/workers/.env"
+    - name: Copy pincodes-service .env
+      ansible.builtin.template:
+        src: templates/pincodes-service.env.j2
+        dest: "{{project_dir}}/pincodes-service/.env"
+    - name: Build console
+      ansible.builtin.shell:
+        cmd: npm run build
+        chdir: "{{project_dir}}/console"
+        creates: "{{project_dir}}/console/dist/index.html"
+    - name: Build webapp
+      ansible.builtin.shell:
+        cmd: npm run build
+        chdir: "{{project_dir}}/webapp"
+        creates: "{{project_dir}}/webapp/dist/index.html"
+    # Database migrations
+    - name: Migrate persistence
+      ansible.builtin.shell:
+        cmd: npm run migrate:latest
+        chdir: "{{project_dir}}/persistence"
+    - name: Migrate pincodes
+      ansible.builtin.shell:
+        cmd: npm run migrate:latest
+        chdir: "{{project_dir}}/pincodes-service"
+    # Start everything
+    - name: Restart console-backend
+      ansible.builtin.shell:
+        cmd: pm2 restart console-backend
+        chdir: "{{project_dir}}/console-backend"
+    - name: Start control-bot
+      ansible.builtin.shell:
+        cmd: pm2 restart control-bot
+        chdir: "{{project_dir}}/control-bot"
+    - name: Restart polling-bot
+      ansible.builtin.shell:
+        cmd: pm2 restart polling-bot
+        chdir: "{{project_dir}}/polling-bot"
+    - name: Restart webapp-backend
+      ansible.builtin.shell:
+        cmd: pm2 restart webapp-backend
+        chdir: "{{project_dir}}/webapp-backend"
+    - name: Restart workers
+      ansible.builtin.shell:
+        cmd: pm2 restart workers
+        chdir: "{{project_dir}}/workers"
+    - name: Start pincodes-service
+      ansible.builtin.shell:
+        cmd: pm2 start npm --name pincodes-service -- start
+        chdir: "{{project_dir}}/pincodes-service"
+    - name: Restart caddy
+      ansible.builtin.systemd:
+        name: caddy
+        state: restarted
