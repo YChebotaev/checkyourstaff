@@ -75,7 +75,7 @@ export const invitesGetByContacts = async (contacts: string[]) => {
   return (await knex
     .select<Invite[]>('*')
     .from('invites')).filter(invite => {
-      for (const { value } of maybeParseJson<ContactRecord[]>(invite.contacts)) {
+      for (const { value } of maybeParseJson<ContactRecord[]>(invite.contacts)!) {
         return contacts.includes(value)
       }
     })
