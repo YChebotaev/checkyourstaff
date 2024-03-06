@@ -96,11 +96,7 @@ const createRouter = () => {
   const hasAccount = accountId != null;
 
   if (isAuthenticated) {
-    console.log(99);
-
     if (hasAccount) {
-      console.log(102);
-
       return createBrowserRouter([
         {
           id: "navigate-stats",
@@ -161,8 +157,6 @@ const createRouter = () => {
         },
       ]);
     } else {
-      console.log(158);
-
       return createBrowserRouter([
         {
           id: "navigate-select-account",
@@ -187,8 +181,6 @@ const createRouter = () => {
       ]);
     }
   } else {
-    console.log(181);
-
     return createBrowserRouter([
       {
         id: "signin",
