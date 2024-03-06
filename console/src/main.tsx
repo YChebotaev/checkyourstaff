@@ -96,17 +96,19 @@ const createRouter = () => {
   const hasAccount = accountId != null;
 
   if (isAuthenticated) {
-    console.log(99)
+    console.log(99);
 
     if (hasAccount) {
-      console.log(102)
+      console.log(102);
 
       return createBrowserRouter([
         {
+          id: "navigate-stats",
           index: true,
           element: <Navigate to="/stats" />,
         },
         {
+          id: "stats",
           path: "/stats",
           element: <StatsPage />,
           async loader() {
@@ -116,6 +118,7 @@ const createRouter = () => {
           },
         },
         {
+          id: "charts",
           path: "/charts",
           element: <ChartsPage />,
           async loader() {
@@ -129,6 +132,7 @@ const createRouter = () => {
           },
         },
         {
+          id: "charts-details",
           path: "/charts/:sampleGroupId",
           element: <ChartsPage />,
           async loader({ params: { sampleGroupId: sampleGroupIdStr } }) {
@@ -141,6 +145,7 @@ const createRouter = () => {
           },
         },
         {
+          id: "feedback",
           path: "/feedback",
           element: <FeedbackPage />,
           async loader() {
@@ -150,19 +155,22 @@ const createRouter = () => {
           },
         },
         {
+          id: "signout",
           path: "/signout",
           element: <LogoutPage />,
         },
       ]);
     } else {
-      console.log(158)
+      console.log(158);
 
       return createBrowserRouter([
         {
+          id: "navigate-select-account",
           path: "*",
           element: <Navigate to="/selectAccount" />,
         },
         {
+          id: "select-account",
           path: "/selectAccount",
           element: <SelectAccountPage />,
           async loader() {
@@ -172,28 +180,33 @@ const createRouter = () => {
           },
         },
         {
+          id: "signout",
           path: "/signout",
           element: <LogoutPage />,
         },
       ]);
     }
   } else {
-    console.log(181)
+    console.log(181);
 
     return createBrowserRouter([
       {
+        id: "signin",
         path: "/signin",
         element: <SignInPage />,
       },
       {
+        id: "signin-success",
         path: "/signin/success",
         element: <SignInSuccessPage />,
       },
       {
+        id: "signout",
         path: "/signout",
         element: <LogoutPage />,
       },
       {
+        id: "navigate-signin",
         path: "*",
         element: <Navigate to="/signin" />,
       },
