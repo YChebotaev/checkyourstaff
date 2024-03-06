@@ -51,12 +51,10 @@
       ansible.builtin.shell:
         cmd: npm run build
         chdir: "{{project_dir}}/console"
-        creates: "{{project_dir}}/console/dist/index.html"
     - name: Build webapp
       ansible.builtin.shell:
         cmd: npm run build
         chdir: "{{project_dir}}/webapp"
-        creates: "{{project_dir}}/webapp/dist/index.html"
     # Database migrations
     - name: Migrate persistence
       ansible.builtin.shell:
