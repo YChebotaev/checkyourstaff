@@ -1,14 +1,17 @@
 import { useState, type FC } from "react";
-import { useLoaderData, useNavigate, useRevalidator } from "react-router";
-import type { SelectAccountLoaderResult } from "../types";
+import {
+  /*useLoaderData,*/ useNavigate /*, useRevalidator*/,
+} from "react-router";
+// import type { SelectAccountLoaderResult } from "../types";
 import { BullseyeLayout } from "../layouts/BullseyeLayout";
 import { setAccountId } from "../utils/setAccountId";
 import { refresh } from "../main";
+import { useGetAccounts } from "../hooks/useGetAccounts";
 
 export const SelectAccountPage: FC = () => {
   const navigate = useNavigate();
-  const revalidator = useRevalidator()
-  const { accounts } = useLoaderData() as SelectAccountLoaderResult;
+  // const { accounts } = useLoaderData() as SelectAccountLoaderResult;
+  const accounts = useGetAccounts()!;
   const [selectedAccountIdStr, setSelectedAccountIdStr] = useState(
     String(accounts[0].id),
   );
@@ -33,8 +36,6 @@ export const SelectAccountPage: FC = () => {
               setAccountId(accountId);
 
               refresh();
-
-              revalidator.revalidate()
 
               navigate("/stats");
             }

@@ -1,5 +1,5 @@
 import { useMemo, type FC } from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { AppLayout } from "../layouts/AppLayout/AppLayout";
 import { appMenu } from "../constants/appMenu";
@@ -8,11 +8,15 @@ import { SampleGroupSelector } from "../components/SampleGroupSelector";
 import { PageHeader } from "../components/PageHeader";
 import { ChartSection } from "../components/ChartSection";
 import { useFetchSampleGroups } from "../hooks/useFetchSampleGroups";
-import type { ChartsLoaderResult } from "../types";
+import { useChartsPageData } from "../hooks/useChartsPageData";
 
 export const ChartsPage: FC = () => {
   const navigate = useNavigate();
-  const { sampleGroupId, chartsData } = useLoaderData() as ChartsLoaderResult;
+  const { sampleGroupId: sampleGroupIdStr } = useParams() as {
+    sampleGroupId: string;
+  };
+  const sampleGroupId = Number(sampleGroupIdStr);
+  const chartsData = useChartsPageData(sampleGroupId)!;
   const { data: sampleGroups, isLoading } = useFetchSampleGroups();
 
   const charts = useMemo(() => {

@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import { useLoaderData } from "react-router-dom";
+// import { useLoaderData } from "react-router-dom";
 import { isEmpty } from "lodash";
 import { AppLayout } from "../layouts/AppLayout/AppLayout";
 import { appMenu } from "../constants/appMenu";
@@ -7,10 +7,12 @@ import { PageHeader } from "../components/PageHeader";
 import { IndicatorsGrid } from "../components/IndicatorsGrid";
 import { EmptyData } from "../components/EmptyData";
 import { IndicatorsSection } from "../components/IndicatorsSection";
-import type { StatsLoaderResult } from "../types";
+// import type { StatsLoaderResult } from "../types";
+import { useStatsPageData } from "../hooks/useStatsPageData";
 
 export const StatsPage: FC = () => {
-  const { stats } = useLoaderData() as StatsLoaderResult;
+  // const { stats } = useLoaderData() as StatsLoaderResult;
+  const stats = useStatsPageData()!;
 
   return (
     <AppLayout navMenu={{ items: appMenu, activeKey: "stats" }}>
