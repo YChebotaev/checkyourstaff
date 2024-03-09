@@ -7,7 +7,11 @@ import { clearAccountId } from "../utils/clearAccountId";
 export const AccountGuard: FC<{ children(): ReactNode }> = ({ children }) => {
   const accounts = useGetAccounts();
 
-  const cont/*inue*/ = useMemo(() => {
+  const cont /*inue*/ = useMemo(() => {
+    if (location.pathname.startsWith("/selectAccount")) {
+      return true;
+    }
+
     if (accounts) {
       const selectedAccountId = getAccountId();
       const account =
