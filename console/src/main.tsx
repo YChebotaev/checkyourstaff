@@ -20,9 +20,15 @@ export const refresh = () => {
       <QueryClientProvider client={queryClient}>
         <useApiClient.Provider apiClient={apiClient}>
           <TokenGuard>
-            <AccountGuard>
-              {() => <RouterProvider router={createRouter()} />}
-            </AccountGuard>
+            {(skipAccounts) =>
+              skipAccounts ? (
+                <RouterProvider router={createRouter()} />
+              ) : (
+                <AccountGuard>
+                  {() => <RouterProvider router={createRouter()} />}
+                </AccountGuard>
+              )
+            }
           </TokenGuard>
         </useApiClient.Provider>
       </QueryClientProvider>
