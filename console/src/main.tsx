@@ -7,6 +7,7 @@ import { createApiClient } from "./lib/createApiClient";
 import { createQueryClient } from "./lib/createQueryClient";
 import { createRouter } from "./lib/createRouter";
 import { AccountGuard } from "./components/AccountGuard";
+import { TokenGuard } from "./components/TokenGuard";
 import "./index.css";
 
 const apiClient = createApiClient();
@@ -18,13 +19,15 @@ export const refresh = () => {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <useApiClient.Provider apiClient={apiClient}>
-          <AccountGuard>
-            {() => <RouterProvider router={createRouter()} />}
-          </AccountGuard>
+          <TokenGuard>
+            <AccountGuard>
+              {() => <RouterProvider router={createRouter()} />}
+            </AccountGuard>
+          </TokenGuard>
         </useApiClient.Provider>
       </QueryClientProvider>
     </StrictMode>,
   );
 };
 
-refresh()
+refresh();

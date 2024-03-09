@@ -69,7 +69,7 @@
       ansible.builtin.shell:
         cmd: pm2 restart console-backend
         chdir: "{{project_dir}}/console-backend"
-    - name: Start control-bot
+    - name: Restart control-bot
       ansible.builtin.shell:
         cmd: pm2 restart control-bot
         chdir: "{{project_dir}}/control-bot"
