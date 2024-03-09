@@ -43,9 +43,6 @@ export const PollQuestion: FC<{
       )}
       <MainButton
         text={`Далее (${index + 1}/${count})`}
-        {...MainButton.disabledProps(
-          score <= textFeedbackRequestTreshold && feedback.trim() === "",
-        )}
         onClick={() => {
           onComplete({
             score,

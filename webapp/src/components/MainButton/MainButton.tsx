@@ -50,8 +50,6 @@ export const MainButton: MainButtonType = ({
     }
 
     return () => {
-      Telegram.WebApp.MainButton.hide();
-
       if (progress != null) {
         Telegram.WebApp.MainButton.hideProgress();
       }
@@ -61,6 +59,14 @@ export const MainButton: MainButtonType = ({
       }
     };
   }, [text, color, textColor, isActive, isVisible, progress, onClick]);
+
+  useEffect(() => {
+    return () => {
+      if (Telegram.WebApp.MainButton.isVisible) {
+        Telegram.WebApp.MainButton.hide();
+      }
+    };
+  });
 
   return null;
 };
