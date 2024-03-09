@@ -87,7 +87,7 @@
         chdir: "{{project_dir}}/workers"
     - name: Start pincodes-service
       ansible.builtin.shell:
-        cmd: pm2 start npm --name pincodes-service -- start
+        cmd: pm2 restart pincodes-service
         chdir: "{{project_dir}}/pincodes-service"
     - name: Restart caddy
       ansible.builtin.systemd:
