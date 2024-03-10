@@ -1,3 +1,5 @@
+export type BotType = 'polling-bot' | 'control-bot'
+
 export type VerifyBody = {
   initData: string;
   bot: "control-bot" | "polling-bot";
