@@ -1,8 +1,8 @@
 import { useMemo, type FC, type ReactNode } from "react";
-import { useGetAccounts } from "../hooks/useGetAccounts";
-import { getAccountId } from "../utils/getAccountId";
-import { setAccountId } from "../utils/setAccountId";
-import { clearAccountId } from "../utils/clearAccountId";
+import { useGetAccounts } from "../features/account/hooks/useGetAccounts";
+import { getAccountId } from "../lib/getAccountId";
+import { setAccountId } from "../lib/setAccountId";
+import { clearAccountId } from "../lib/clearAccountId";
 
 export const AccountGuard: FC<{ children(): ReactNode }> = ({ children }) => {
   const accounts = useGetAccounts();

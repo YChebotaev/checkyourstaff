@@ -1,19 +1,19 @@
 import { Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { ChartsSkeletonPage } from "../pages/ChartsSkeletonPage";
-import { FeedbackSkeletonPage } from "../pages/FeedbackSkeletonPage";
-import { StatsSkeletonPage } from "../pages/StatsSkeletonPage";
-import { getAccountId } from "../utils/getAccountId";
-import { getToken } from "../utils/getToken";
-import { ChartsPage } from "../pages/ChartsPage";
-import { ChartsRedirectToDefaultPage } from "../pages/ChartsRedirectToDefaultPage";
-import { FeedbackPage } from "../pages/FeedbackPage";
-import { LogoutPage } from "../pages/LogoutPage";
-import { SelectAccountPage } from "../pages/SelectAccountPage";
-import { SelectAccountSkeletonPage } from "../pages/SelectAccountSkeletonPage";
-import { SignInPage } from "../pages/SignInPage";
-import { SignInSuccessPage } from "../pages/SignInSuccessPage";
-import { StatsPage } from "../pages/StatsPage";
+import { ChartsSkeletonPage } from "../features/charts/pages/ChartsSkeletonPage";
+import { FeedbackPage } from "../features/feedback/pages/FeedbackPage";
+import { FeedbackSkeletonPage } from "../features/feedback/pages/FeedbackSkeletonPage";
+import { getAccountId } from "./getAccountId";
+import { getToken } from "./getToken";
+import { ChartsPage } from "../features/charts/pages/ChartsPage";
+import { ChartsRedirectToDefaultPage } from "../features/charts/pages/ChartsRedirectToDefaultPage";
+import { LogoutPage } from "../features/auth/pages/LogoutPage";
+import { SelectAccountPage } from "../features/account/pages/SelectAccountPage";
+import { SelectAccountSkeletonPage } from "../features/account/pages/SelectAccountSkeletonPage";
+import { SignInPage } from "../features/auth/pages/SignInPage";
+import { SignInSuccessPage } from "../features/auth/pages/SignInSuccessPage";
+import { StatsSkeletonPage } from "../features/stats/pages/StatsSkeletonPage";
+import { StatsPage } from "../features/stats/pages/StatsPage";
 
 const createAppRouter = () =>
   createBrowserRouter([

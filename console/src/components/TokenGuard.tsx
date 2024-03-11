@@ -1,5 +1,5 @@
 import { type FC, type ReactNode } from "react";
-import { getToken } from "../utils/getToken";
+import { getToken } from "../lib/getToken";
 
 export const TokenGuard: FC<{ children(skipAccounts: boolean): ReactNode }> = ({
   children,
