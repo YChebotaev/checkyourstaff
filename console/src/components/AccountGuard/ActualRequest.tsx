@@ -1,17 +1,13 @@
 import { useMemo, type FC, type ReactNode } from "react";
-import { useGetAccounts } from "../features/account/hooks/useGetAccounts";
-import { getAccountId } from "../lib/getAccountId";
-import { setAccountId } from "../lib/setAccountId";
-import { clearAccountId } from "../lib/clearAccountId";
+import { useGetAccounts } from "../../features/account/hooks/useGetAccounts";
+import { getAccountId } from "../../lib/getAccountId";
+import { setAccountId } from "../../lib/setAccountId";
+import { clearAccountId } from "../../lib/clearAccountId";
 
-export const AccountGuard: FC<{ skip: boolean, children(): ReactNode }> = ({ skip, children }) => {
+export const ActualRequest: FC<{ children(): ReactNode }> = ({ children }) => {
   const accounts = useGetAccounts();
 
   const cont /*inue*/ = useMemo(() => {
-    if (skip) {
-      return true
-    }
-
     if (accounts) {
       const selectedAccountId = getAccountId();
       const account =
@@ -39,7 +35,7 @@ export const AccountGuard: FC<{ skip: boolean, children(): ReactNode }> = ({ ski
     }
 
     return false;
-  }, [accounts, skip]);
+  }, [accounts]);
 
   return cont ? children() : null;
 };
