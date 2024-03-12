@@ -24,7 +24,12 @@ export const refresh = () => {
               skipAccounts ? (
                 <RouterProvider router={createRouter()} />
               ) : (
-                <AccountGuard>
+                <AccountGuard
+                  skip={
+                    location.pathname.startsWith("/selectAccount") ||
+                    location.pathname.startsWith("/signout")
+                  }
+                >
                   {() => <RouterProvider router={createRouter()} />}
                 </AccountGuard>
               )

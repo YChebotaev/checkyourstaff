@@ -4,12 +4,12 @@ import { getAccountId } from "../lib/getAccountId";
 import { setAccountId } from "../lib/setAccountId";
 import { clearAccountId } from "../lib/clearAccountId";
 
-export const AccountGuard: FC<{ children(): ReactNode }> = ({ children }) => {
+export const AccountGuard: FC<{ skip: boolean, children(): ReactNode }> = ({ skip, children }) => {
   const accounts = useGetAccounts();
 
   const cont /*inue*/ = useMemo(() => {
-    if (location.pathname.startsWith("/selectAccount")) {
-      return true;
+    if (skip) {
+      return true
     }
 
     if (accounts) {
