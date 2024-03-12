@@ -7,7 +7,7 @@ import { getAccountId } from "./getAccountId";
 import { getToken } from "./getToken";
 import { ChartsPage } from "../features/charts/pages/ChartsPage";
 import { ChartsRedirectToDefaultPage } from "../features/charts/pages/ChartsRedirectToDefaultPage";
-import { LogoutPage } from "../features/auth/pages/LogoutPage";
+import { SignOutPage } from "../features/auth/pages/LogoutPage";
 import { SelectAccountPage } from "../features/account/pages/SelectAccountPage";
 import { SelectAccountSkeletonPage } from "../features/account/pages/SelectAccountSkeletonPage";
 import { SignInPage } from "../features/auth/pages/SignInPage";
@@ -61,7 +61,7 @@ const createAppRouter = () =>
     {
       id: "signout",
       path: "/signout",
-      element: <LogoutPage />,
+      element: <SignOutPage />,
     },
   ]);
 
@@ -84,7 +84,7 @@ const createSelectAccountRouter = () =>
     {
       id: "signout",
       path: "/signout",
-      element: <LogoutPage />,
+      element: <SignOutPage />,
     },
   ]);
 
@@ -103,7 +103,7 @@ const createAuthRouter = () =>
     {
       id: "signout",
       path: "/signout",
-      element: <LogoutPage />,
+      element: <SignOutPage />,
     },
     {
       id: "navigate-signin",
