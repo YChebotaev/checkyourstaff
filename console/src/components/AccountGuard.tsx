@@ -39,7 +39,7 @@ export const AccountGuard: FC<{ skip: boolean, children(): ReactNode }> = ({ ski
     }
 
     return false;
-  }, [accounts]);
+  }, [accounts, skip]);
 
   return cont ? children() : null;
 };
