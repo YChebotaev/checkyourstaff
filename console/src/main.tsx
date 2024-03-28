@@ -12,7 +12,10 @@ import "./index.css";
 
 const apiClient = createApiClient();
 const queryClient = createQueryClient();
-const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
+const rootEl = document.getElementById("root")!;
+const reactRoot = ReactDOM.createRoot(rootEl);
+const locationStartsWith = (prefix: string) =>
+  location.pathname.startsWith(prefix);
 
 export const refresh = () => {
   reactRoot.render(
@@ -20,21 +23,13 @@ export const refresh = () => {
       <QueryClientProvider client={queryClient}>
         <useApiClient.Provider apiClient={apiClient}>
           <TokenGuard>
-            {(skipAccounts) =>
-              skipAccounts ? (
-                <RouterProvider router={createRouter()} />
-              ) : (
-                <AccountGuard
-                  skip={
-                    location.pathname.startsWith("/selectAccount") ||
-                    location.pathname.startsWith("/signout") ||
-                    location.pathname.startsWith('/signin')
-                  }
-                >
-                  {() => <RouterProvider router={createRouter()} />}
-                </AccountGuard>
-              )
-            }
+            <AccountGuard
+              skip={["/selectAccount", "/signout", "/signin"].some(
+                locationStartsWith,
+              )}
+            >
+              <RouterProvider router={createRouter()} />
+            </AccountGuard>
           </TokenGuard>
         </useApiClient.Provider>
       </QueryClientProvider>

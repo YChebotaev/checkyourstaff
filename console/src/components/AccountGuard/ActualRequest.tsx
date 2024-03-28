@@ -4,7 +4,7 @@ import { getAccountId } from "../../lib/getAccountId";
 import { setAccountId } from "../../lib/setAccountId";
 import { clearAccountId } from "../../lib/clearAccountId";
 
-export const ActualRequest: FC<{ children(): ReactNode }> = ({ children }) => {
+export const ActualRequest: FC<{ children: ReactNode }> = ({ children }) => {
   const accounts = useGetAccounts();
 
   const cont /*inue*/ = useMemo(() => {
@@ -37,5 +37,5 @@ export const ActualRequest: FC<{ children(): ReactNode }> = ({ children }) => {
     return false;
   }, [accounts]);
 
-  return cont ? children() : null;
+  return cont ? children : null;
 };
