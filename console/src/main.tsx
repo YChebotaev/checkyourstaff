@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,7 +7,7 @@ import { createApiClient } from "./lib/createApiClient";
 import { createQueryClient } from "./lib/createQueryClient";
 import { createRouter } from "./lib/createRouter";
 import { AccountGuard } from "./components/AccountGuard";
-import { TokenGuard } from "./components/TokenGuard";
+import { AppLoading } from "./layouts/AppLoading";
 import "./index.css";
 
 const apiClient = createApiClient();
@@ -22,7 +22,7 @@ export const refresh = () => {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <useApiClient.Provider apiClient={apiClient}>
-          <TokenGuard>
+          <Suspense fallback={<AppLoading />}>
             <AccountGuard
               skip={["/selectAccount", "/signout", "/signin"].some(
                 locationStartsWith,
@@ -30,7 +30,7 @@ export const refresh = () => {
             >
               <RouterProvider router={createRouter()} />
             </AccountGuard>
-          </TokenGuard>
+          </Suspense>
         </useApiClient.Provider>
       </QueryClientProvider>
     </StrictMode>,

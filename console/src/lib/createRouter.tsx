@@ -68,11 +68,6 @@ const createAppRouter = () =>
 const createSelectAccountRouter = () =>
   createBrowserRouter([
     {
-      id: "navigate-select-account",
-      path: "*",
-      element: <Navigate to="/selectAccount" />,
-    },
-    {
       id: "select-account",
       path: "/selectAccount",
       element: (
@@ -85,6 +80,11 @@ const createSelectAccountRouter = () =>
       id: "signout",
       path: "/signout",
       element: <SignOutPage />,
+    },
+    {
+      id: "navigate-select-account",
+      path: "*",
+      element: <Navigate to="/selectAccount" />,
     },
   ]);
 
