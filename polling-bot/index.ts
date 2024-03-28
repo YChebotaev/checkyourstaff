@@ -12,9 +12,9 @@ import {
   messageMetaDelete,
 } from "@checkyourstaff/persistence";
 import { initializeSession } from "@checkyourstaff/common/initializeSession";
+import { createBot } from '@checkyourstaff/common/createBot'
 import {
   logger,
-  createBot,
   requestPinCode,
   handleEnterPin,
   launchBot,
