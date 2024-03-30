@@ -9,6 +9,7 @@ import { createRouter } from "./lib/createRouter";
 import { AccountGuard } from "./components/AccountGuard";
 import { AppLoading } from "./layouts/AppLoading";
 import "./index.css";
+import { getToken } from "./lib/getToken";
 
 const apiClient = createApiClient();
 const queryClient = createQueryClient();
@@ -18,16 +19,16 @@ const locationStartsWith = (prefix: string) =>
   location.pathname.startsWith(prefix);
 
 export const refresh = () => {
+  const skipAccountGuard =
+    getToken() == null ||
+    ["/selectAccount", "/signout", "/signin"].some(locationStartsWith);
+
   reactRoot.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <useApiClient.Provider apiClient={apiClient}>
           <Suspense fallback={<AppLoading />}>
-            <AccountGuard
-              skip={["/selectAccount", "/signout", "/signin"].some(
-                locationStartsWith,
-              )}
-            >
+            <AccountGuard skip={skipAccountGuard}>
               <RouterProvider router={createRouter()} />
             </AccountGuard>
           </Suspense>
