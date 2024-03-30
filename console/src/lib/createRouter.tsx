@@ -12,18 +12,17 @@ import { SelectAccountPage } from "../features/account/pages/SelectAccountPage";
 import { SelectAccountSkeletonPage } from "../features/account/pages/SelectAccountSkeletonPage";
 import { SignInPage } from "../features/auth/pages/SignInPage";
 import { SignInSuccessPage } from "../features/auth/pages/SignInSuccessPage";
+import { SigninFailedPage } from "../features/auth/pages/SignInFailedPage";
 import { StatsSkeletonPage } from "../features/stats/pages/StatsSkeletonPage";
 import { StatsPage } from "../features/stats/pages/StatsPage";
 
 const createAppRouter = () =>
   createBrowserRouter([
     {
-      id: "navigate-stats",
       index: true,
       element: <Navigate to="/stats" />,
     },
     {
-      id: "stats",
       path: "/stats",
       element: (
         <Suspense fallback={<StatsSkeletonPage />}>
@@ -32,7 +31,6 @@ const createAppRouter = () =>
       ),
     },
     {
-      id: "charts",
       path: "/charts",
       element: (
         <Suspense fallback={<ChartsSkeletonPage />}>
@@ -41,7 +39,6 @@ const createAppRouter = () =>
       ),
     },
     {
-      id: "charts-details",
       path: "/charts/:sampleGroupId",
       element: (
         <Suspense fallback={<ChartsSkeletonPage />}>
@@ -50,7 +47,6 @@ const createAppRouter = () =>
       ),
     },
     {
-      id: "feedback",
       path: "/feedback",
       element: (
         <Suspense fallback={<FeedbackSkeletonPage />}>
@@ -59,7 +55,6 @@ const createAppRouter = () =>
       ),
     },
     {
-      id: "signout",
       path: "/signout",
       element: <SignOutPage />,
     },
@@ -68,7 +63,6 @@ const createAppRouter = () =>
 const createSelectAccountRouter = () =>
   createBrowserRouter([
     {
-      id: "select-account",
       path: "/selectAccount",
       element: (
         <Suspense fallback={<SelectAccountSkeletonPage />}>
@@ -77,12 +71,10 @@ const createSelectAccountRouter = () =>
       ),
     },
     {
-      id: "signout",
       path: "/signout",
       element: <SignOutPage />,
     },
     {
-      id: "navigate-select-account",
       path: "*",
       element: <Navigate to="/selectAccount" />,
     },
@@ -91,22 +83,22 @@ const createSelectAccountRouter = () =>
 const createAuthRouter = () =>
   createBrowserRouter([
     {
-      id: "signin",
       path: "/signin",
       element: <SignInPage />,
     },
     {
-      id: "signin-success",
       path: "/signin/success",
       element: <SignInSuccessPage />,
     },
     {
-      id: "signout",
+      path: "/signin/failed",
+      element: <SigninFailedPage />,
+    },
+    {
       path: "/signout",
       element: <SignOutPage />,
     },
     {
-      id: "navigate-signin",
       path: "*",
       element: <Navigate to="/signin" />,
     },

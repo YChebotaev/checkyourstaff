@@ -1,22 +1,15 @@
-import { useCallback, useState, type FC } from "react";
-import { Navigate } from "react-router-dom";
+import { useCallback, type FC } from "react";
 import { AuthVerifyData } from "@checkyourstaff/console-backend/types";
+import { useNavigate } from "react-router-dom";
 import { useAuthVerify } from "../hooks/useAuthVerify";
 import { setToken } from "../../../lib/setToken";
 import { refresh } from "../../../main";
-import { getToken } from "../../../lib/getToken";
 import { useApiClient } from "../../../hooks/useApiClient";
 import { setAccountId } from "../../../lib/setAccountId";
 
 export const SignInSuccessPage: FC = () => {
+  const navigate = useNavigate();
   const apiClient = useApiClient();
-  const [redirectTo, setRedirectTo] = useState<
-    "stats" | "failed" | "selectAccount" | null
-  >(() => {
-    const token = getToken();
-
-    return token ? "stats" : null;
-  });
 
   useAuthVerify({
     onSuccess: useCallback(
@@ -32,28 +25,22 @@ export const SignInSuccessPage: FC = () => {
             } else if (accounts.length === 1) {
               setAccountId(accounts[0].id);
 
-              setRedirectTo("stats");
-            } else {
-              setRedirectTo("selectAccount");
-            }
+              refresh();
 
-            refresh();
+              navigate("/stats");
+            } else {
+              refresh();
+
+              navigate("/selectAccount");
+            }
           }
         } else {
-          setRedirectTo("failed");
+          navigate("/signin/failed");
         }
       },
-      [apiClient],
+      [apiClient, navigate],
     ),
   });
 
-  if (redirectTo == null) {
-    return null;
-  } else if (redirectTo === "failed") {
-    return "Не удается подтвердить подлинность аккаунта";
-  } else if (redirectTo === "selectAccount") {
-    return <Navigate to="/selectAccount" />;
-  } else if (redirectTo === "stats") {
-    return <Navigate to="/stats" />;
-  }
+  return null;
 };
