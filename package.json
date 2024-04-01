@@ -9,7 +9,8 @@
     "persistence",
     "common",
     "workers",
-    "pincodes-service"
+    "pincodes-service",
+    "scripts"
   ],
   "author": "YChebotaev <yury.79120345101@gmail.com>",
   "license": "UNLICENSED",
