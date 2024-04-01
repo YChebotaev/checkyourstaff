@@ -66,7 +66,7 @@ export const MainButton: MainButtonType = ({
         Telegram.WebApp.MainButton.hide();
       }
     };
-  });
+  }, []);
 
   return null;
 };
