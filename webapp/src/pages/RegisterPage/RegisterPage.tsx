@@ -11,7 +11,7 @@ import { Text } from "../../components/Text";
 import { BullseyeLayout } from "../../layouts/BullseyeLayout";
 import { useCloudStorageItem } from "../../hooks/useCloudStorageItem";
 
-const REQUIRED_MINIMUM_CONTACTS_COUNT = /** @todo: debug only */ 2; // 10;
+const REQUIRED_MINIMUM_CONTACTS_COUNT = 10;
 
 const isListValid = (list: string) => {
   const contactGroups = parseContactsList(list);
@@ -30,9 +30,9 @@ export const RegisterPage: FC = () => {
   const userId = searchParams.get("userId");
 
   // DEBUG ONLY:
-  Telegram.WebApp.CloudStorage.removeItem(
-    `registration_complete_${tgChatId}_${userId}`,
-  );
+  // Telegram.WebApp.CloudStorage.removeItem(
+  //   `registration_complete_${tgChatId}_${userId}`,
+  // );
 
   const [registrationComplete, setRegistrationComplete] = useCloudStorageItem(
     `registration_complete_${tgChatId}_${userId}`,
