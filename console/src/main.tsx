@@ -22,15 +22,20 @@ export const refresh = () => {
   const skipAccountGuard =
     getToken() == null ||
     ["/selectAccount", "/signout", "/signin"].some(locationStartsWith);
+  const routerProvider = <RouterProvider router={createRouter()} />;
 
   reactRoot.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <useApiClient.Provider apiClient={apiClient}>
           <Suspense fallback={<AppLoading />}>
-            <AccountGuard skip={skipAccountGuard}>
-              <RouterProvider router={createRouter()} />
-            </AccountGuard>
+            {skipAccountGuard ? (
+              routerProvider
+            ) : (
+              <AccountGuard>
+                {routerProvider}
+              </AccountGuard>
+            )}
           </Suspense>
         </useApiClient.Provider>
       </QueryClientProvider>
