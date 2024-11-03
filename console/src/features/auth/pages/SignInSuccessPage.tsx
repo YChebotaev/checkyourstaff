@@ -1,5 +1,5 @@
 import { useCallback, type FC } from "react";
-import { AuthVerifyData } from "@checkyourstaff/console-backend/types";
+import type { AuthVerifyData } from "@checkyourstaff/console-backend/types";
 import { useNavigate } from "react-router-dom";
 import { useAuthVerify } from "../hooks/useAuthVerify";
 import { setToken } from "../../../lib/setToken";
@@ -40,6 +40,9 @@ export const SignInSuccessPage: FC = () => {
       },
       [apiClient, navigate],
     ),
+    onError: useCallback(() => {
+      navigate("/signin/failed");
+    }, [navigate]),
   });
 
   return null;

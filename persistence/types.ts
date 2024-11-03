@@ -182,8 +182,6 @@ export type ContactRecord = {
 export type Invite = {
   id: number;
   sampleGroupId: number;
-  // email: string | null;
-  // phone: string | null;
   contacts: ContactRecord[]
   deleted: boolean;
   createdAt: string;
