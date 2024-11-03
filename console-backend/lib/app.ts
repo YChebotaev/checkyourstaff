@@ -1,5 +1,7 @@
 import { fastify } from "fastify";
 import { fastifyCors } from "@fastify/cors";
+import { fastifySwagger } from '@fastify/swagger'
+import { fastifySwaggerUi } from '@fastify/swagger-ui'
 import {
   sampleGroupsGetByAccountId,
   textFeedbackDelete,
@@ -24,6 +26,24 @@ app.register(fastifyCors, {
   origin: getCorsOrign(),
   credentials: true,
 });
+app.register(fastifySwagger, {
+  swagger: {
+    info: {
+      title: 'Console Backend Service',
+      description: '',
+      version: '0.2.0'
+    },
+    consumes: ['application/json'],
+    produces: ['application/json'],
+    securityDefinitions: {
+      Bearer: {
+        type: 'apiKey',
+        name: 'Authorization',
+        in: 'header'
+      }
+    }
+  }
+})
 
 app.get<{
   Querystring: AuthVerifyQuery;
@@ -179,3 +199,10 @@ app.post<{
     });
   },
 });
+
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+  uiConfig: {
+    deepLinking: true
+  }
+})
