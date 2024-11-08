@@ -17,7 +17,7 @@ const isValid = (query: AuthVerifyQuery) => {
   return query.hash === hash;
 };
 
-const createToken = (query: AuthVerifyQuery) => {
+export const createToken = (query: AuthVerifyQuery) => {
   const payload: TokenPayoad = {
     tgUserId: Number(query.id),
     firstName: query.first_name,

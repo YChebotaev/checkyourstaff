@@ -1,12 +1,13 @@
 import axios from "axios";
-import type {
-  StatsResp,
-  AccountsResp,
-  ChartsDataResp,
-  SampleGroupsData,
-  TextFeedbackResp,
-  AuthVerifyData,
-  AuthVerifyQuery,
+import {
+  type StatsResp,
+  type AccountsResp,
+  type ChartsDataResp,
+  type SampleGroupsData,
+  type TextFeedbackResp,
+  type AuthVerifyData,
+  type AuthVerifyQuery,
+  TestLoginData,
 } from "../types";
 
 export const createClient = ({
@@ -69,6 +70,11 @@ export const createClient = ({
       });
 
       return data;
+    },
+    async authTest() {
+      const { data } = await client.post<TestLoginData>('/auth/test-login')
+
+      return data
     },
     async getAccounts() {
       const { data } = await client.get<AccountsResp>("/accounts");

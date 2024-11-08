@@ -67,7 +67,10 @@ export type AuthVerifyQuery = {
 export type AuthVerifyData = {
   valid: boolean;
   token?: string;
-  accountId?: number;
 };
+
+export type TestLoginData = {
+  token: string
+}
 
 export type SampleGroupsData = SampleGroup[];

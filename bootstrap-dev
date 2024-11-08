@@ -1,8 +1,12 @@
 import { exec } from 'node:child_process'
-import { $, cd } from 'zx'
+import { $, cd, within, minimist } from 'zx'
 import { GenericContainer } from 'testcontainers'
-import { within } from 'zx'
 import createKnex from 'knex'
+
+const argv = minimist(process.argv.slice(3), {
+  string: ['only'],
+  boolean: ['skip-tunnels']
+})
 
 /**
  * 
@@ -26,9 +30,12 @@ const startLoophole = (port, hostname) => {
 const npmDev = async (projects) => {
   await Promise.all(
     projects.map(name => within(async () => {
-      cd(`./${name}`)
+      // $.cwd = `./${name}`
 
-      const p = exec('npm run dev')
+      console.log('Starting service "%s"', name)
+      
+      // const p = exec('npm run dev')
+      const p = exec(`npm run dev -w ${name}`)
       p.stdout?.pipe(process.stdout)
       p.stderr?.pipe(process.stderr)
     }))
@@ -70,6 +77,8 @@ const startContainers = async () => {
         })
       }
 
+      console.log('Container %s starting...', name)
+
       return container.start()
     })
   )).forEach(container => {
@@ -89,12 +98,12 @@ const initDb = async () => {
     }
   })
 
-  // Create checkyourstaff db
+  console.log('Initializing "checkyourstaff" database')
   await knex.raw('CREATE USER checkyourstaff WITH PASSWORD \'Nu9ifPc9U3\';')
   await knex.raw('CREATE DATABASE checkyourstaff WITH OWNER = checkyourstaff;')
   await knex.raw('GRANT ALL PRIVILEGES ON DATABASE checkyourstaff TO checkyourstaff;')
 
-  // Create pincodes db
+  console.log('Initializing "pincodes" database')
   await knex.raw('CREATE USER pincodes WITH PASSWORD \'YOMdaH5kzLQ\';')
   await knex.raw('CREATE DATABASE pincodes WITH OWNER = pincodes;')
   await knex.raw('GRANT ALL PRIVILEGES ON DATABASE pincodes TO pincodes;')
@@ -102,19 +111,25 @@ const initDb = async () => {
 
 const applyMigrations = () => Promise.all([
   within(async () => {
-    cd('./persistence')
+    $.cwd = ('./persistence')
 
     await $`npm run migrate:latest`
   }),
   within(async () => {
-    cd('./pincodes-service')
+    $.cwd = ('./pincodes-service')
 
     await $`npm run migrate:latest`
   })
 ])
 
-const startServices = async () => {
-  await npmDev([
+const applySeeds = () => within(async () => {
+  $.cwd = ('./persistence')
+
+  await $`npm run seed:run`
+})
+
+const startServices = async ({ only }) => {
+  const all = [
     'console',
     'console-backend',
     'webapp',
@@ -123,7 +138,16 @@ const startServices = async () => {
     'polling-bot',
     'control-bot',
     'workers',
-  ])
+  ]
+
+  if (only) {
+    only = [only].flat()
+    only = only.filter(project => all.indexOf(project) >= 0)
+
+    await npmDev(only)
+  } else {
+    await npmDev(all)
+  }
 }
 
 const startTunnels = async () => {
@@ -139,10 +163,32 @@ const startTunnels = async () => {
 
 // MAIN
 
+console.group('Starting containers...')
 await startContainers()
+console.groupEnd()
+
+console.group('Initializing database...')
 await initDb()
+console.groupEnd()
+
+console.group('Applying migrations...')
 await applyMigrations()
-await startServices()
-await startTunnels()
+console.groupEnd()
+
+console.group('Applying seeds...')
+await applySeeds()
+console.groupEnd()
+
+console.group('Starting services...')
+await startServices({
+  only: argv.only
+})
+console.groupEnd()
+
+if (!argv['skip-tunnels']) {
+  console.group('Starting tunnels...')
+  await startTunnels()
+  console.groupEnd()
+}
 
 setInterval(() => { }, 1000)

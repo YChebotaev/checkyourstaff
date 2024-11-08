@@ -8,4 +8,4 @@ export * from "./tokenGuard";
 export * from "./accountGuard";
 export * from "./sendMessageToTextFeedback";
 export * from "./getCorsOrigin";
-export * from './app'
+export * from './createApp'
