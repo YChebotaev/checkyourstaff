@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import { Root, Link } from "./styled";
+import { Root, Link, Title } from "./styled";
 import type { NavMenuItemProps } from "../types";
 
 const renderIcon = (active: boolean, icon: NavMenuItemProps["icon"]) => {
@@ -17,7 +17,10 @@ export const NavMenuItem: FC<
 > = ({ title, href, icon, active }) => {
   return (
     <Root $active={active}>
-      <Link to={href}>{renderIcon(active, icon)}</Link>
+      <Link to={href}>
+        {renderIcon(active, icon)}
+        <Title>{title}</Title>
+      </Link>
     </Root>
   );
 };

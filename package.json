@@ -29,6 +29,8 @@
     "force-start-poll-session": "ts-node scripts/force-start-poll-session.ts",
     "create-account": "ts-node scripts/create-account.ts",
     "bootstrap-dev": "zx ./bootstrap-dev",
+    "tunnel:console-backend": "./loophole http 3001 localhost --hostname console-backend-checkyourstaff",
+    "tunnel:console": "./loophole http 5173 localhost --hostname console-checkyourstaff",
     "lines-count": "git ls-files | xargs wc -l #12645",
     "update": "ansible-playbook -i ansible/inventory.yml ansible/update.yml"
   }

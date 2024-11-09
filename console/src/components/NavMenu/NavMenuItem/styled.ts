@@ -5,17 +5,33 @@ type RootProps = {
   $active: boolean
 }
 
+export const Title = styled.div`
+  font-size: 24px;
+  color: #19ACFF;
+
+  @media (max-width: 868px /* var(--container-width) */) {
+    display: none;
+  }
+`
+
 export const Root = styled.div<RootProps>`
-  padding: 0 10px;
-  border: 7px solid transparent;
-  border-top-width: 0;
-  border-bottom-width: 0;
+  height: calc(var(--header-height) - 7px);
+  border-bottom: 7px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   ${({ $active }) => $active && css`
-    border-left-color: #1cacff;
+    border-bottom-color: #1cacff;
   `}
 `
 
 export const Link = styled(BaseLink)`
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  text-decoration: none;
+  padding: 0 14px;
 `

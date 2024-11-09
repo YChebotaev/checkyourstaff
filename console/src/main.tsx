@@ -8,8 +8,8 @@ import { createQueryClient } from "./lib/createQueryClient";
 import { createRouter } from "./lib/createRouter";
 import { AccountGuard } from "./components/AccountGuard";
 import { AppLoading } from "./layouts/AppLoading";
-import "./index.css";
 import { getToken } from "./lib/getToken";
+import "./index.css";
 
 const apiClient = createApiClient();
 const queryClient = createQueryClient();

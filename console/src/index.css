@@ -1,9 +1,14 @@
 :root {
   font-family: "Source Sans 3", sans-serif;
-  
+
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  --header-height: 76px;
+  --container-width: 868px;
 }
 
 body {

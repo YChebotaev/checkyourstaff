@@ -2,25 +2,19 @@ import { styled } from 'styled-components'
 
 export const Root = styled.div`
   display: grid;
-  grid-template-columns: max-content 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: 'menu content';
-  width: 100vw;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'menu'
+    'content';
+  grid-template-rows: var(--header-height) 1fr;
   min-height: 100vh;
 `
 
-export const MenuColumn = styled.div`
+export const MenuRow = styled.div`
   grid-area: menu;
 `
 
-export const NavMenuWrapper = styled.div`
-  padding: 50px 30px 0 30px;
-`
-
-export const ContentColumn = styled.div`
+export const ContentRow = styled.div`
   grid-area: content;
-`
-
-export const ContentWrapper = styled.div`
   padding: 50px 30px 0 30px;
 `
