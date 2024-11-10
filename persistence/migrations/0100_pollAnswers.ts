@@ -8,6 +8,7 @@ export const up = async (knex: Knex): Promise<void> =>
     table.integer("pollSessionId");
     table.integer("userId");
     table.integer("sampleGroupId");
+    table.integer("accountId");
 
     table.integer("score");
 

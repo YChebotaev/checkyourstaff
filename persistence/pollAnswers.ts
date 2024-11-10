@@ -7,13 +7,19 @@ export const pollAnswerCreate = async ({
   pollQuestionId,
   pollSessionId,
   sampleGroupId,
+  accountId,
   score,
+  // DEBUG FIELDS:
+  __createdAt__,
 }: {
   userId: number;
   pollQuestionId: number;
   pollSessionId: number;
   sampleGroupId: number;
+  accountId: number;
   score: number;
+  // DEBUG FIELDS:
+  __createdAt__?: number
 }) => {
   const [{ id }] = await knex
     .insert({
@@ -21,8 +27,9 @@ export const pollAnswerCreate = async ({
       pollQuestionId,
       pollSessionId,
       sampleGroupId,
+      accountId,
       score,
-      createdAt: new Date().getTime(),
+      createdAt: __createdAt__ ?? new Date().getTime(),
     })
     .into("pollAnswers")
     .returning("id");
@@ -36,6 +43,15 @@ export const pollAnswerCreate = async ({
 
   return id as number;
 };
+
+export const pollAnsersByAccountIdAndPollQuestionId = async (accountId: number, pollQuestionId: number) => {
+  return (await knex
+    .select<PollAnswer[]>('*')
+    .from('pollAnswers')
+    .where('accountId', accountId)
+    .where('pollQuestionId', pollQuestionId))
+    .filter(({ deleted }) => !deleted)
+}
 
 export const pollAnswersGetByPollQuestionIdAndPollSessionIdAndSampleGroupId =
   async (

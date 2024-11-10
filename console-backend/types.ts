@@ -39,6 +39,14 @@ export type ChartsDataRespSession = {
 
 export type ChartsDataResp = ChartsDataRespSession[];
 
+export type ChartsByQuestionResp = {
+  name: string
+  values: {
+    date: string,
+    value: number
+  }[]
+}[]
+
 export type TextFeedbackValue = {
   id: number;
   date: string;
@@ -74,3 +82,20 @@ export type TestLoginData = {
 }
 
 export type SampleGroupsData = SampleGroup[];
+
+export type PollSessionsResp = {
+  id: number
+  accountId: number
+  pollId: number
+  sampleGroupId: number
+  deleted: null
+  createdAt: number
+  updatedAt: number
+}[]
+
+export type PollQuestionsDistinctNameRecord = {
+  id: number
+  name: string
+}
+
+export type PollQuestionsDistinctNamesResp = PollQuestionsDistinctNameRecord[]

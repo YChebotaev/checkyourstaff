@@ -10,7 +10,7 @@ import {
   ChartsDataRespSession,
 } from "../types";
 
-export const getCharts = async ({
+export const getChartsBySampleGroupId = async ({
   accountId,
   sampleGroupId,
 }: {

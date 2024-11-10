@@ -46,6 +46,7 @@ export const completeRegistration = async ({
     pollId,
     aggregationIndex: 0,
     text: "Оцените результаты на работе от 1 до 5",
+    measurenmentName: 'Результат работы',
   });
 
   await pollQuestionCreate({
@@ -53,6 +54,7 @@ export const completeRegistration = async ({
     pollId,
     aggregationIndex: 1,
     text: "Оцените нагрузку на работе от 1 до 5",
+    measurenmentName: 'Нагрузка',
   });
 
   await pollQuestionCreate({
@@ -60,6 +62,7 @@ export const completeRegistration = async ({
     pollId,
     aggregationIndex: 2,
     text: "Оцените счастье на работе от 1 до 5",
+    measurenmentName: 'Уровень счастья'
   });
 
   await inviteRecepients({

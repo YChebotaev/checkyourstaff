@@ -10,7 +10,7 @@ export const appMenu: NavMenuItemProps[] = [
   },
   {
     key: "charts",
-    title: "Графики",
+    title: "Динамика",
     href: "/charts",
     icon: <ChartAlt />,
   },

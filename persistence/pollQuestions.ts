@@ -1,3 +1,4 @@
+import { groupBy, toPairs } from 'lodash'
 import { knex } from './knex'
 import { logger } from './logger'
 import { PollQuestion } from './types'
@@ -6,11 +7,13 @@ export const pollQuestionCreate = async ({
   accountId,
   pollId,
   aggregationIndex,
+  measurenmentName,
   text
 }: {
   accountId: number
   pollId: number
   aggregationIndex: number
+  measurenmentName: string,
   text: string
 }) => {
   const [{ id }] = await knex
@@ -18,6 +21,7 @@ export const pollQuestionCreate = async ({
       accountId,
       pollId,
       aggregationIndex,
+      measurenmentName,
       text,
       minScore: 1,
       maxScore: 5,
@@ -64,7 +68,19 @@ export const pollQuestionsGetByPollId = async (pollId: number) => {
     .select<PollQuestion[]>('*')
     .from('pollQuestions')
     .where('pollId', pollId))
-    .filter(pollQuestion => !pollQuestion.deleted)
+    .filter(({ deleted }) => !deleted)
+}
+
+export const pollQuestionsByAccountIdUniqByAggregationIndex = async ({ accountId }: { accountId: number }) => {
+  const pollQuestions = (await knex
+    .select<PollQuestion[]>('*')
+    .from('pollQuestions')
+    .where('accountId', accountId))
+    .filter(({ deleted }) => !deleted)
+
+  const groupsByAggregationIndex = groupBy(pollQuestions, 'aggregationIndex')
+
+  return toPairs(groupsByAggregationIndex).map(([aggregationIndexStr, pollQuestions]) => pollQuestions[0])
 }
 
 export const pollQuestionDelete = async (id: number) => {

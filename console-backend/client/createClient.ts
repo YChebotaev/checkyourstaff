@@ -7,7 +7,10 @@ import {
   type TextFeedbackResp,
   type AuthVerifyData,
   type AuthVerifyQuery,
-  TestLoginData,
+  type TestLoginData,
+  type PollSessionsResp,
+  type PollQuestionsDistinctNamesResp,
+  ChartsByQuestionResp
 } from "../types";
 
 export const createClient = ({
@@ -81,6 +84,24 @@ export const createClient = ({
 
       return data;
     },
+    async getPollSessions({ accountId }: { accountId: number }) {
+      const { data } = await client.get<PollSessionsResp>('/pollSessions', {
+        params: {
+          accountId
+        }
+      })
+
+      return data
+    },
+    async getPollQuestionsDistinctNames({ accountId }: { accountId: number }) {
+      const { data } = await client.get<PollQuestionsDistinctNamesResp>('/pollQuestions/distinctNames', {
+        params: {
+          accountId
+        }
+      })
+
+      return data
+    },
     async getStats({ accountId }: { accountId: number }) {
       const { data } = await client.get<StatsResp>("/stats", {
         params: { accountId },
@@ -91,12 +112,14 @@ export const createClient = ({
     async getCharts({
       accountId,
       sampleGroupId,
+      questionId
     }: {
       accountId: number;
-      sampleGroupId: number;
+      sampleGroupId?: number;
+      questionId?: number
     }) {
-      const { data } = await client.get<ChartsDataResp>("/charts", {
-        params: { accountId, sampleGroupId },
+      const { data } = await client.get<ChartsDataResp | ChartsByQuestionResp>("/charts", {
+        params: { accountId, sampleGroupId, questionId },
       });
 
       return data;

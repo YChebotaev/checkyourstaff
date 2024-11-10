@@ -10,6 +10,8 @@ export const textFeedbackCreate = async ({
   pollQuestionId,
   pollSessionId,
   text,
+  // DEBUG FIELDS:
+  __createdAt__,
 }: {
   userId: number;
   accountId: number;
@@ -18,6 +20,8 @@ export const textFeedbackCreate = async ({
   pollQuestionId?: number | null;
   pollSessionId?: number | null;
   text: string;
+  // DEBUG FIELDS:
+  __createdAt__?: number
 }) => {
   const [{ id }] = await knex
     .insert({
@@ -28,7 +32,7 @@ export const textFeedbackCreate = async ({
       pollQuestionId,
       pollSessionId,
       text,
-      createdAt: new Date().getTime(),
+      createdAt: __createdAt__ ?? new Date().getTime(),
     })
     .into("textFeedbacks")
     .returning("id");

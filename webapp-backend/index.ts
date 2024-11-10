@@ -242,6 +242,7 @@ app.post<{
         pollSessionId,
         pollQuestionId: answer.id,
         sampleGroupId: pollSession.sampleGroupId,
+        accountId: pollSession.accountId,
         score: answer.score,
       });
 

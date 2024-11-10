@@ -6,17 +6,21 @@ export const pollSessionCreate = async ({
   pollId,
   accountId,
   sampleGroupId,
+  // DEBUG FIELDS:
+  __createdAt__,
 }: {
   pollId: number;
   accountId: number;
   sampleGroupId: number;
+  // DEBUG FIELDS:
+  __createdAt__: number
 }) => {
   const [{ id }] = await knex
     .insert({
       pollId,
       accountId,
       sampleGroupId,
-      createdAt: new Date().getTime(),
+      createdAt: __createdAt__ ?? new Date().getTime(),
     })
     .into("pollSessions")
     .returning("id");

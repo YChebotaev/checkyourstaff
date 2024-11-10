@@ -11,7 +11,7 @@ export const ViewChart = styled.div`
   color: #35424a;
   font-weight: 600;
   font-size: 10px;
-  padding: 40px 0;
+  padding: 10px 0;
   transition: opacity 0.2s ease-in-out;
 `;
 
@@ -24,7 +24,7 @@ const rootBaseStyles = css`
   gap: 10px;
   border-radius: 30px;
   box-shadow: 0 0 10px #05296f2f;
-  aspect-ratio: 1;
+  border: 1px solid transparent;
 
   ${ViewChart} {
     opacity: 0;
@@ -35,6 +35,10 @@ const RootLink = styled(BaseLink)`
   ${rootBaseStyles}
 
   cursor: pointer;
+
+  &:hover {
+    border: 1px solid #1AACFF;
+  }
 
   &:hover ${ViewChart} {
     opacity: 1;
@@ -50,8 +54,6 @@ export const Root: FC<any> = (props) =>
   props.to ? <RootLink {...props} /> : <RootBox {...props} />;
 
 export const ValueRow = styled.div<ValueRowProps>`
-  margin-top: 20px;
-
   ${({ $withDelta }) =>
     $withDelta &&
     css`
@@ -80,6 +82,8 @@ export const NameRow = styled.div`
   color: #35424a;
   font-weight: 600;
   font-size: 13.3px;
+  text-align: center;
+  margin: 0 5px;
 `;
 
 export const Separator = styled.div`

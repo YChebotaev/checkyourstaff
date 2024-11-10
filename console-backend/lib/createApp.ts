@@ -3,6 +3,8 @@ import { fastifyCors } from "@fastify/cors";
 import { fastifySwagger } from '@fastify/swagger'
 import { fastifySwaggerUi } from '@fastify/swagger-ui'
 import {
+  pollQuestionsByAccountIdUniqByAggregationIndex,
+  pollSessionsGetByAccountId,
   sampleGroupsGetByAccountId,
   textFeedbackDelete,
 } from "@checkyourstaff/persistence";
@@ -11,13 +13,14 @@ import {
   getCorsOrign,
   authVerify,
   getStats,
-  getCharts,
+  getChartsBySampleGroupId,
   getTextFeedback,
   getAccountsOfUser,
   tokenGuard,
   accountGuard,
   sendMessageToTextFeedback,
   createToken,
+  getChartsByQuestionId,
 } from ".";
 import type { AuthVerifyQuery } from "../types";
 
@@ -99,6 +102,25 @@ export const createApp = async () => {
 
   app.get<{
     Querystring: {
+      accountId: number
+    }
+  }>('/pollSessions', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          accountId: { type: 'number' }
+        }
+      }
+    }
+  }, async ({ headers, query: { accountId } }) => {
+    tokenGuard(headers)
+
+    return pollSessionsGetByAccountId(accountId)
+  })
+
+  app.get<{
+    Querystring: {
       accountId: string;
     };
   }>("/stats", {
@@ -134,24 +156,62 @@ export const createApp = async () => {
 
   app.get<{
     Querystring: {
-      accountId: string;
-      sampleGroupId: string;
+      accountId: number;
+      sampleGroupId: number;
+      questionId: number
     };
   }>(
     "/charts",
+    {
+      schema: {
+        querystring: {
+          type: 'object',
+          required: ['accountId'],
+          properties: {
+            accountId: { type: 'number' },
+            sampleGroupId: { type: 'number' },
+            questionId: { type: 'number' },
+          }
+        }
+      }
+    },
     async ({
       headers,
-      query: { accountId: accountIdStr, sampleGroupId: sampleGroupIdStr },
+      query: { accountId: accountId, sampleGroupId, questionId },
     }) => {
       const { tgUserId } = tokenGuard(headers);
-      const accountId = Number(accountIdStr);
-      const sampleGroupId = Number(sampleGroupIdStr);
 
       await accountGuard({ tgUserId, accountId });
 
-      return getCharts({ accountId, sampleGroupId });
+      if (questionId) {
+        return getChartsByQuestionId({ accountId, questionId })
+      } else if (sampleGroupId) {
+        return getChartsBySampleGroupId({ accountId, sampleGroupId });
+      } else {
+        throw new Error('Cannot find any charts data')
+      }
     },
   );
+
+  app.get<{
+    Querystring: {
+      accountId: number
+    }
+  }>('/pollQuestions/distinctNames', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          accountId: { type: 'number' }
+        }
+      }
+    }
+  }, async ({ headers, query: { accountId } }) => {
+    tokenGuard(headers)
+
+    return (await pollQuestionsByAccountIdUniqByAggregationIndex({ accountId }))
+      .map(({ id, measurenmentName }) => ({ id, name: measurenmentName }))
+  })
 
   app.get<{
     Querystring: {

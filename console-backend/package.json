@@ -20,7 +20,7 @@
     "@fastify/swagger": "^9.2.0",
     "@fastify/swagger-ui": "^5.1.0",
     "axios": "^1.6.7",
-    "date-fns": "^3.3.0",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.3.1",
     "fastify": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
@@ -29,6 +29,6 @@
     "pino": "^8.16.2",
     "plural-ru": "^2.0.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.6.3"
   }
 }

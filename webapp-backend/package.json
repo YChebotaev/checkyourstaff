@@ -24,6 +24,6 @@
     "plural-ru": "^2.0.2",
     "telegraf": "^4.15.3",
     "ts-node": "^10.9.1",
-    "typescript": "^5.3.2"
+    "typescript": "^5.6.3"
   }
 }

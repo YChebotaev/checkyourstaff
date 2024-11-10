@@ -5,8 +5,6 @@ import { FeedbackPage } from "../features/feedback/pages/FeedbackPage";
 import { FeedbackSkeletonPage } from "../features/feedback/pages/FeedbackSkeletonPage";
 import { getAccountId } from "./getAccountId";
 import { getToken } from "./getToken";
-import { ChartsPage } from "../features/charts/pages/ChartsPage";
-import { ChartsRedirectToDefaultPage } from "../features/charts/pages/ChartsRedirectToDefaultPage";
 import { SignOutPage } from "../features/auth/pages/LogoutPage";
 import { SelectAccountPage } from "../features/account/pages/SelectAccountPage";
 import { SelectAccountSkeletonPage } from "../features/account/pages/SelectAccountSkeletonPage";
@@ -15,6 +13,7 @@ import { SignInSuccessPage } from "../features/auth/pages/SignInSuccessPage";
 import { SigninFailedPage } from "../features/auth/pages/SignInFailedPage";
 import { StatsSkeletonPage } from "../features/stats/pages/StatsSkeletonPage";
 import { StatsPage } from "../features/stats/pages/StatsPage";
+import { ChartsIndexPage } from "../features/charts/pages/ChartsIndexPage";
 
 const createAppRouter = () =>
   createBrowserRouter([
@@ -34,15 +33,7 @@ const createAppRouter = () =>
       path: "/charts",
       element: (
         <Suspense fallback={<ChartsSkeletonPage />}>
-          <ChartsRedirectToDefaultPage />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/charts/:sampleGroupId",
-      element: (
-        <Suspense fallback={<ChartsSkeletonPage />}>
-          <ChartsPage />
+          <ChartsIndexPage />
         </Suspense>
       ),
     },

@@ -4,24 +4,27 @@ import { IndicatorsGrid } from "../components/IndicatorsGrid";
 import { useStatsPageData } from "../hooks/useStatsPageData";
 import { AppLayout } from "../../../layouts/AppLayout/AppLayout";
 import { appMenu } from "../../../constants/appMenu";
-import { PageHeader } from "../../../components/PageHeader";
+import { TitleWithAction } from "../../../components/TitleWithAction";
+import { DateSelector } from "../../../components/DateSelector";
 
 export const StatsPage: FC = () => {
   const stats = useStatsPageData()!;
 
   return (
     <AppLayout navMenu={{ items: appMenu, activeKey: "stats" }}>
-      <PageHeader>Общие данные</PageHeader>
-      <IndicatorsGrid
-        items={stats.general.map((item) => ({
-          key: item.title,
-          name: item.title,
-          value: item.value,
-          deltaPercent: item.differencePercentage,
-        }))}
-      />
+      <TitleWithAction action={<DateSelector />}>Показатели</TitleWithAction>
+      <IndicatorsSection title="Все отделы">
+        <IndicatorsGrid
+          items={stats.general.map((item) => ({
+            key: item.title,
+            name: item.title,
+            value: item.value,
+            deltaPercent: item.differencePercentage,
+          }))}
+        />
+      </IndicatorsSection>
       {stats.groups.map((item) => (
-        <IndicatorsSection title={item.title}>
+        <IndicatorsSection key={item.title} title={item.title}>
           <IndicatorsGrid
             items={item.values.map((item) => ({
               key: item.title,

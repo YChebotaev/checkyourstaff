@@ -4,7 +4,7 @@ import type { Poll } from './types'
 
 export const pollCreate = async ({
   accountId,
-  name
+  name,
 }: {
   accountId: number
   name: string

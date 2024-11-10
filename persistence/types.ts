@@ -61,13 +61,14 @@ export type PollQuestion = {
   accountId: number;
   pollId: number;
   aggregationIndex: number;
+  measurenmentName: string
   text: string;
   minScore: number;
   maxScore: number;
   textFeedbackRequestTreshold: number;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
+  createdAt: number;
+  updatedAt: number | null;
 };
 
 export type PollSession = {
