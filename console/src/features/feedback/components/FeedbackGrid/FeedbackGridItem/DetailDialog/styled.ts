@@ -4,6 +4,11 @@ export const Inner = styled.div`
   position: relative;
   min-width: 500px;
   min-height: 250px;
+
+  @media (max-width: 868px /* var(--container-width) */) {
+    min-width: 200px;
+    min-height: 150px;
+  }
 `
 
 export const Text = styled.div`

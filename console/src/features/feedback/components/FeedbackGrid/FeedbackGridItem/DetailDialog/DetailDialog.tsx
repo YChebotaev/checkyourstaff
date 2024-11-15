@@ -143,7 +143,7 @@ export const DetailDialog: FC<{
         );
       case "contact-success":
     }
-  }, [state, id, username, role]);
+  }, [state, id, username, role, onDeleteItem]);
   const questionElement = useMemo(() => {
     switch (state) {
       case "detail":
