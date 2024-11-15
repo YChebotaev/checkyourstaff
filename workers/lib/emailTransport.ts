@@ -5,7 +5,7 @@ export const emailTransport = createTransport({
   secure: false,
   debug: true,
   auth: {
-    user: "noreply@checkyourstaff.ru",
+    user: "noreply@kaknarabote.ru",
     pass: process.env["SMTP_PASS"]!,
   },
 });
