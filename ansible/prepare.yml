@@ -303,33 +303,15 @@
         creates: "{{project_dir}}/webapp/dist/index.html"
 
     # Start everything
-    - name: Start console-backend
+    - name: Copy production ecosystem
+      ansible.builtin.template:
+        src: templates/ecosystem.production.json.j2
+        dest: "{{project_dir}}/ecosystem.production.json"
+    - name: Restart everything
       ansible.builtin.shell:
-        cmd: pm2 start npm --name console-backend -- start
-        chdir: "{{project_dir}}/console-backend"
-    - name: Start control-bot
-      ansible.builtin.shell:
-        cmd: pm2 start npm --name control-bot -- start
-        chdir: "{{project_dir}}/control-bot"
-    - name: Start polling-bot
-      ansible.builtin.shell:
-        cmd: pm2 start npm --name polling-bot -- start
-        chdir: "{{project_dir}}/polling-bot"
-    - name: Start webapp-backend
-      ansible.builtin.shell:
-        cmd: pm2 start npm --name webapp-backend -- start
-        chdir: "{{project_dir}}/webapp-backend"
-    - name: Start workers
-      ansible.builtin.shell:
-        cmd: pm2 start npm --name workers -- start
-        chdir: "{{project_dir}}/workers"
-    - name: Start pincodes-service
-      ansible.builtin.shell:
-        cmd: pm2 start npm --name pincodes-service -- start
-        chdir: "{{project_dir}}/pincodes-service"
-    - name: pm2 startup
-      ansible.builtin.shell:
-        cmd: pm2 startup
-    - name: pm2 save
-      ansible.builtin.shell:
-        cmd: pm2 save
+        cmd: pm2 startOrRestart ecosystem.production.json
+        chdir: "{{project_dir}}"
+    - name: Restart caddy
+      ansible.builtin.systemd:
+        name: caddy
+        state: restarted

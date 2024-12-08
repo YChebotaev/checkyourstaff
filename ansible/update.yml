@@ -66,30 +66,14 @@
         cmd: npm run migrate:latest
         chdir: "{{project_dir}}/pincodes-service"
     # Start everything
-    - name: Restart console-backend
+    - name: Copy production ecosystem
+      ansible.builtin.template:
+        src: templates/ecosystem.production.json.j2
+        dest: "{{project_dir}}/ecosystem.production.json"
+    - name: Restart everything
       ansible.builtin.shell:
-        cmd: pm2 restart console-backend
-        chdir: "{{project_dir}}/console-backend"
-    - name: Restart control-bot
-      ansible.builtin.shell:
-        cmd: pm2 restart control-bot
-        chdir: "{{project_dir}}/control-bot"
-    - name: Restart polling-bot
-      ansible.builtin.shell:
-        cmd: pm2 restart polling-bot
-        chdir: "{{project_dir}}/polling-bot"
-    - name: Restart webapp-backend
-      ansible.builtin.shell:
-        cmd: pm2 restart webapp-backend
-        chdir: "{{project_dir}}/webapp-backend"
-    - name: Restart workers
-      ansible.builtin.shell:
-        cmd: pm2 restart workers
-        chdir: "{{project_dir}}/workers"
-    - name: Start pincodes-service
-      ansible.builtin.shell:
-        cmd: pm2 restart pincodes-service
-        chdir: "{{project_dir}}/pincodes-service"
+        cmd: pm2 startOrRestart ecosystem.production.json
+        chdir: "{{project_dir}}"
     - name: Restart caddy
       ansible.builtin.systemd:
         name: caddy
