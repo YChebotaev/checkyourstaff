@@ -36,7 +36,7 @@ export const PollQuestion: FC<{
           onChange={setScore}
         />
       </ScoreWrapper>
-      {(score <= textFeedbackRequestTreshold && score !== 0) && (
+      {score <= textFeedbackRequestTreshold && score !== 0 && (
         <FeedbackWrapper>
           <FeedbackControl value={feedback} onChange={setFeedback} />
         </FeedbackWrapper>

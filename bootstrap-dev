@@ -1,12 +1,16 @@
 import { exec } from 'node:child_process'
-import { $, cd, within, minimist } from 'zx'
+import { $, within, minimist } from 'zx'
 import { GenericContainer } from 'testcontainers'
 import createKnex from 'knex'
 
 const argv = minimist(process.argv.slice(3), {
   string: ['only'],
-  boolean: ['skip-tunnels']
+  boolean: ['skip-tunnels', 'only-spin-db'],
 })
+
+const only = argv.only
+const skipTunnels = argv['skip-tunnels']
+const onlySpinDb = argv['only-spin-db']
 
 /**
  * 
@@ -33,7 +37,7 @@ const npmDev = async (projects) => {
       // $.cwd = `./${name}`
 
       console.log('Starting service "%s"', name)
-      
+
       // const p = exec('npm run dev')
       const p = exec(`npm run dev -w ${name}`)
       p.stdout?.pipe(process.stdout)
@@ -42,45 +46,51 @@ const npmDev = async (projects) => {
   )
 }
 
-const startContainers = async () => {
+const startContainers = async (only = []) => {
   return (await Promise.all(
     Object.entries({
-      'redis': 6379,
-      'postgres': 5432,
-      'dpage/pgadmin4': 443,
-    }).map(([name, port]) => {
-      const container = new GenericContainer(name)
-
-      if (name === 'postgres') {
-        container.withExposedPorts({
-          container: port,
-          host: port
-        })
-        container.withEnvironment({
+      'redis': { port: 6379 },
+      'postgres': {
+        port: 5432,
+        env: {
           POSTGRES_DB: "postgres",
           POSTGRES_USER: "postgres",
           POSTGRES_PASSWORD: "postgres",
-        })
-      } else if (name === 'dpage/pgadmin4') {
-        container.withExposedPorts({
+        }
+      },
+      'dpage/pgadmin4': {
+        port: {
           container: 80,
           host: 8080
-        })
-        container.withEnvironment({
+        },
+        env: {
           PGADMIN_DEFAULT_EMAIL: 'yury.79120345101@gmail.com',
           PGADMIN_DEFAULT_PASSWORD: 'admin'
-        })
-      } else if (name === 'redis') {
-        container.withExposedPorts({
-          container: port,
-          host: port
-        })
-      }
+        }
+      },
+    }).filter(([name, port]) => {
+      if (!only || only.length === 0) return true
 
-      console.log('Container %s starting...', name)
-
-      return container.start()
+      return only.includes(name)
     })
+      .map(([name, { port, env }]) => {
+        const container = new GenericContainer(name)
+
+        if (typeof port === 'number') {
+          container.withExposedPorts({ container: port, host: port })
+        } else
+          if (typeof port === 'object') {
+            container.withExposedPorts(port)
+          }
+
+        if (env) {
+          container.withEnvironment(env)
+        }
+
+        console.log('Container %s starting...', name)
+
+        return container.start()
+      })
   )).forEach(container => {
     process.once('beforeExit', () => container.stop())
   })
@@ -164,7 +174,7 @@ const startTunnels = async () => {
 // MAIN
 
 console.group('Starting containers...')
-await startContainers()
+await startContainers(onlySpinDb ? ['postgres', 'dpage/pgadmin4'] : undefined)
 console.groupEnd()
 
 console.group('Initializing database...')
@@ -179,16 +189,18 @@ console.group('Applying seeds...')
 await applySeeds()
 console.groupEnd()
 
-console.group('Starting services...')
-await startServices({
-  only: argv.only
-})
-console.groupEnd()
-
-if (!argv['skip-tunnels']) {
-  console.group('Starting tunnels...')
-  await startTunnels()
+if (!onlySpinDb) {
+  console.group('Starting services...')
+  await startServices({ only })
   console.groupEnd()
+
+  if (skipTunnels) {
+    console.group('Starting tunnels...')
+    await startTunnels()
+    console.groupEnd()
+  }
 }
+
+console.log('Up and running')
 
 setInterval(() => { }, 1000)

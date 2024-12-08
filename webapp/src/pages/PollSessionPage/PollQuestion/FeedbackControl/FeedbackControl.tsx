@@ -9,7 +9,11 @@ export const FeedbackControl: FC<{
   return (
     <Root>
       <Label>Расскажите, что пошло не так?</Label>
-      <Textarea value={value} onChange={(e) => onChange(e.target.value)} />
+      <Textarea
+        value={value}
+        maxLength={2000}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </Root>
   );
 };
