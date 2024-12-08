@@ -10,6 +10,7 @@
         dest: "{{project_dir}}"
     - name: Install code dependencies
       community.general.npm:
+        ci: true
         path: "{{project_dir}}"
     - name: Copy console .env
       ansible.builtin.template:
