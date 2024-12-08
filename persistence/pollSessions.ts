@@ -13,7 +13,7 @@ export const pollSessionCreate = async ({
   accountId: number;
   sampleGroupId: number;
   // DEBUG FIELDS:
-  __createdAt__: number
+  __createdAt__?: number
 }) => {
   const [{ id }] = await knex
     .insert({
