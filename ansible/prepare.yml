@@ -39,6 +39,7 @@
     - name: Enable ufw
       community.general.ufw:
         state: enabled
+
     # Caddy
     - name: Install Caddy deps
       ansible.builtin.apt:
@@ -77,6 +78,7 @@
       ansible.builtin.systemd:
         name: caddy
         state: restarted
+
     # Redis
     - name: Install Redis
       ansible.builtin.apt:
@@ -96,6 +98,7 @@
       ansible.builtin.systemd:
         name: redis-server
         enabled: true
+
     # Postgres
     - name: Create the file repository configuration
       ansible.builtin.shell: sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt {{ansible_distribution_release}}-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
@@ -114,6 +117,7 @@
       ansible.builtin.systemd:
         name: postgresql
         enabled: true
+
     # Databases
     - name: Install ansible postgresql helpers deps
       ansible.builtin.apt:
@@ -148,6 +152,7 @@
         name: "{{pincodes_db}}"
         encoding: UTF-8
         owner: "{{pincodes_db_user}}"
+
     # Node
     - name: Install node deps
       ansible.builtin.apt:
@@ -169,6 +174,79 @@
       community.general.npm:
         name: pm2
         global: true
+
+    # Docker
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+    - name: Install docker python library
+      ansible.builtin.apt:
+        name: python3-docker
+        update_cache: true
+        state: present
+
+    # PgAdmin
+    - name: Install pgadmin docker image
+      community.docker.docker_container:
+        name: pgadmin
+        image: dpage/pgadmin4
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "127.0.0.1:{{pgadmin_port}}:80"
+        env:
+          PGADMIN_DEFAULT_EMAIL: "{{pgadmin_default_email}}"
+          PGADMIN_DEFAULT_PASSWORD: "{{pgadmin_default_password}}"
+
+    # OpenObserve
+    - name: Instal OpenObserve docker image
+      community.docker.docker_container:
+        name: openobserve
+        image: public.ecr.aws/zinclabs/openobserve:latest
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "127.0.0.1:5080:5080"
+        env:
+          ZO_ROOT_USER_EMAIL: "{{openobserve_default_username}}"
+          ZO_ROOT_USER_PASSWORD: "{{openobserve_default_password}}"
+    # # Bull Monitor
+    # - name: Install bull monitor docker image
+    #   community.docker.docker_container:
+    #     name: bull-monitor
+    #     image: ejhayes/nodejs-bull-monitor
+    #     state: started
+    #     restart_policy: unless-stopped
+    #     ports:
+    #       - "127.0.0.1:{{bull_monitor_port}}:3000"
+    #     env:
+    #       REDIS_HOST: host.docker.internal
+    #       REDIS_PORT: "6379"
+    #       PORT: "3000"
+    # Database migrations
+    - name: Migrate persistence
+      ansible.builtin.shell:
+        cmd: npm run migrate:latest
+        chdir: "{{project_dir}}/persistence"
+    - name: Migrate pincodes
+      ansible.builtin.shell:
+        cmd: npm run migrate:latest
+        chdir: "{{project_dir}}/pincodes-service"
+    - name: Seed pincodes
+      ansible.builtin.shell:
+        cmd: npm run seed:run
+        chdir: "{{project_dir}}/pincodes-service"
+
     # Code
     - name: Pull the code
       ansible.builtin.git:
@@ -223,19 +301,7 @@
         cmd: npm run build
         chdir: "{{project_dir}}/webapp"
         creates: "{{project_dir}}/webapp/dist/index.html"
-    # Database migrations
-    - name: Migrate persistence
-      ansible.builtin.shell:
-        cmd: npm run migrate:latest
-        chdir: "{{project_dir}}/persistence"
-    - name: Migrate pincodes
-      ansible.builtin.shell:
-        cmd: npm run migrate:latest
-        chdir: "{{project_dir}}/pincodes-service"
-    - name: Seed pincodes
-      ansible.builtin.shell:
-        cmd: npm run seed:run
-        chdir: "{{project_dir}}/pincodes-service"
+
     # Start everything
     - name: Start console-backend
       ansible.builtin.shell:
@@ -267,59 +333,3 @@
     - name: pm2 save
       ansible.builtin.shell:
         cmd: pm2 save
-    # Docker
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
-        state: present
-    - name: Update apt and install docker-ce
-      apt:
-        name: docker-ce
-        state: latest
-        update_cache: true
-    - name: Install docker python library
-      ansible.builtin.apt:
-        name: python3-docker
-        update_cache: true
-        state: present
-    # PgAdmin
-    - name: Install pgadmin docker image
-      community.docker.docker_container:
-        name: pgadmin
-        image: dpage/pgadmin4
-        state: started
-        restart_policy: unless-stopped
-        ports:
-          - "127.0.0.1:{{pgadmin_port}}:80"
-        env:
-          PGADMIN_DEFAULT_EMAIL: "{{pgadmin_default_email}}"
-          PGADMIN_DEFAULT_PASSWORD: "{{pgadmin_default_password}}"
-    # OpenObserve
-    - name: Instal OpenObserve docker image
-      community.docker.docker_container:
-        name: openobserve
-        image: public.ecr.aws/zinclabs/openobserve:latest
-        state: started
-        restart_policy: unless-stopped
-        ports:
-          - "127.0.0.1:5080:5080"
-        env:
-          ZO_ROOT_USER_EMAIL: "{{openobserve_default_username}}"
-          ZO_ROOT_USER_PASSWORD: "{{openobserve_default_password}}"
-    # # Bull Monitor
-    # - name: Install bull monitor docker image
-    #   community.docker.docker_container:
-    #     name: bull-monitor
-    #     image: ejhayes/nodejs-bull-monitor
-    #     state: started
-    #     restart_policy: unless-stopped
-    #     ports:
-    #       - "127.0.0.1:{{bull_monitor_port}}:3000"
-    #     env:
-    #       REDIS_HOST: host.docker.internal
-    #       REDIS_PORT: "6379"
-    #       PORT: "3000"
